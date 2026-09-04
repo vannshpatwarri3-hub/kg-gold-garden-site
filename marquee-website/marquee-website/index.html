@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MARQUEE — What's Next</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Archivo:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0b0d;
+    --bg-alt:#111318;
+    --surface:#1a1c21;
+    --ink:#f4f1ea;
+    --ink-dim:#9aa0ac;
+    --red:#c81e3a;
+    --red-dim:#7a1526;
+    --steel:#7c8899;
+    --steel-dim:#3c4652;
+    --amber:#d98b3f;
+    --amber-dim:#7a4f22;
+    --rule:rgba(244,241,234,0.12);
+    --display:'Bebas Neue', sans-serif;
+    --body:'Archivo', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--body);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+  }
+  img{display:block; max-width:100%;}
+  a{color:inherit;}
+  ::selection{background:var(--red); color:var(--ink);}
+
+  .wrap{max-width:1280px; margin:0 auto; padding:0 clamp(20px,4vw,64px);}
+
+  /* ---------- NAV ---------- */
+  nav.site-nav{
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px clamp(20px,4vw,64px);
+    background:linear-gradient(to bottom, rgba(10,11,13,0.85), transparent);
+    backdrop-filter:blur(2px);
+  }
+  .brand{
+    font-family:var(--display);
+    font-size:22px;
+    letter-spacing:0.06em;
+    display:flex; align-items:center; gap:8px;
+  }
+  .brand .dot{width:8px; height:8px; border-radius:50%; background:var(--red); box-shadow:0 0 12px var(--red);}
+  .nav-links{display:flex; gap:clamp(16px,3vw,36px); font-size:14px; font-weight:500;}
+  .nav-links a{text-decoration:none; color:var(--ink-dim); transition:color .25s ease; position:relative;}
+  .nav-links a:hover, .nav-links a:focus-visible{color:var(--ink);}
+  .nav-links a:focus-visible{outline:1px solid var(--ink); outline-offset:4px;}
+  @media (max-width:640px){ .nav-links{display:none;} }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    height:100vh; min-height:640px;
+    display:flex; align-items:flex-end;
+    overflow:hidden;
+  }
+  /* Mobile-only fix: mobile browser chrome (address bar) makes 100vh unreliable,
+     which was cropping/hiding part of the hero video and content. Desktop is untouched. */
+  @media (max-width:900px){
+    .hero{
+      height:100svh;
+      height:calc(var(--vh, 1vh) * 100);
+      min-height:560px;
+    }
+  }
+  .hero video{
+    position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+    filter:saturate(0.9) brightness(0.62);
+  }
+  .hero::before{
+    content:'';
+    position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(10,11,13,0.35) 0%, rgba(10,11,13,0.35) 40%, rgba(10,11,13,0.96) 96%);
+    z-index:1;
+  }
+  .hero::after{
+    content:'';
+    position:absolute; inset:0;
+    background:radial-gradient(ellipse at 20% 30%, rgba(200,30,58,0.18), transparent 55%);
+    z-index:1;
+  }
+  .hero-content{position:relative; z-index:2; width:100%; padding-bottom:clamp(48px,7vw,96px);}
+  .hero-eyebrow{
+    font-size:14px; color:var(--steel); font-weight:600; margin:0 0 6px; overflow:hidden;
+  }
+  .hero-eyebrow span{display:inline-block; transform:translateY(120%);}
+  .hero h1{
+    font-family:var(--display);
+    margin:0;
+    line-height:0.92;
+    letter-spacing:0.01em;
+  }
+  .hero h1 .line{overflow:hidden; display:block;}
+  .hero h1 .line span{display:inline-block; transform:translateY(115%);}
+  .hero h1 .l1{font-size:clamp(2rem,5.2vw,3.6rem); color:var(--ink-dim); font-weight:400;}
+  .hero h1 .l2{font-size:clamp(4.2rem,13.5vw,9.5rem); color:var(--ink);}
+  .hero h1 .l3{
+    font-family:var(--body); font-style:italic; font-weight:400;
+    font-size:clamp(1.3rem,3vw,2rem); color:var(--amber); margin-top:6px;
+  }
+  .hero-sub{
+    max-width:46ch; color:var(--ink-dim); font-size:16px; line-height:1.6;
+    margin:22px 0 30px; opacity:0; transform:translateY(14px);
+  }
+  .hero-cta{display:flex; gap:14px; flex-wrap:wrap; opacity:0; transform:translateY(14px);}
+  .btn{
+    font-family:var(--body); font-weight:600; font-size:15px;
+    padding:14px 26px; border-radius:2px; text-decoration:none;
+    display:inline-flex; align-items:center; gap:8px; cursor:pointer;
+    border:1px solid transparent; transition:transform .25s ease, background .25s ease, border-color .25s ease;
+  }
+  .btn-primary{background:var(--red); color:#fff;}
+  .btn-primary:hover{background:#e0273f; transform:translateY(-2px);}
+  .btn-ghost{border-color:var(--rule); color:var(--ink); background:transparent;}
+  .btn-ghost:hover{border-color:var(--ink); transform:translateY(-2px);}
+  .btn:focus-visible{outline:2px solid var(--ink); outline-offset:3px;}
+
+  .scroll-cue{
+    position:absolute; right:clamp(20px,4vw,64px); bottom:36px; z-index:2;
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+    color:var(--ink-dim); font-size:12px; font-weight:600; letter-spacing:0.08em;
+  }
+  .scroll-cue .track{width:1px; height:52px; background:var(--rule); position:relative; overflow:hidden;}
+  .scroll-cue .track::after{
+    content:''; position:absolute; left:0; top:-40%; width:100%; height:40%;
+    background:var(--ink); animation:cue 1.8s ease-in-out infinite;
+  }
+  @keyframes cue{ 0%{top:-40%;} 60%{top:100%;} 100%{top:100%;} }
+  @media (max-width:640px){ .scroll-cue{display:none;} }
+
+  /* ---------- MARQUEE TICKER ---------- */
+  .ticker-strip{
+    background:var(--bg-alt);
+    border-top:1px solid var(--rule); border-bottom:1px solid var(--rule);
+    overflow:hidden; white-space:nowrap; padding:14px 0;
+  }
+  .ticker-track{display:inline-flex; gap:40px; animation:ticker 26s linear infinite;}
+  .ticker-track span{
+    font-family:var(--display); font-size:18px; letter-spacing:0.04em; color:var(--ink-dim);
+    display:inline-flex; align-items:center; gap:40px;
+  }
+  .ticker-track span b{color:var(--ink); font-weight:400;}
+  .ticker-track span i{color:var(--red); font-style:normal; margin-left:40px;}
+  @keyframes ticker{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
+
+  /* ---------- SLATE (horizontal) ---------- */
+  #slate{position:relative;}
+  .slate-pin{
+    height:100vh; min-height:600px;
+    display:flex; align-items:stretch; overflow:hidden;
+  }
+  .slate-track{display:flex; height:100%; will-change:transform;}
+  .slate-panel{
+    position:relative; flex:0 0 100vw; height:100%;
+    display:flex; align-items:flex-end;
+    border-right:1px solid var(--rule);
+  }
+  .slate-panel.intro{
+    background:var(--bg-alt);
+    align-items:center; justify-content:center; flex-direction:column; text-align:center;
+    padding:0 40px;
+  }
+  .slate-panel.intro .num{font-family:var(--display); font-size:clamp(3rem,10vw,7rem); color:var(--rule);}
+  .slate-panel.intro h2{font-family:var(--display); font-size:clamp(3rem,9vw,6.5rem); margin:0; line-height:0.95;}
+  .slate-panel.intro p{color:var(--ink-dim); max-width:38ch; margin-top:14px; font-size:16px;}
+  .arrow-btn{
+    margin-top:32px; width:56px; height:56px; border-radius:50%;
+    border:1px solid var(--rule); background:transparent; color:var(--ink);
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+    align-self:flex-end;
+    transition:background .25s ease, transform .25s ease, border-color .25s ease;
+  }
+  .arrow-btn:hover{background:var(--red); border-color:var(--red); transform:translateX(4px);}
+  .arrow-btn:focus-visible{outline:2px solid var(--ink); outline-offset:3px;}
+  .slate-panel img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;}
+  .slate-panel .duo{position:absolute; inset:0;}
+  .slate-panel.p1 .duo{background:linear-gradient(0deg, rgba(10,11,13,0.95) 5%, rgba(200,30,58,0.12) 55%, rgba(10,11,13,0.55) 100%);}
+  .slate-panel.p2 .duo{background:linear-gradient(0deg, rgba(10,11,13,0.95) 5%, rgba(124,136,153,0.14) 55%, rgba(10,11,13,0.55) 100%);}
+  .slate-panel.p3 .duo{background:linear-gradient(0deg, rgba(10,11,13,0.95) 5%, rgba(217,139,63,0.16) 55%, rgba(10,11,13,0.5) 100%);}
+  .slate-info{position:relative; z-index:2; padding:0 clamp(24px,5vw,64px) clamp(40px,6vw,80px); max-width:640px;}
+  .slate-index{font-size:14px; color:var(--ink-dim); margin:0 0 10px; font-weight:600;}
+  .slate-info h3{font-family:var(--display); font-size:clamp(3rem,9vw,6rem); margin:0; line-height:0.95;}
+  .slate-info .sub{font-style:italic; color:var(--ink-dim); font-size:18px; margin:4px 0 16px;}
+  .pill{
+    display:inline-block; font-size:12px; font-weight:600; padding:6px 14px;
+    border:1px solid var(--rule); border-radius:100px; color:var(--ink-dim); margin-bottom:16px;
+  }
+  .slate-info p.blurb{font-size:16px; line-height:1.6; color:var(--ink-dim); max-width:44ch;}
+  .p1 .pill{border-color:var(--red-dim); color:#e58a97;}
+  .p2 .pill{border-color:var(--steel-dim); color:#c3ccd6;}
+  .p3 .pill{border-color:var(--amber-dim); color:#f0be8c;}
+
+  @media (max-width:900px){
+    .slate-pin{height:auto; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;}
+    .slate-track{transform:none !important;}
+    .slate-panel{flex:0 0 92vw; height:82vh; min-height:520px; scroll-snap-align:start;}
+  }
+
+  /* ---------- SPOTLIGHT ---------- */
+  .section-head{padding:clamp(90px,12vw,140px) 0 20px;}
+  .section-head h2{font-family:var(--display); font-size:clamp(2.6rem,6vw,4.2rem); margin:0; line-height:0.95;}
+  .section-head p{color:var(--ink-dim); max-width:40ch; margin-top:10px; font-size:16px;}
+  .trailer-count{font-size:13px !important; color:var(--amber) !important; font-weight:600; margin-top:14px !important;}
+
+  .spot-row{
+    display:grid; grid-template-columns:1fr 1fr; gap:clamp(30px,5vw,80px);
+    align-items:center; padding:clamp(50px,8vw,90px) 0; border-top:1px solid var(--rule);
+  }
+  .spot-row:nth-child(even){direction:rtl;}
+  .spot-row:nth-child(even) > *{direction:ltr;}
+  .spot-media{position:relative; overflow:hidden; aspect-ratio:4/5; border-radius:2px; background:var(--surface);}
+  .spot-media img{width:100%; height:110%; object-fit:cover; will-change:transform;}
+  .spot-text h3{font-family:var(--display); font-size:clamp(2.4rem,5vw,3.6rem); margin:0 0 14px; line-height:0.95;}
+  .spot-text p{color:var(--ink-dim); font-size:16px; line-height:1.7; max-width:48ch;}
+  .spot-text .tag{font-size:13px; color:var(--ink-dim); font-weight:600; margin-bottom:10px; display:block;}
+  @media (max-width:760px){
+    .spot-row, .spot-row:nth-child(even){grid-template-columns:1fr; direction:ltr;}
+  }
+
+  .reveal{opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s ease;}
+  .reveal.in{opacity:1; transform:translateY(0);}
+
+  /* ---------- ARCHIVE ---------- */
+  .archive-row{
+    display:flex; gap:18px; overflow-x:auto; padding:34px 0 18px;
+    scroll-snap-type:x proximity; -webkit-overflow-scrolling:touch;
+    scrollbar-width:thin; scrollbar-color:var(--rule) transparent;
+  }
+  .archive-row::-webkit-scrollbar{height:6px;}
+  .archive-row::-webkit-scrollbar-thumb{background:var(--rule); border-radius:4px;}
+  .stub{
+    flex:0 0 260px; scroll-snap-align:start;
+    background:var(--surface); border:1px solid var(--rule); border-radius:2px;
+    padding:22px 20px 24px; position:relative;
+  }
+  .stub::after{
+    content:''; position:absolute; right:0; top:14px; bottom:14px; width:1px;
+    background-image:linear-gradient(var(--rule) 60%, transparent 0%);
+    background-size:1px 8px; background-repeat:repeat-y;
+  }
+  .stub-year{font-family:var(--display); font-size:15px; color:var(--ink-dim); letter-spacing:0.04em;}
+  .stub h4{font-family:var(--display); font-size:26px; margin:8px 0 4px; line-height:1.05; letter-spacing:0.01em;}
+  .stub-tag{font-size:12px; color:var(--red); font-weight:600; margin:0 0 12px;}
+  .stub-line{font-size:14px; color:var(--ink-dim); line-height:1.55; margin:0;}
+  @media (max-width:640px){ .stub{flex:0 0 78vw;} }
+
+  /* ---------- TRAILERS ---------- */
+  .trailer-controls{
+    display:flex; gap:16px; flex-wrap:wrap; align-items:center; justify-content:space-between;
+    padding:30px 0 8px;
+  }
+  .trailer-search{
+    display:flex; align-items:center; gap:10px; flex:1; min-width:220px; max-width:360px;
+    border:1px solid var(--rule); border-radius:2px; padding:11px 14px; color:var(--ink-dim);
+  }
+  .trailer-search input{
+    flex:1; background:transparent; border:0; color:var(--ink); font-family:var(--body);
+    font-size:14px; outline:none;
+  }
+  .trailer-search input::placeholder{color:var(--ink-dim);}
+  .trailer-search:focus-within{border-color:var(--ink);}
+  .filter-pills{display:flex; gap:8px; flex-wrap:wrap;}
+  .filter-pill{
+    font-family:var(--body); font-size:13px; font-weight:600; color:var(--ink-dim);
+    background:transparent; border:1px solid var(--rule); border-radius:100px;
+    padding:9px 16px; cursor:pointer; transition:all .2s ease;
+  }
+  .filter-pill:hover{color:var(--ink); border-color:var(--ink-dim);}
+  .filter-pill.active{background:var(--ink); color:var(--bg); border-color:var(--ink);}
+  .filter-pill:focus-visible{outline:2px solid var(--ink); outline-offset:2px;}
+
+  .lang-row{display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:4px 0 8px;}
+  .lang-label{font-size:12px; font-weight:700; letter-spacing:0.06em; color:var(--ink-dim);}
+  .lang-note{font-size:12px; color:var(--ink-dim); margin:0; width:100%;}
+
+  .trailer-grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:20px;
+    padding:28px 0 40px;
+  }
+  .trailer-empty{color:var(--ink-dim); padding:20px 0 40px; font-size:14px;}
+  .trailer-card{
+    background:var(--surface); border:1px solid var(--rule); border-radius:2px; overflow:hidden;
+    cursor:pointer; text-align:left; font-family:var(--body); color:var(--ink);
+    transition:transform .25s ease, border-color .25s ease;
+  }
+  .trailer-card:hover{transform:translateY(-4px); border-color:var(--ink-dim);}
+  .trailer-card:focus-visible{outline:2px solid var(--ink); outline-offset:3px;}
+  .trailer-thumb{position:relative; aspect-ratio:16/9; background:var(--bg-alt); overflow:hidden;}
+  .trailer-thumb img{width:100%; height:100%; object-fit:cover;}
+  .trailer-play{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(0deg, rgba(10,11,13,0.55), rgba(10,11,13,0.05));
+  }
+  .trailer-play svg{
+    width:46px; height:46px; padding:14px; border-radius:50%;
+    background:rgba(244,241,234,0.92); color:var(--bg);
+    transition:transform .25s ease, background .25s ease;
+  }
+  .trailer-card:hover .trailer-play svg{transform:scale(1.08); background:var(--red); color:#fff;}
+  .trailer-status{
+    position:absolute; top:10px; left:10px; font-size:11px; font-weight:700; letter-spacing:0.03em;
+    padding:5px 10px; border-radius:100px; background:rgba(10,11,13,0.72); color:var(--ink);
+  }
+  .trailer-meta{padding:14px 16px 18px;}
+  .trailer-meta h4{font-family:var(--display); font-size:22px; margin:0 0 4px; line-height:1.05;}
+  .trailer-meta p{font-size:12px; color:var(--ink-dim); margin:0;}
+  .lang-tag{
+    display:inline-block; margin-top:6px; margin-right:4px; font-size:10px; font-weight:700; letter-spacing:0.04em;
+    padding:3px 8px; border-radius:100px; border:1px solid var(--rule); color:var(--ink-dim);
+  }
+  .archival-tag{border-color:var(--amber-dim); color:#f0be8c;}
+
+  .trailer-modal{
+    position:fixed; inset:0; z-index:200; display:none; align-items:center; justify-content:center; padding:24px;
+  }
+  .trailer-modal.open{display:flex;}
+  .trailer-modal-backdrop{position:absolute; inset:0; background:rgba(6,7,8,0.88);}
+  .trailer-modal-box{position:relative; width:100%; max-width:920px; z-index:1;}
+  .trailer-modal-frame{position:relative; width:100%; aspect-ratio:16/9; background:#000;}
+  .trailer-modal-frame iframe{position:absolute; inset:0; width:100%; height:100%; border:0;}
+  .trailer-modal-title{color:var(--ink-dim); font-size:14px; margin:12px 2px 0;}
+  .trailer-modal-close{
+    position:absolute; top:-44px; right:0; background:transparent; border:0; color:var(--ink);
+    cursor:pointer; padding:8px;
+  }
+  .trailer-modal-close:focus-visible{outline:2px solid var(--ink); outline-offset:2px;}
+
+  /* ---------- CREDITS ---------- */
+  .credits-grid{
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:24px;
+    padding:20px 0 10px;
+  }
+  .credit-block h4{font-family:var(--display); font-size:20px; margin:0 0 8px; letter-spacing:0.01em;}
+  .credit-block p{font-size:13px; color:var(--ink-dim); line-height:1.65; margin:0;}
+
+  /* ---------- FOOTER ---------- */  footer{
+    padding:clamp(90px,12vw,140px) 0 40px; border-top:1px solid var(--rule); margin-top:40px;
+    background:var(--bg-alt);
+  }
+  footer h2{font-family:var(--display); font-size:clamp(2.6rem,7vw,5rem); margin:0 0 14px; line-height:0.95;}
+  footer p.lead{color:var(--ink-dim); max-width:44ch; font-size:16px; margin-bottom:34px;}
+  .notify-form{display:flex; gap:12px; max-width:460px; flex-wrap:wrap;}
+  .notify-form input{
+    flex:1; min-width:200px; background:transparent; border:1px solid var(--rule); color:var(--ink);
+    padding:14px 16px; font-family:var(--body); font-size:15px; border-radius:2px;
+  }
+  .notify-form input::placeholder{color:var(--ink-dim);}
+  .notify-form input:focus-visible{outline:2px solid var(--ink); outline-offset:2px;}
+  .notify-msg{margin-top:12px; font-size:14px; color:var(--amber); min-height:20px;}
+
+  .foot-bottom{
+    display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:24px;
+    margin-top:clamp(60px,8vw,100px); padding-top:24px; border-top:1px solid var(--rule);
+    font-size:13px; color:var(--ink-dim);
+  }
+  .foot-bottom .disclaimer{max-width:52ch; line-height:1.6;}
+  .foot-links{display:flex; gap:20px;}
+  .foot-links a{text-decoration:none; color:var(--ink-dim); transition:color .2s;}
+  .foot-links a:hover{color:var(--ink);}
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="brand"><span class="dot"></span>MARQUEE</div>
+  <div class="nav-links">
+    <a href="#slate">The Slate</a>
+    <a href="#spotlight">Spotlight</a>
+    <a href="#archive">Archive</a>
+    <a href="#trailers">Trailers</a>
+    <a href="#credits">Credits</a>
+    <a href="#notify">Get Alerts</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <video autoplay muted loop playsinline webkit-playsinline="true" preload="auto" disablePictureInPicture>
+    <source src="assets/video/hero-video.mp4" type="video/mp4">
+  </video>
+  <div class="hero-content wrap">
+    <p class="hero-eyebrow"><span>What's queued up next</span></p>
+    <h1>
+      <span class="line l1"><span>Three heroes.</span></span>
+      <span class="line l2"><span>ONE MARQUEE.</span></span>
+      <span class="l3">Lit for the films worth showing up for.</span>
+    </h1>
+    <p class="hero-sub">From rooftop vigilantes to armored monarchs to a warrior wrapped in fur — here's what's on the slate next, and why it's worth the ticket.</p>
+    <div class="hero-cta">
+      <a href="#slate" class="btn btn-primary">See the slate</a>
+      <a href="#notify" class="btn btn-ghost">Get release alerts</a>
+    </div>
+  </div>
+  <div class="scroll-cue"><span>Scroll</span><span class="track"></span></div>
+</header>
+
+<div class="ticker-strip">
+  <div class="ticker-track" id="tickerTrack"></div>
+</div>
+
+<section id="slate">
+  <div class="slate-pin">
+    <div class="slate-track" id="slateTrack">
+      <div class="slate-panel intro">
+        <p class="num">01–03</p>
+        <h2>The Slate</h2>
+        <p>Three releases, three tones, one night out. Scroll to move through the lineup.</p>
+        <button class="arrow-btn" id="slateArrow" aria-label="Advance through the slate">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 12H20M20 12L14 6M20 12L14 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="slate-panel p1">
+        <img src="assets/images/spidy.jpg" alt="Spider-Man crouched on a rooftop above a red-painted mural">
+        <div class="duo"></div>
+        <div class="slate-info">
+          <p class="slate-index">01 · Street level</p>
+          <h3>SPIDER-MAN</h3>
+          <p class="sub">Brand New Day</p>
+          <span class="pill">In theaters now</span>
+          <p class="blurb">Peter's been forgotten by the city he protects, and the isolation is starting to change him — right as something even he can't out-swing arrives.</p>
+        </div>
+      </div>
+
+      <div class="slate-panel p2">
+        <img src="assets/images/dooms.jpg" alt="Doctor Doom in armor and a green cloak, arms outstretched">
+        <div class="duo"></div>
+        <div class="slate-info">
+          <p class="slate-index">02 · The throne</p>
+          <h3>DOOM</h3>
+          <p class="sub">Avengers: Doomsday</p>
+          <span class="pill">Coming Dec 18, 2026</span>
+          <p class="blurb">Heroes from three different timelines collide, and the one thing they all agree on is that Doom got here first.</p>
+        </div>
+      </div>
+
+      <div class="slate-panel p3">
+        <img src="assets/images/panda.jpg" alt="An animated panda warrior resting against a wall">
+        <div class="duo"></div>
+        <div class="slate-info">
+          <p class="slate-index">03 · The valley</p>
+          <h3>DRAGON WARRIOR</h3>
+          <p class="sub">Kung Fu Panda 4</p>
+          <span class="pill">Streaming now</span>
+          <p class="blurb">Po has to track down and train his own successor — turns out that's harder than anything Oogway ever taught him.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="spotlight" class="wrap">
+  <div class="section-head reveal">
+    <h2>Spotlight</h2>
+    <p>A closer look at who's carrying the slate this season.</p>
+  </div>
+
+  <div class="spot-row reveal">
+    <div class="spot-media"><img src="assets/images/spidy.jpg" alt="Spider-Man close up, red and black suit detail"></div>
+    <div class="spot-text">
+      <span class="tag">Street level · Brand New Day</span>
+      <h3>Spider-Man</h3>
+      <p>Four years on from the spell that erased him from everyone's memory, Peter's still swinging — just quieter, and mostly alone. This chapter leans into that isolation before it lets things get loud again.</p>
+    </div>
+  </div>
+
+  <div class="spot-row reveal">
+    <div class="spot-media"><img src="assets/images/dooms.jpg" alt="Doctor Doom armor detail with chain and medallion"></div>
+    <div class="spot-text">
+      <span class="tag">The throne · Avengers: Doomsday</span>
+      <h3>Doom</h3>
+      <p>Not a villain waiting to be stopped — a ruler waiting to be understood. Three universes' worth of heroes are about to learn that Doom doesn't do surprises. He does inevitabilities.</p>
+    </div>
+  </div>
+
+  <div class="spot-row reveal">
+    <div class="spot-media"><img src="assets/images/panda.jpg" alt="Animated panda warrior with a striped sash"></div>
+    <div class="spot-text">
+      <span class="tag">The valley · Kung Fu Panda 4</span>
+      <h3>The Dragon Warrior</h3>
+      <p>Same big heart, new job description: finding whoever comes next. This one is about legacy — training a successor without quite admitting he's ready to hand over the title.</p>
+    </div>
+  </div>
+</section>
+
+<section id="archive" class="wrap">
+  <div class="section-head reveal">
+    <h2>Previously on the marquee</h2>
+    <p>The full run — every stub from the archive, previous and upcoming.</p>
+  </div>
+  <div class="archive-row" id="archiveRow"></div>
+</section>
+
+<section id="trailers" class="wrap">
+  <div class="section-head reveal">
+    <h2>Trailers</h2>
+    <p>Previous, streaming, and upcoming — every trailer on the slate, in one place.</p>
+    <p class="trailer-count" id="trailerCount"></p>
+  </div>
+
+  <div class="trailer-controls reveal">
+    <div class="trailer-search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <input type="text" id="trailerSearch" placeholder="Search a title…" aria-label="Search trailers">
+    </div>
+    <div class="filter-pills" id="filterPills" role="group" aria-label="Filter trailers by status">
+      <button class="filter-pill active" data-filter="all">All</button>
+      <button class="filter-pill" data-filter="previous">Previous</button>
+      <button class="filter-pill" data-filter="streaming">Streaming now</button>
+      <button class="filter-pill" data-filter="upcoming">Upcoming</button>
+    </div>
+  </div>
+
+  <div class="lang-row reveal">
+    <span class="lang-label">Language</span>
+    <div class="filter-pills" id="langPills" role="group" aria-label="Choose trailer language">
+      <button class="filter-pill active" data-lang="en">English</button>
+      <button class="filter-pill" data-lang="hi">हिन्दी (Hindi)</button>
+      <button class="filter-pill" data-lang="es">Español (Spanish)</button>
+      <button class="filter-pill" data-lang="fr">Français (French)</button>
+      <button class="filter-pill" data-lang="zh">中文 (Mandarin)</button>
+      <button class="filter-pill" data-lang="ar">العربية (Arabic)</button>
+      <button class="filter-pill" data-lang="ja">日本語 (Japanese)</button>
+    </div>
+    <p class="lang-note" id="langNote"></p>
+  </div>
+
+  <div class="trailer-grid" id="trailerGrid"></div>
+  <p class="trailer-empty" id="trailerEmpty" hidden>No titles match that search.</p>
+</section>
+
+<div class="trailer-modal" id="trailerModal" aria-hidden="true">
+  <div class="trailer-modal-backdrop" id="trailerModalBackdrop"></div>
+  <div class="trailer-modal-box" role="dialog" aria-modal="true" aria-label="Trailer player">
+    <button class="trailer-modal-close" id="trailerModalClose" aria-label="Close trailer">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 5L19 19M19 5L5 19" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+    <div class="trailer-modal-frame" id="trailerModalFrame"></div>
+    <p class="trailer-modal-title" id="trailerModalTitle"></p>
+  </div>
+</div>
+
+<section id="credits" class="wrap">
+  <div class="section-head reveal">
+    <h2>Credits &amp; sources</h2>
+    <p>Everything this site is built from, and who it actually belongs to.</p>
+  </div>
+  <div class="credits-grid reveal">
+    <div class="credit-block">
+      <h4>Movies, characters &amp; trailers</h4>
+      <p>Every film title, character, and trailer referenced on this site is the property of its
+      respective studio and rights holder — including Marvel Studios, The Walt Disney Company,
+      Sony Pictures, DreamWorks Animation, and Pixar Animation Studios. Nothing here is official;
+      this is a fan-built concept site, not a Marvel or studio product.</p>
+    </div>
+    <div class="credit-block">
+      <h4>Trailer playback</h4>
+      <p>All trailers play through YouTube's own embedded player. Where a title's trailer comes from
+      the studio's own official channel — including its regional/dubbing channel for the Hindi,
+      Spanish, French, Mandarin, Arabic, and Japanese versions — that's who you're watching. For older
+      catalog titles where the studio itself never uploaded the original trailer to YouTube, the site
+      uses the best available preservation upload instead — these are marked "Archival upload" on the
+      card, and credit for that footage belongs to whichever channel uploaded it, visible directly in
+      the YouTube player itself once you press play. The language switch only ever shows a title in a
+      language once an official dub trailer for it has actually been verified on YouTube — if a title
+      has no dub in a given language yet (or none currently exists), it's left out of that language's
+      list rather than guessed at. Trailer thumbnail images are pulled from YouTube's public thumbnail
+      service for the linked video. No trailer video is hosted or redistributed by this site.</p>
+    </div>
+    <div class="credit-block">
+      <h4>Character artwork</h4>
+      <p>The Spider-Man, Doom, and panda artwork used across the hero, slate, and spotlight sections
+      was supplied by the site owner. Original artist credit, where visible in the source image, remains
+      with the artist.</p>
+    </div>
+    <div class="credit-block">
+      <h4>Tools &amp; libraries</h4>
+      <p>Built with GSAP &amp; ScrollTrigger (GreenSock) for animation, Google Fonts (Bebas Neue,
+      Archivo) for type, and EmailJS for the alerts form. All used under their respective open
+      licenses.</p>
+    </div>
+  </div>
+</section>
+
+<footer id="notify">
+  <div class="wrap">
+    <h2>Don't miss the lights</h2>
+    <p class="lead">Drop your email and we'll send you a confirmation the moment you're on the list.</p>
+    <form class="notify-form" id="notifyForm">
+      <input type="email" id="notifyEmail" required placeholder="you@email.com" aria-label="Email address">
+      <button type="submit" class="btn btn-primary" id="notifyBtn">Notify me</button>
+      <button type="button" class="btn btn-ghost" id="notifyClear">Clear</button>
+    </form>
+    <p class="notify-msg" id="notifyMsg"></p>
+
+    <div class="foot-bottom">
+      <p class="disclaimer">Concept site built as a design exercise. All characters, likenesses, movie
+      titles, and trailers belong to their original studios and artists — see Credits &amp; sources above.</p>
+      <div class="foot-links">
+        <a href="#slate">The Slate</a>
+        <a href="#spotlight">Spotlight</a>
+        <a href="#archive">Archive</a>
+        <a href="#trailers">Trailers</a>
+        <a href="#credits">Credits</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+(function(){
+  // ---------- Mobile viewport-height fix (used only by the mobile media query above) ----------
+  function setVH(){
+    document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
+  }
+  setVH();
+  window.addEventListener('resize', setVH);
+  window.addEventListener('orientationchange', setVH);
+
+  // ---------- Marquee ticker content ----------
+  var items = ["Spider-Man: Brand New Day","Avengers: Doomsday","Kung Fu Panda 4","Now booking"];
+  var track = document.getElementById('tickerTrack');
+  var html = '';
+  for(var r=0;r<2;r++){
+    items.forEach(function(t){ html += '<span><b>'+t+'</b><i>&bull;</i></span>'; });
+  }
+  track.innerHTML = html;
+
+  // ---------- Shared movie catalog (drives Archive + Trailers) ----------
+  // yt = official English trailer (YouTube video id). hi = official Hindi trailer, where one exists.
+  var MOVIES = [
+    {title:"Iron Man", year:2008, studio:"Marvel", cat:"previous", yt:"8hYlB38asDY", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A weapons genius builds his way out of a cave and into a whole new job description."},
+    {title:"The Avengers", year:2012, studio:"Marvel", cat:"previous", yt:"eOrNdBpGMv8", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Six mismatched heroes, one shared enemy, and a first attempt at getting along."},
+    {title:"Captain America: Civil War", year:2016, studio:"Marvel", cat:"previous", yt:"dKrVegVI0Us", hi:"IxxmvrrSSNQ", es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Two old friends pick a side each, and drag the rest of the team into the fallout."},
+    {title:"Guardians of the Galaxy", year:2014, studio:"Marvel", cat:"previous", yt:"d96cjJhvlMA", hi:"ZqbojqBkYzY", es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A ragtag crew of misfits accidentally becomes the galaxy's last line of defense."},
+    {title:"Doctor Strange", year:2016, studio:"Marvel", cat:"previous", yt:"Lt-U_t2pUHI", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A surgeon's hands stop working, and everything he trusted about control goes with them."},
+    {title:"Doctor Strange in the Multiverse of Madness", year:2022, studio:"Marvel", cat:"previous", yt:"aWzlQ2N6qqg", hi:"-mjWrrKgwJM", es:null, fr:null, zh:null, ar:null, ja:null, blurb:"One wrong step between universes, and Strange becomes the least strange thing in the room."},
+    {title:"Black Panther", year:2018, studio:"Marvel", cat:"previous", yt:"xjDjIWPwcPU", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A king's first year on the throne, and the cousin who thinks he'd do it better."},
+    {title:"Black Panther: Wakanda Forever", year:2022, studio:"Marvel", cat:"previous", yt:"_Z3QKkl1WyM", hi:"y9JDJ6up55U", es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A nation grieves its king in public while quietly deciding who protects it next."},
+    {title:"Captain Marvel", year:2019, studio:"Marvel", cat:"previous", yt:"Z1BCujX3pw8", hi:"hoOXjoU4VTg", es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Higher, further, faster — a pilot with no memory finds out exactly how powerful she already is."},
+    {title:"The Marvels", year:2023, studio:"Marvel", cat:"previous", yt:"wS_qbDztgVY", hi:"gLuhrhEfQBc", es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Three heroes keep swapping places mid-fight, and none of them asked for the upgrade."},
+    {title:"Spider-Man: Into the Spider-Verse", year:2018, studio:"Marvel", cat:"previous", yt:"g4Hbz2jLxvQ", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"One mask, a dozen universes, and a teenager figuring out which version of the leap is his."},
+    {title:"Spider-Man: No Way Home", year:2021, studio:"Marvel", cat:"previous", yt:"JfVOs4VSpmA", hi:"Hi4ktzK9g0I", es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A spell goes wrong, the multiverse cracks open, and Peter gets more help than he asked for."},
+    {title:"Avengers: Endgame", year:2019, studio:"Marvel", cat:"previous", yt:"TcMBFSGVi1c", hi:"-ohtFJ3Efto", es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The one where every loose thread from a decade gets pulled at once."},
+    {title:"Thor: Love and Thunder", year:2022, studio:"Marvel", cat:"previous", yt:"Go8nTmfrQd8", hi:"sFTD5vBfRGY", es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Thor gets his heart broken twice — once by an ex, once by a god-killer with a grudge."},
+    {title:"Spider-Man: Across the Spider-Verse", year:2023, studio:"Marvel", cat:"previous", yt:"UUqUZ7uumqE", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The sequel that widens the lens — more spiders, more rules, and a canon worth breaking."},
+    {title:"Guardians of the Galaxy Vol. 3", year:2023, studio:"Marvel", cat:"previous", yt:"u3V5KDHRQvk", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"One last job for a family that was never supposed to work as a team in the first place."},
+    {title:"Kung Fu Panda", year:2008, studio:"DreamWorks", cat:"previous", yt:"PXi3Mv6KMzY", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The noodle-shop kid nobody bet on, chosen for the one job that made no sense on paper."},
+    {title:"Kung Fu Panda 3", year:2016, studio:"DreamWorks", cat:"previous", yt:"10r9ozshGVE", hi:"7U6RzqwNTF8", es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Po meets the father he never knew, in a village full of pandas just like him."},
+    {title:"The Incredibles", year:2004, studio:"Pixar", cat:"previous", yt:"ixKqYNMqcnE", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Retirement never really takes when the suit still fits."},
+    {title:"Incredibles 2", year:2018, studio:"Pixar", cat:"previous", yt:"i5qOzqD9Rms", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Helen gets the spotlight this time, and Bob is left home discovering parenting is its own superpower."},
+    {title:"Big Hero 6", year:2014, studio:"Marvel", cat:"previous", yt:"jwbHKtEsOeM", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A grieving kid, an inflatable nurse-bot, and a city that turns out to need saving anyway."},
+    {title:"Kung Fu Panda 4", year:2024, studio:"DreamWorks", cat:"streaming", yt:"xCVBU07uGf4", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Po has to find his own replacement, which turns out to be harder than becoming the Dragon Warrior ever was."},
+    {title:"Deadpool & Wolverine", year:2024, studio:"Marvel", cat:"streaming", yt:"73_1biulkYk", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Two characters who can't die, forced to spend a whole movie in the same room."},
+    {title:"The Fantastic Four: First Steps", year:2025, studio:"Marvel", cat:"streaming", yt:"pAsmrKyMqaA", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A family of scientists gets a cosmic problem no lab can solve their way out of."},
+    {title:"Spider-Man: Brand New Day", year:2026, studio:"Marvel", cat:"streaming", yt:"1eONa8Nx_jQ", hi:"QdLExXYsyQw", es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A city that's forgotten who he is, and a Peter Parker running out of ways to remind them quietly."},
+    {title:"Avengers: Doomsday", year:2026, studio:"Marvel", cat:"upcoming", yt:"fxNh27fRdYA", hi:"hvKW6iDOZrc", es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Three universes on a collision course, and a monarch who's done waiting for an invitation."},
+    {title:"Frozen", year:2013, studio:"Disney", cat:"previous", yt:"TbQm5doF_Uc", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A queen's ice powers get loose on her own coronation night, and winter won't leave on its own."},
+    {title:"Frozen II", year:2019, studio:"Disney", cat:"previous", yt:"Zi4LMpSDccc", hi:"gWSt-_ejxzI", es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Elsa goes looking for where her powers actually came from, and the past doesn't stay buried quietly."},
+    {title:"Moana", year:2016, studio:"Disney", cat:"previous", yt:"LKFuXETZUsI", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The ocean picks a chief's daughter for a voyage her whole island told her not to take."},
+    {title:"Zootopia", year:2016, studio:"Disney", cat:"previous", yt:"XFaff7zbr7c", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A rookie rabbit cop and a con-artist fox end up solving the one case nobody wanted looked at."},
+    {title:"Beauty and the Beast", year:1991, studio:"Disney", cat:"previous", yt:"fNVe13diYq0", hi:"Kg0eTTWgW5g", es:null, fr:null, zh:null, ar:null, ja:null, src:"archival", blurb:"A prince cursed into a monster gets one shot at love before the last petal falls."},
+    {title:"Aladdin", year:1992, studio:"Disney", cat:"previous", yt:"N8t6gjxeW4Y", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, src:"archival", blurb:"A street kid, a genie, and three wishes he keeps almost wasting on the wrong things."},
+    {title:"The Lion King", year:1994, studio:"Disney", cat:"previous", yt:"lFzVJEksoDY", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A cub blamed for his father's death runs from a kingdom that was always supposed to be his."},
+    {title:"Mulan", year:1998, studio:"Disney", cat:"previous", yt:"ZcyNiBr3rec", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, src:"archival", blurb:"A daughter takes her father's place in the army, armor and all, and tells no one."},
+    {title:"Tangled", year:2010, studio:"Disney", cat:"previous", yt:"87XoLxggHqI", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, src:"archival", blurb:"A tower, seventy feet of hair, and a thief who picked the worst possible hideout."},
+    {title:"Pocahontas", year:1995, studio:"Disney", cat:"previous", yt:"RIZJO0V8H6o", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, src:"archival", blurb:"Two worlds meet on the riverbank, and neither one is ready to listen."},
+    {title:"The Hunchback of Notre Dame", year:1996, studio:"Disney", cat:"previous", yt:"tIgYuzADBa8", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, src:"archival", blurb:"A bell-ringer watches the world from a rooftop, wanting nothing more than one day out in it."},
+    {title:"The Little Mermaid", year:1989, studio:"Disney", cat:"previous", yt:"C26bl-BIklk", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A mermaid trades her voice for legs and three days to make a prince fall for her without it."},
+    {title:"Hercules", year:1997, studio:"Disney", cat:"previous", yt:"Rf8L7SPOQ-A", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, src:"archival", blurb:"A god's son grows up mortal on Earth and has to earn his way back to Olympus the hard way."},
+    {title:"Tarzan", year:1999, studio:"Disney", cat:"previous", yt:"9FZ0l8csNSg", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, src:"archival", blurb:"A shipwrecked baby raised by gorillas has to decide which family — and which world — is really his."},
+    {title:"Lilo & Stitch", year:2002, studio:"Disney", cat:"previous", yt:"9OAC55UWAQs", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, src:"archival", blurb:"A genetically engineered disaster gets adopted as a dog by a lonely Hawaiian kid who needed one anyway."},
+    {title:"Wreck-It Ralph", year:2012, studio:"Disney", cat:"previous", yt:"Yxaz7wgJ4gM", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"An arcade villain gets tired of being the bad guy and goes game-hopping to earn a medal instead."},
+    {title:"Cinderella", year:1950, studio:"Disney", cat:"previous", yt:"yLCH5j7NkZk", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A girl trapped scrubbing floors for her stepfamily gets one enchanted night to change everything."},
+    {title:"Sleeping Beauty", year:1959, studio:"Disney", cat:"previous", yt:"cxvLw7zkx_g", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A princess cursed at birth gets one loophole in the spell, and a kingdom that spends sixteen years hoping it holds."},
+    {title:"Snow White and the Seven Dwarfs", year:1937, studio:"Disney", cat:"previous", yt:"_u8VsVM9KNY", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, src:"archival", blurb:"The first of its kind — a princess, a poisoned apple, and seven strangers who take her in without asking questions."},
+    {title:"Pinocchio", year:1940, studio:"Disney", cat:"previous", yt:"CGXShg3rqf4", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, src:"archival", blurb:"A wooden puppet wants to be real so badly he'll walk straight into every bad idea Pleasure Island has to offer."},
+    {title:"Alice in Wonderland", year:1951, studio:"Disney", cat:"previous", yt:"KLIqErnQCuw", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, src:"archival", blurb:"A girl follows a rabbit in a waistcoat down a hole and never quite gets the logic of where she lands."},
+    {title:"Peter Pan", year:1953, studio:"Disney", cat:"previous", yt:"UuV86wF2-P0", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A boy who refuses to grow up flies three kids off to Neverland, pirates and all."},
+    {title:"The Jungle Book", year:1967, studio:"Disney", cat:"previous", yt:"wJ11RRW9qQc", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A boy raised by wolves gets walked toward the man-village by a panther who won't take no for an answer."},
+    {title:"One Hundred and One Dalmatians", year:1961, studio:"Disney", cat:"previous", yt:"c3ljkqMcOcE", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, src:"archival", blurb:"A litter of stolen puppies, a villain in a fur coat, and a rescue that runs the length of England."},
+    {title:"Robin Hood", year:1973, studio:"Disney", cat:"previous", yt:"G9gaTbKCC7M", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, src:"archival", blurb:"An outlaw fox robs from a greedy lion king to feed a kingdom he's not supposed to care about."},
+    {title:"Lady and the Tramp", year:1955, studio:"Disney", cat:"previous", yt:"wL4rbIc5XV4", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A pampered spaniel and a street-smart mutt share a plate of spaghetti and rethink everything about their own side of town."},
+    {title:"The Aristocats", year:1970, studio:"Disney", cat:"previous", yt:"mWUWGV6Ch88", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A Parisian house cat and her kittens get dumped in the countryside by a butler with his eye on their inheritance."},
+    {title:"Dumbo", year:1941, studio:"Disney", cat:"previous", yt:"OFNRmu2xRKU", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, src:"archival", blurb:"A circus elephant gets mocked for his ears right up until they turn out to be exactly what gets him off the ground."},
+    {title:"Bambi", year:1942, studio:"Disney", cat:"previous", yt:"Wg4qdsv5MfU", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, src:"archival", blurb:"A fawn grows up through a forest year, learning what it costs to survive in it."},
+    {title:"The Sword in the Stone", year:1963, studio:"Disney", cat:"previous", yt:"JY_w9Aj7s1o", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"An unwanted kitchen boy pulls a sword out of a stone and finds out that's the easy part of being king."},
+    {title:"Fantasia", year:1940, studio:"Disney", cat:"previous", yt:"V88OP8n1IQY", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, src:"archival", blurb:"An orchestra plays, and the animation just follows wherever the music decides to go — brooms, dinosaurs, and all."},
+    {title:"Oliver & Company", year:1988, studio:"Disney", cat:"previous", yt:"EExIKWcqSAI", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, src:"archival", blurb:"An orphaned kitten falls in with a gang of street dogs running scams across New York."},
+    {title:"The Rescuers", year:1977, studio:"Disney", cat:"previous", yt:"xwryNsCchog", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, src:"archival", blurb:"Two mice from a tiny rescue society take on a case way bigger than either of them — a kidnapped orphan and the world's biggest diamond."},
+    {title:"The Fox and the Hound", year:1981, studio:"Disney", cat:"previous", yt:"I9r11J3d5YI", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, src:"archival", blurb:"A fox and a hound grow up as best friends, right up until the world reminds them what they're each bred to do to the other."},
+    {title:"The Great Mouse Detective", year:1986, studio:"Disney", cat:"previous", yt:"N-aEr0kOQNU", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, src:"archival", blurb:"A Sherlock Holmes-obsessed mouse takes on his own Moriarty when a toymaker goes missing in Victorian London."},
+    {title:"The Princess and the Frog", year:2009, studio:"Disney", cat:"previous", yt:"P-3WxyDJDvU", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A hardworking waitress kisses the wrong frog prince and ends up hopping through the bayou instead of opening her restaurant."},
+    {title:"Raya and the Last Dragon", year:2021, studio:"Disney", cat:"previous", yt:"ODGU8kgVmpU", hi:"MVeQKJ9XA2g", es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A lone warrior tracks down the last dragon to undo five hundred years of a broken, divided land."},
+    {title:"Treasure Planet", year:2002, studio:"Disney", cat:"previous", yt:"Z0aH_RsPXac", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, src:"archival", blurb:"A map to the greatest treasure in the galaxy, and a teenager who's about to learn his crew isn't what it seems."},
+    {title:"Atlantis: The Lost Empire", year:2001, studio:"Disney", cat:"previous", yt:"JuWOj27MyMg", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, src:"archival", blurb:"A linguist funds his grandfather's impossible dream and finds the lost city exactly where the myths said it'd be."},
+    {title:"The Emperor's New Groove", year:2000, studio:"Disney", cat:"previous", yt:"JX6btxoFhI8", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, src:"archival", blurb:"A self-obsessed emperor gets turned into a llama by his own advisor and has to find his way home — and grow up a little getting there."},
+    {title:"Meet the Robinsons", year:2007, studio:"Disney", cat:"previous", yt:"7cFm-x_x44s", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"An orphan inventor gets whisked into the future by a stranger's kid, right as someone starts sabotaging his own timeline."},
+    {title:"Chicken Little", year:2005, studio:"Disney", cat:"previous", yt:"32wRvggX7Ug", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, src:"archival", blurb:"A kid who once cried wolf about the sky falling turns out to have been right all along — now he just has to get anyone to believe him twice."},
+    {title:"Bolt", year:2008, studio:"Disney", cat:"previous", yt:"Pj0a7GkMH3w", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A TV superdog with no idea his powers are fake gets lost for real, and has to cross the country to find his person."},
+    {title:"Brother Bear", year:2003, studio:"Disney", cat:"previous", yt:"6-9g434R7Uo", hi:null, es:null, fr:null, zh:null, ar:null, ja:null, src:"archival", blurb:"A young hunter is turned into the very animal he swore revenge on, and has to see the world through its eyes to become human again."},
+    {title:"Ralph Breaks the Internet", year:2018, studio:"Disney", cat:"previous", yt:"3xiaYAUk52k", hi:"pgbiCuPoEHE", es:null, fr:null, zh:null, ar:null, ja:null, blurb:"An arcade hero and his best friend head online for a spare part and end up gambling with the whole friendship instead."},
+    {title:"Encanto", year:2021, studio:"Disney", cat:"previous", yt:"gxc6y2ZVfCU", hi:"gN5kjU2Eu_I", es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Every Madrigal gets a magic gift at birth — except Mirabel, who might be the only one who can save the family's magic house anyway."},
+    {title:"A Bug's Life", year:1998, studio:"Pixar", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"An ant recruits a band of bumbling circus bugs to fight off the grasshoppers shaking down his colony."},
+    {title:"A Silent Voice", year:2016, studio:"Kyoto Animation", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A former bully tries to make amends with the deaf classmate he once tormented."},
+    {title:"Abominable", year:2019, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A teenage girl and her friends race a yeti named Everest home across China before he's captured."},
+    {title:"Akira", year:1988, studio:"Toei/Tokyo Movie Shinsha", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A biker gang leader's best friend develops terrifying psychic powers in a collapsing neo-Tokyo."},
+    {title:"All-Star Superman", year:2011, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Dying from an overdose of solar energy, Superman spends his last days finishing everything he's ever meant to do."},
+    {title:"An American Tail", year:1986, studio:"Amblin/Universal", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A Russian mouse family emigrates to America, and young Fievel gets separated from them on the crossing."},
+    {title:"An American Tail: Fievel Goes West", year:1991, studio:"Amblin/Universal", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Fievel and his family head to the frontier chasing a con artist's promise of a cat-free West."},
+    {title:"Antz", year:1998, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A neurotic worker ant falls for the colony princess and accidentally becomes a war hero."},
+    {title:"Arthur Christmas", year:2011, studio:"Aardman", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Santa's earnest, overlooked son races the clock to deliver one forgotten present before dawn."},
+    {title:"Avengers Confidential: Black Widow & Punisher", year:2014, studio:"Marvel", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Black Widow and the Punisher reluctantly team up against a black-market weapons ring."},
+    {title:"Batman & Mr. Freeze: SubZero", year:1998, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Batman races to save Robin's girlfriend after Mr. Freeze needs a transplant to save his cryogenically frozen wife."},
+    {title:"Batman Beyond: Return of the Joker", year:2000, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"An aging Bruce Wayne and his successor confront the return of Batman's most dangerous enemy."},
+    {title:"Batman vs. Robin", year:2015, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Robin is pulled toward a secret society of assassins that once tried to recruit his own father."},
+    {title:"Batman: Assault on Arkham", year:2014, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The Suicide Squad is sent into Arkham Asylum on a black-ops mission that crosses paths with Batman."},
+    {title:"Batman: Bad Blood", year:2016, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"With Batman missing, Batwoman and a new Robin have to hold Gotham together."},
+    {title:"Batman: Hush", year:2019, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A mysterious mastermind manipulates Batman's rogues gallery while an old friend resurfaces."},
+    {title:"Batman: Mask of the Phantasm", year:1993, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"An old flame returns to Gotham the same night a masked killer starts hunting the city's mob bosses."},
+    {title:"Batman: Mystery of the Batwoman", year:2003, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A new vigilante in a bat-themed costume forces Batman to figure out whose side she's really on."},
+    {title:"Batman: Soul of the Dragon", year:2021, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Batman reunites with old martial-arts allies to stop a supernatural threat unleashed from an ancient tome."},
+    {title:"Batman: The Doom That Came to Gotham", year:2023, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"An Arctic expedition unearths a Lovecraftian horror that follows Bruce Wayne home to Gotham."},
+    {title:"Batman: Under the Red Hood", year:2010, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A ruthless new vigilante with a grudge forces Batman to confront a death he's never gotten over."},
+    {title:"Batman: Year One", year:2011, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A rookie Bruce Wayne and an incorruptible cop named Gordon each try to clean up Gotham their own way."},
+    {title:"Bee Movie", year:2007, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A bee sues the human race after discovering they've been stealing honey all along."},
+    {title:"Belle", year:2021, studio:"Studio Chizu", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A shy teenager becomes a global pop sensation inside a vast virtual world, then meets a beast who needs her help."},
+    {title:"Brave", year:2012, studio:"Pixar", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A headstrong Scottish princess's wish to change her fate turns her mother into a bear."},
+    {title:"Captain Underpants: The First Epic Movie", year:2017, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Two prank-loving kids hypnotize their principal into believing he's a underwear-clad superhero."},
+    {title:"Cars", year:2006, studio:"Pixar", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A hotshot rookie race car gets stranded in a forgotten Route 66 town and learns what really matters."},
+    {title:"Cars 2", year:2011, studio:"Pixar", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Tow Mater gets swept into international espionage while trailing Lightning McQueen on a world racing tour."},
+    {title:"Cars 3", year:2017, studio:"Pixar", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"An aging Lightning McQueen trains with a new crew chief to prove he's still got a shot against a new generation."},
+    {title:"Castle in the Sky", year:1986, studio:"Studio Ghibli", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A boy and a girl with a mysterious pendant race pirates and the military to reach a legendary floating city."},
+    {title:"Catwoman: Hunted", year:2022, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Catwoman is hunted across the globe by rival thieves, Interpol, and a mysterious crime syndicate."},
+    {title:"Chicken Run", year:2000, studio:"Aardman", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A coop of hens plots an elaborate escape before the farmer turns them all into pies."},
+    {title:"Cloudy with a Chance of Meatballs", year:2009, studio:"Sony", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"An inventor's machine that turns water into food spirals wildly out of control over his hometown."},
+    {title:"Cloudy with a Chance of Meatballs 2", year:2013, studio:"Sony", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The gang returns to the island to find it overrun with living, breathing food-animal hybrids."},
+    {title:"Coco", year:2017, studio:"Pixar", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A boy who dreams of being a musician crosses into the Land of the Dead to find his great-great-grandfather."},
+    {title:"Coraline", year:2009, studio:"Laika", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A bored girl finds a door to an idealized parallel world that turns out to want her, permanently."},
+    {title:"Corpse Bride", year:2005, studio:"Warner Bros.", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A nervous groom accidentally marries a dead woman in the land of the departed the night before his real wedding."},
+    {title:"DC League of Super-Pets", year:2022, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Krypto the Superdog assembles a team of shelter animals with powers of their own to rescue the Justice League."},
+    {title:"Demon Slayer: Infinity Castle", year:2025, studio:"ufotable", cat:"upcoming", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Tanjiro and the Hashira storm the Demon King's shifting fortress in the final chapter of the saga."},
+    {title:"Demon Slayer: Mugen Train", year:2020, studio:"ufotable", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Tanjiro and the Hashira board a train hiding a demon that traps its passengers in their dreams."},
+    {title:"Demon Slayer: To the Hashira Training", year:2024, studio:"ufotable", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The Hashira put Tanjiro and friends through brutal training to prepare for the war with Muzan."},
+    {title:"Despicable Me", year:2010, studio:"Illumination", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A supervillain adopts three orphan girls as part of a heist, and they adopt him right back."},
+    {title:"Despicable Me 2", year:2013, studio:"Illumination", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Gru is recruited by a secret anti-villain league to track down a powerful new mutagen."},
+    {title:"Despicable Me 3", year:2017, studio:"Illumination", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Gru meets the long-lost identical twin brother he never knew he had."},
+    {title:"Despicable Me 4", year:2024, studio:"Illumination", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Gru and his family go into witness protection after he makes a dangerous new enemy."},
+    {title:"Dinosaur", year:2000, studio:"Disney", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"An orphaned dinosaur raised by lemurs leads a herd of survivors across a scorched, meteor-struck land."},
+    {title:"Doctor Strange: The Sorcerer Supreme", year:2007, studio:"Marvel", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A young Stephen Strange is drawn into a battle against dark magic threatening to consume the world."},
+    {title:"Dog Man", year:2025, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Part dog, part man, all cop — Dog Man takes on a devious cat mastermind bent on world domination."},
+    {title:"Dragon Ball Super: Broly", year:2018, studio:"Toei Animation", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Goku and Vegeta face the last Saiyan they never knew existed — one raised on nothing but rage."},
+    {title:"Dragon Ball Super: Super Hero", year:2022, studio:"Toei Animation", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The Red Ribbon Army returns with android soldiers built to finally settle old scores."},
+    {title:"Earwig and the Witch", year:2020, studio:"Studio Ghibli", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"An orphan adopted by a witch has to out-scheme her new guardian to get anything she wants."},
+    {title:"Elemental", year:2023, studio:"Pixar", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A fire-element woman and a water-element man fall for each other in a city built for neither of them."},
+    {title:"Elio", year:2025, studio:"Pixar", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A space-obsessed kid is accidentally beamed up and mistaken for Earth's official ambassador to the galaxy."},
+    {title:"Epic", year:2013, studio:"Blue Sky Studios", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A teenage girl is shrunk down into a hidden forest world locked in war between growth and decay."},
+    {title:"Fantastic Mr. Fox", year:2009, studio:"20th Century Fox", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A reformed chicken thief can't resist one last score against three vicious farmers."},
+    {title:"Ferdinand", year:2017, studio:"Blue Sky Studios", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A gentle bull mistaken for a savage beast just wants to get back to the flower farm and his family."},
+    {title:"Finding Dory", year:2016, studio:"Pixar", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A forgetful blue tang sets off to find the parents she barely remembers she ever had."},
+    {title:"Finding Nemo", year:2003, studio:"Pixar", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A nervous clownfish crosses the ocean to rescue his son from a dentist's fish tank in Sydney."},
+    {title:"Flushed Away", year:2006, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A pampered pet rat is flushed into London's sewers and has to fight his way back home."},
+    {title:"Frankenweenie", year:2012, studio:"Disney", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A boy resurrects his dead dog with lightning, and the neighborhood pets start getting ideas of their own."},
+    {title:"Ghost in the Shell", year:1995, studio:"Production I.G", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A cyborg cop hunts a hacker who may be more self-aware than anyone in her own department."},
+    {title:"Goosebumps", year:2015, studio:"Sony", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A teenager accidentally unleashes every monster R.L. Stine ever locked inside his manuscripts."},
+    {title:"Grave of the Fireflies", year:1988, studio:"Studio Ghibli", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A teenage boy and his little sister try to survive on their own in the last months of World War II Japan."},
+    {title:"Hexed", year:2026, studio:"Disney", cat:"upcoming", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A cursed sorceress teams up with the one hero immune to her magic to break the spell before it's permanent."},
+    {title:"Home", year:2015, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A fugitive alien and the girl he's hiding from his own kind become the unlikeliest of best friends."},
+    {title:"Home on the Range", year:2004, studio:"Disney", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Three barnyard misfits set off to catch a notorious cattle rustler and save their farm from auction."},
+    {title:"Hop", year:2011, studio:"Illumination", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The Easter Bunny's slacker son runs off to Hollywood, chasing a career as a drummer instead of the family business."},
+    {title:"Hoppers", year:2026, studio:"Pixar", cat:"upcoming", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A young woman uploads her mind into a robotic beaver to secretly live among the wildlife she's trying to protect."},
+    {title:"Horton Hears a Who!", year:2008, studio:"Blue Sky Studios", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"An elephant tries to protect a microscopic civilization living on a speck of dust, against a jungle that thinks he's lost it."},
+    {title:"Hotel Transylvania", year:2012, studio:"Sony", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Dracula runs a monster-only resort that goes into chaos the day an ordinary human wanders in."},
+    {title:"Hotel Transylvania 2", year:2015, studio:"Sony", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Dracula worries his half-human grandson hasn't shown any signs of developing vampire powers."},
+    {title:"Hotel Transylvania 3: Summer Vacation", year:2018, studio:"Sony", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The monster family sets sail on a cruise, and Dracula falls for the ship's mysterious human captain."},
+    {title:"Hotel Transylvania: Transformania", year:2022, studio:"Sony", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A mishap with a ray gun turns all the monsters human and Johnny into a monster."},
+    {title:"How to Train Your Dragon", year:2010, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A young Viking befriends the dragon he was raised to kill, upending everything his village believes."},
+    {title:"How to Train Your Dragon 2", year:2014, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Hiccup discovers his long-lost mother living among a hidden dragon sanctuary."},
+    {title:"How to Train Your Dragon: The Hidden World", year:2019, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Hiccup and Toothless search for the mythical hidden world where dragons might finally be safe."},
+    {title:"Howl's Moving Castle", year:2004, studio:"Studio Ghibli", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A young woman cursed into an old woman's body finds shelter in a wizard's walking, clanking castle."},
+    {title:"Hulk Versus", year:2009, studio:"Marvel", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The Hulk squares off against Wolverine and then Thor in two brutal back-to-back showdowns."},
+    {title:"Hulk: Where Monsters Dwell", year:2016, studio:"Marvel", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Bruce Banner and the Hulk are dropped into a savage lost world crawling with ancient monsters."},
+    {title:"Ice Age", year:2002, studio:"Blue Sky Studios", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A woolly mammoth, a sloth, and a saber-toothed tiger team up to return a lost human baby to his tribe."},
+    {title:"Ice Age: Adventures of Buck Wild", year:2022, studio:"Blue Sky Studios", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Sid follows the one-eyed weasel Buck into the Lost World to battle dinosaurs one more time."},
+    {title:"Ice Age: Collision Course", year:2016, studio:"Blue Sky Studios", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Scrat's chase for his acorn accidentally sends an asteroid hurtling toward the herd's entire world."},
+    {title:"Ice Age: Continental Drift", year:2012, studio:"Blue Sky Studios", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A tectonic shift strands Manny and friends on an ice floe adrift in the open ocean."},
+    {title:"Ice Age: Dawn of the Dinosaurs", year:2009, studio:"Blue Sky Studios", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The herd ventures underground into a hidden jungle still ruled by dinosaurs."},
+    {title:"Ice Age: The Meltdown", year:2006, studio:"Blue Sky Studios", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A thawing ice age forces the herd to find a way to survive the coming flood."},
+    {title:"Injustice", year:2021, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A world where Superman becomes a tyrant forces Batman to lead a resistance against his oldest ally."},
+    {title:"Inside Out", year:2015, studio:"Pixar", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Five emotions inside a young girl's mind scramble to keep her steady after a difficult move."},
+    {title:"Inside Out 2", year:2024, studio:"Pixar", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Puberty brings a wave of new emotions crashing into headquarters, led by an anxious new arrival."},
+    {title:"Iron Man & Captain America: Heroes United", year:2014, studio:"Marvel", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Iron Man and Captain America team up against Hydra and the Red Skull's latest scheme."},
+    {title:"Iron Man & Hulk: Heroes United", year:2013, studio:"Marvel", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Tony Stark and Bruce Banner join forces after Hydra gets its hands on gamma technology."},
+    {title:"Iron Man: Rise of Technovore", year:2013, studio:"Marvel", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Iron Man and a team of allies face a bioweapon that turns soldiers into unstoppable monsters."},
+    {title:"Josee, the Tiger and the Fish", year:2020, studio:"Bones", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A wheelchair-using young woman with a vivid inner world forms a bond with the college student hired to help her."},
+    {title:"Jujutsu Kaisen 0", year:2021, studio:"MAPPA", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A student cursed by his dead childhood friend's spirit enrolls in a school built to fight curses like her."},
+    {title:"Justice League Dark", year:2017, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Batman recruits a team of magic-wielding misfits when a mystical threat outpaces what the Justice League can punch."},
+    {title:"Justice League Dark: Apokolips War", year:2020, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A desperate, battered Justice League makes one last stand against Darkseid's total conquest of Earth."},
+    {title:"Justice League: Crisis on Infinite Earths Part One", year:2024, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The Monitor recruits heroes across infinite parallel Earths as a wave of annihilation erases universe after universe."},
+    {title:"Justice League: Crisis on Infinite Earths Part Three", year:2024, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The surviving heroes make their final stand against the Anti-Monitor to save what's left of existence."},
+    {title:"Justice League: Crisis on Infinite Earths Part Two", year:2024, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"As entire universes blink out of existence, old rivalries have to be set aside fast."},
+    {title:"Justice League: Doom", year:2012, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Batman's secret contingency plans against his own teammates fall into the hands of the villain who wants them dead."},
+    {title:"Justice League: Gods and Monsters", year:2015, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"An alternate Justice League with darker origins is framed for a string of murders."},
+    {title:"Justice League: The Flashpoint Paradox", year:2013, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The Flash wakes up in a shattered timeline where his one small change broke the entire world."},
+    {title:"Justice League: War", year:2014, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"An alien invasion forces a still-unfamiliar group of heroes to become a league before they're ready."},
+    {title:"Kiki's Delivery Service", year:1989, studio:"Studio Ghibli", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A young witch sets up a flying delivery service in a new town to complete her year of training."},
+    {title:"KPop Demon Hunters", year:2025, studio:"Sony", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A K-pop girl group secretly moonlights as demon hunters protecting the world between sold-out shows."},
+    {title:"Kubo and the Two Strings", year:2016, studio:"Laika", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A boy with a magic shamisen sets out to find his father's armor before his grandfather's spirits catch him."},
+    {title:"Kung Fu Panda 2", year:2011, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Po confronts a peacock warlord and the fractured memories of the parents he never knew."},
+    {title:"LEGO DC Batman: Family Matters", year:2019, studio:"Warner Bros.", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Batman's own found family starts unraveling right as a mysterious villain infiltrates the Bat-Family itself."},
+    {title:"LEGO DC Comics Super Heroes: Justice League Cosmic Clash", year:2016, studio:"Warner Bros.", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Brainiac shrinks and steals entire cities, and the Justice League has to travel through time to stop him."},
+    {title:"LEGO DC Comics Super Heroes: Justice League vs. Bizarro League", year:2015, studio:"Warner Bros.", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A backfired duplication ray fills the world with warped Bizarro copies of the Justice League."},
+    {title:"LEGO DC Comics Super Heroes: The Flash", year:2018, studio:"Warner Bros.", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The Flash races through parallel timelines to undo a mistake that keeps getting worse."},
+    {title:"LEGO Marvel Avengers: Code Red", year:2023, studio:"Marvel", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The Avengers scramble after a mysterious signal starts turning ordinary people into puppets."},
+    {title:"LEGO Marvel Avengers: Mission Demolition", year:2022, studio:"Marvel", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The Avengers team up to stop a wave of supervillain heists targeting the city's landmarks."},
+    {title:"LEGO Marvel Super Heroes Black Panther: Trouble in Wakanda", year:2018, studio:"Marvel", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Black Panther defends Wakanda's vibranium from a gang of scheming supervillains."},
+    {title:"LEGO Marvel Super Heroes Guardians of the Galaxy: The Thanos Threat", year:2017, studio:"Marvel", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The Guardians race across the galaxy to keep the Infinity Stones out of Thanos's hands."},
+    {title:"LEGO Marvel Super Heroes: Avengers Reassembled!", year:2015, studio:"Marvel", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Loki frees the Avengers' worst enemies from prison all at once, forcing the team back together."},
+    {title:"LEGO Marvel Super Heroes: Maximum Overload", year:2013, studio:"Marvel", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The Avengers try to stop Doctor Doom and a gang of villains from stealing S.H.I.E.L.D.'s most dangerous tech."},
+    {title:"Lightyear", year:2022, studio:"Pixar", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The space ranger who inspired the toy gets stranded on a hostile planet with a rookie recruit team."},
+    {title:"Luca", year:2021, studio:"Pixar", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A sea monster disguised as a boy spends one unforgettable summer exploring a seaside town on land."},
+    {title:"Madagascar", year:2005, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Four pampered zoo animals wash up on the wild island of Madagascar and have to fend for themselves."},
+    {title:"Madagascar 3: Europe's Most Wanted", year:2012, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The gang joins a traveling circus across Europe to shake a relentless animal control officer."},
+    {title:"Madagascar: Escape 2 Africa", year:2008, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A crash-landing strands the zoo animals in the African wild where Alex's long-lost family still rules."},
+    {title:"Megamind", year:2010, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A supervillain accidentally kills his nemesis and has to invent a new hero just to feel like himself again."},
+    {title:"Merry Little Batman", year:2023, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A young Damian Wayne sets out to save Christmas alone after his dad is knocked out of commission."},
+    {title:"Migration", year:2023, studio:"Illumination", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"An overprotective duck father is finally talked into taking his family on their first great migration."},
+    {title:"Minions", year:2015, studio:"Illumination", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Long before Gru, the Minions search history for the biggest, baddest villain worth serving."},
+    {title:"Minions 3", year:2027, studio:"Illumination", cat:"upcoming", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The Minions' next chapter of gleeful chaos in service of their favorite villains."},
+    {title:"Minions: The Rise of Gru", year:2022, studio:"Illumination", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A twelve-year-old Gru tries to join a supervillain group called the Vicious 6, with mixed results."},
+    {title:"Moana 2", year:2024, studio:"Disney", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Moana sails beyond the reef on a perilous voyage to a long-lost, cursed island."},
+    {title:"Monsters University", year:2013, studio:"Pixar", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Mike and Sulley meet as rival students long before they became the best scaring team at Monsters, Inc."},
+    {title:"Monsters vs. Aliens", year:2009, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A woman struck by a meteor grows to fifty feet tall and is drafted into a secret monster task force."},
+    {title:"Monsters, Inc.", year:2001, studio:"Pixar", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Two monster best friends discover a human child loose in their scream-powered city."},
+    {title:"Mr. Peabody & Sherman", year:2014, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A genius dog and his adopted son use a time machine, with predictably chaotic historical results."},
+    {title:"My Hero Academia: Heroes Rising", year:2019, studio:"Bones", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Class 1-A's field training on a remote island turns into a real fight against a villain hunting a young girl's power."},
+    {title:"My Hero Academia: Two Heroes", year:2018, studio:"Bones", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Deku and All Might travel to a floating hero-tech city that turns out to be hiding a dangerous secret."},
+    {title:"My Hero Academia: World Heroes' Mission", year:2021, studio:"Bones", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A global terrorist plot to 'purify' the world of quirks forces heroes everywhere into action."},
+    {title:"My Neighbor Totoro", year:1988, studio:"Studio Ghibli", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Two sisters in the countryside befriend a gentle giant forest spirit only children can see."},
+    {title:"Next Avengers: Heroes of Tomorrow", year:2008, studio:"Marvel", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The children of the fallen Avengers train in secret to finally face the villain who killed their parents."},
+    {title:"One Piece Film: Red", year:2022, studio:"Toei Animation", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The world's most beloved singer turns out to have a connection to Luffy no one saw coming."},
+    {title:"One Piece Film: Z", year:2012, studio:"Toei Animation", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A former Marine admiral declares war on all pirates using weapons powerful enough to reshape the seas."},
+    {title:"Onward", year:2020, studio:"Pixar", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Two elf brothers cast a spell to bring their late father back for one day, but only half of him shows up."},
+    {title:"Open Season", year:2006, studio:"Sony", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A domesticated grizzly bear is dumped in the wild days before hunting season opens."},
+    {title:"Open Season 2", year:2008, studio:"Sony", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Boog and friends chase down a lovestruck dachshund who's run off to rejoin his old pet family."},
+    {title:"Over the Hedge", year:2006, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A raccoon con artist convinces a hedge full of woodland animals that suburbia is the ultimate buffet."},
+    {title:"Paprika", year:2006, studio:"Madhouse", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A device that lets therapists enter patients' dreams is stolen, and reality starts bleeding into dreams citywide."},
+    {title:"ParaNorman", year:2012, studio:"Laika", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A boy who can talk to the dead is the only one who can stop his town's zombie curse."},
+    {title:"PAW Patrol: The Mighty Movie", year:2023, studio:"Spin Master", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A meteor strike gives the PAW Patrol pups genuine superpowers, and a new threat to test them."},
+    {title:"PAW Patrol: The Movie", year:2021, studio:"Spin Master", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The pups head to Adventure City to stop a corrupt mayor from ruining everything for everyone."},
+    {title:"Penguins of Madagascar", year:2014, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The penguins team up with a spy organization to stop an octopus bent on penguin-only revenge."},
+    {title:"Perfect Blue", year:1997, studio:"Madhouse", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A pop idol turned actress starts losing track of what's real as a stalker blurs the line for her."},
+    {title:"Planet Hulk", year:2010, studio:"Marvel", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Exiled from Earth, the Hulk crash-lands on an alien world and is forced into gladiatorial combat."},
+    {title:"Pokemon 3: The Movie", year:2000, studio:"OLM", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A grieving Pokemon trainer's psychic power threatens to freeze Ash and friends in crystal forever."},
+    {title:"Pokemon 4Ever", year:2001, studio:"OLM", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A boy from the past and a hunted Celebi need Ash's help to escape a ruthless Pokemon poacher."},
+    {title:"Pokemon Heroes", year:2002, studio:"OLM", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Two thieves plot to steal the guardian Pokemon of a Venice-like city for a legendary treasure."},
+    {title:"Pokemon Ranger and the Temple of the Sea", year:2006, studio:"OLM", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Ash and friends protect a young Manaphy and an underwater kingdom from treasure-hunting pirates."},
+    {title:"Pokemon the Movie 2000", year:1999, studio:"OLM", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Ash must gather three legendary birds' orbs to stop a collector from destroying the world's balance."},
+    {title:"Pokemon: Destiny Deoxys", year:2004, studio:"OLM", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A Deoxys crash-lands in a city already guarded by a lonely Rayquaza, and the two collide."},
+    {title:"Pokemon: Lucario and the Mystery of Mew", year:2005, studio:"OLM", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Ash befriends a Lucario bound by an ancient promise to protect a kingdom under threat from Mew's power."},
+    {title:"Pokemon: Mewtwo Strikes Back", year:1998, studio:"OLM", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A genetically engineered Pokemon lures trainers to his island to prove artificial life can surpass nature."},
+    {title:"Pokemon: The Rise of Darkrai", year:2007, studio:"OLM", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A misunderstood Darkrai is blamed for nightmares actually caused by a battle between two space giants."},
+    {title:"Ponyo", year:2008, studio:"Studio Ghibli", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A magical goldfish princess wants to become human after a boy on the shore takes her in."},
+    {title:"Princess Mononoke", year:1997, studio:"Studio Ghibli", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A cursed prince is caught between a forest's furious spirits and the humans strip-mining their home."},
+    {title:"Puss in Boots", year:2011, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"An outlaw cat teams up with an old flame and Humpty Dumpty to steal the goose that lays golden eggs."},
+    {title:"Puss in Boots: The Last Wish", year:2022, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Down to his last life, Puss goes looking for a wishing star to get his eight lost lives back."},
+    {title:"Ratatouille", year:2007, studio:"Pixar", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A rat with a chef's palate teams up with a hapless kitchen boy to cook in a top Paris restaurant."},
+    {title:"Reign of the Supermen", year:2019, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Four different heroes claim to be the resurrected Superman, and only one of them is telling the truth."},
+    {title:"Robots", year:2005, studio:"Blue Sky Studios", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"An idealistic young inventor robot heads to the big city only to find the company he idolized has stopped making replacement parts for older models."},
+    {title:"Rio", year:2011, studio:"Blue Sky Studios", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A domesticated macaw is flown to Rio to meet the last female of his species, whether he likes it or not."},
+    {title:"Rio 2", year:2014, studio:"Blue Sky Studios", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Blu discovers Jewel's wild flock deep in the Amazon, where he doesn't exactly fit in."},
+    {title:"Rise of the Guardians", year:2012, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Santa, the Easter Bunny, and the Sandman recruit Jack Frost to fight the Boogeyman for children's belief itself."},
+    {title:"Ruby Gillman, Teenage Kraken", year:2023, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"An anxious teen discovers she's descended from a line of giant sea krakens meant to protect the ocean."},
+    {title:"Scoob!", year:2020, studio:"Warner Bros.", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Scooby-Doo's forgotten origin story collides with a plot to open the gates of the underworld."},
+    {title:"Shark Tale", year:2004, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A small-time fish claims credit for killing a shark and becomes an unlikely reef celebrity."},
+    {title:"Shaun the Sheep Movie", year:2015, studio:"Aardman", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Shaun's prank to get a day off from the farmer spirals into a rescue mission in the big city."},
+    {title:"Shaun the Sheep Movie: Farmageddon", year:2019, studio:"Aardman", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Shaun befriends a crash-landed alien and has to keep her hidden from a shadowy government agency."},
+    {title:"Shrek", year:2001, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A grumpy ogre has to rescue a princess to get his swamp back from an army of displaced fairy tale creatures."},
+    {title:"Shrek 2", year:2004, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Shrek meets his new in-laws, who had a very different son-in-law in mind for their daughter."},
+    {title:"Shrek 5", year:2027, studio:"DreamWorks", cat:"upcoming", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Shrek returns to the swamp for a new adventure alongside Fiona and a now-teenage Farquaad Jr."},
+    {title:"Shrek Forever After", year:2010, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A deal with Rumpelstiltskin erases Shrek from a world where he was never born."},
+    {title:"Shrek the Third", year:2007, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Shrek goes looking for a reluctant heir to the throne so he doesn't have to take the crown himself."},
+    {title:"Sinbad: Legend of the Seven Seas", year:2003, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A legendary thief has to recover a stolen Book of Peace before his best friend is executed in his place."},
+    {title:"Sing", year:2016, studio:"Illumination", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A koala theater owner stages a singing competition to save his failing theater, with wildly mismatched contestants."},
+    {title:"Sing 2", year:2021, studio:"Illumination", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Buster Moon's troupe cons their way into the biggest show business city around, and now has to actually deliver."},
+    {title:"Smallfoot", year:2018, studio:"Warner Bros.", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A yeti who finds a human is banished from his village for daring to say 'smallfoots' exist."},
+    {title:"Smurfs: The Lost Village", year:2017, studio:"Sony", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Smurfette sets off with friends to find a mysterious village before the evil wizard Gargamel does."},
+    {title:"Son of Batman", year:2014, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Batman discovers he has a son raised by the League of Assassins, and neither of them is ready for the other."},
+    {title:"Soul", year:2020, studio:"Pixar", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A jazz musician's near-death experience strands his soul in the cosmic realm before life even begins."},
+    {title:"Spider-Man: Beyond the Spider-Verse", year:2027, studio:"Sony", cat:"upcoming", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Miles Morales faces the full weight of the Spider-Society and the future Miguel O'Hara is trying to protect."},
+    {title:"Spies in Disguise", year:2019, studio:"Blue Sky Studios", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A super spy accidentally turns himself into a pigeon right before his biggest mission."},
+    {title:"Spirit Untamed", year:2021, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A girl and her wild mustang team up to save a herd of horses from being sold off."},
+    {title:"Spirit: Stallion of the Cimarron", year:2002, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A wild mustang refuses to be broken by the cavalry determined to tame the American frontier."},
+    {title:"Spirited Away", year:2001, studio:"Studio Ghibli", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A girl trapped in a spirit world has to work in a bathhouse to save her parents, turned into pigs."},
+    {title:"Storks", year:2016, studio:"Warner Bros.", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A delivery stork accidentally creates a baby and has to deliver her before headquarters finds out."},
+    {title:"Strange World", year:2022, studio:"Disney", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Three generations of explorers descend beneath their world to find out what's poisoning it from below."},
+    {title:"Superman/Batman: Apocalypse", year:2010, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Superman's cousin Kara crash-lands on Earth, and Darkseid immediately wants her for his own army."},
+    {title:"Superman/Batman: Public Enemies", year:2009, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The President frames Superman for murder and sends every super-villain after him for the bounty."},
+    {title:"Superman: Red Son", year:2020, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Superman's pod lands in Soviet Ukraine instead of Kansas, remaking the Cold War around him."},
+    {title:"Superman: The Movie Animated Special", year:1988, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"An animated retelling of Superman's origin and first stand against Lex Luthor."},
+    {title:"Surf's Up", year:2007, studio:"Sony", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A documentary crew follows a young penguin chasing his idol at the biggest surfing competition in the world."},
+    {title:"Suzume", year:2022, studio:"CoMix Wave Films", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A girl closes mystical doors across Japan that are unleashing disasters when left open."},
+    {title:"Teen Titans Go! To the Movies", year:2018, studio:"Warner Bros.", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The Titans want their own superhero movie and will do absolutely anything, however embarrassing, to get one."},
+    {title:"The Addams Family", year:2019, studio:"MGM", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The famously creepy family's quiet life is upended by a reality-TV host eyeing their haunted mansion."},
+    {title:"The Addams Family 2", year:2021, studio:"MGM", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The Addams pile into an RV for a family road trip that goes wrong in every direction."},
+    {title:"The Angry Birds Movie", year:2016, studio:"Sony", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"An outcast bird has to convince his flightless island the incoming pigs are actually a threat."},
+    {title:"The Angry Birds Movie 2", year:2019, studio:"Sony", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The birds and pigs call a truce to face a common enemy from a third, icier island."},
+    {title:"The Bad Guys", year:2022, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A crew of infamous animal criminals attempts the ultimate con: convincing the world they've gone good."},
+    {title:"The Bad Guys 2", year:2025, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The reformed Bad Guys are pulled back into crime by a trio of even slicker female thieves."},
+    {title:"The Book of Life", year:2014, studio:"20th Century Fox", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Two gods wager on which of two friends will win the heart of the same woman, spanning three worlds."},
+    {title:"The Boss Baby", year:2017, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A suit-wearing, briefcase-carrying baby turns out to be a secret agent for Baby Corp."},
+    {title:"The Boss Baby: Family Business", year:2021, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The Templeton brothers, now grown apart, get turned back into kids for one more Baby Corp mission."},
+    {title:"The Boxtrolls", year:2014, studio:"Laika", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A boy raised by trash-collecting boxtrolls has to save them from an exterminator obsessed with high society."},
+    {title:"The Boy and the Heron", year:2023, studio:"Studio Ghibli", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A grieving boy follows a talking heron into a tower connecting the world of the living and the dead."},
+    {title:"The Casagrandes Movie", year:2024, studio:"Nickelodeon", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The Casagrande family's chaotic bodega life gets even more chaotic on an eventful family day."},
+    {title:"The Cat Returns", year:2002, studio:"Studio Ghibli", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A girl who saves a cat prince is whisked away to the Cat Kingdom to marry him, whether she wants to or not."},
+    {title:"The Croods", year:2013, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A prehistoric family's cave-bound rules are upended when a wandering inventor shows them fire."},
+    {title:"The Croods: A New Age", year:2020, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The Croods meet a more 'evolved' family living behind a wall, and the two clans immediately clash."},
+    {title:"The Dark Knight Returns Part 1", year:2012, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"An aging, retired Batman returns to a Gotham that's grown even more violent without him."},
+    {title:"The Dark Knight Returns Part 2", year:2013, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Batman's war against a Joker back from catatonia collides with a government that's turned Superman against him."},
+    {title:"The Death of Superman", year:2018, studio:"DC", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"An unstoppable monster called Doomsday forces every hero on Earth into one last, losing fight."},
+    {title:"The Emoji Movie", year:2017, studio:"Sony", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"An emoji born with multiple expressions goes on the run to avoid being deleted for being different."},
+    {title:"The First Slam Dunk", year:2022, studio:"Toei Animation", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A high school basketball team's underdog run to the national championship, seen through its smallest player."},
+    {title:"The Girl Who Leapt Through Time", year:2006, studio:"Madhouse", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A teenager who gains the power to leap through time keeps making the same mistakes over and over."},
+    {title:"The Good Dinosaur", year:2015, studio:"Pixar", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"In a world where dinosaurs never went extinct, a young Apatosaurus befriends a feral human boy."},
+    {title:"The Grinch", year:2018, studio:"Illumination", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A grumpy hermit plots to steal Christmas from the relentlessly cheerful town below his mountain."},
+    {title:"The Invincible Iron Man", year:2007, studio:"Marvel", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Tony Stark unearths an ancient Chinese legend tied directly to his own family's history."},
+    {title:"The Iron Giant", year:1999, studio:"Warner Bros.", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A boy befriends a crash-landed alien robot the government is convinced is a weapon."},
+    {title:"The Land Before Time", year:1988, studio:"Amblin/Universal", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"An orphaned young dinosaur leads a mismatched group of hatchlings to the Great Valley alone."},
+    {title:"The LEGO Batman Movie", year:2017, studio:"Warner Bros.", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Batman has to learn to work with a family, starting with the orphan he adopted almost by accident."},
+    {title:"The LEGO Movie", year:2014, studio:"Warner Bros.", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"An utterly ordinary construction worker is mistaken for the prophesied hero who can save all of LEGO reality."},
+    {title:"The LEGO Ninjago Movie", year:2017, studio:"Warner Bros.", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A secret ninja team's leader has to face his own estranged father, who happens to be the city's warlord."},
+    {title:"The Lorax", year:2012, studio:"Illumination", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A boy searches for a real tree to impress a girl, and uncovers why trees vanished from his town in the first place."},
+    {title:"The Loud House Movie", year:2021, studio:"Nickelodeon", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The eleven Loud siblings move to a new town and each has to find their own way to fit in."},
+    {title:"The Many Adventures of Winnie the Pooh", year:1977, studio:"Disney", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Three earlier Pooh featurettes stitched together follow Pooh and friends through the Hundred Acre Wood."},
+    {title:"The Mitchells vs. the Machines", year:2021, studio:"Sony", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A quirky family road trip becomes humanity's last line of defense during a robot uprising."},
+    {title:"The Nightmare Before Christmas", year:1993, studio:"Disney", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Halloween Town's king stumbles into Christmas Town and decides to take over the holiday himself."},
+    {title:"The Peanuts Movie", year:2015, studio:"Blue Sky Studios", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Charlie Brown tries to win over the new girl next door while flying an ace pilot mission in his head."},
+    {title:"The Pirates! Band of Misfits", year:2012, studio:"Aardman", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A hapless pirate captain enters the Pirate of the Year contest against far more fearsome rivals."},
+    {title:"The Prince of Egypt", year:1998, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Two brothers raised as princes of Egypt end up on opposite sides of the Exodus."},
+    {title:"The Rescuers Down Under", year:1990, studio:"Disney", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Two mouse rescuers race to save a boy and a rare eagle from a poacher in the Australian outback."},
+    {title:"The Road to El Dorado", year:2000, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Two con men are mistaken for gods in a hidden city of gold they never meant to find."},
+    {title:"The Sea Beast", year:2022, studio:"Netflix Animation", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A legendary monster hunter is stowed away by a girl determined to prove sea monsters aren't the enemy."},
+    {title:"The Secret Life of Pets", year:2016, studio:"Illumination", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A pampered terrier's routine is thrown off by a scruffy new rescue dog and a runaway adventure through the city."},
+    {title:"The Secret Life of Pets 2", year:2019, studio:"Illumination", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Max works through his anxieties on a farm trip while Snowball dreams of becoming a real superhero."},
+    {title:"The Secret World of Arrietty", year:2010, studio:"Studio Ghibli", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A tiny, secretive family living beneath the floorboards risks everything when a human boy sees their daughter."},
+    {title:"The Simpsons Movie", year:2007, studio:"20th Century Fox", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Homer's environmental disaster gets Springfield sealed under a giant dome by the EPA."},
+    {title:"The Smurfs", year:2011, studio:"Sony", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A band of Smurfs is chased through a portal into modern-day New York City by the wizard Gargamel."},
+    {title:"The SpongeBob Movie: Sponge on the Run", year:2020, studio:"Nickelodeon", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"SpongeBob heads to the Lost City of Atlantic City to rescue his kidnapped pet snail Gary."},
+    {title:"The SpongeBob Movie: Sponge Out of Water", year:2015, studio:"Nickelodeon", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"SpongeBob and Plankton team up on dry land to recover the stolen Krabby Patty formula."},
+    {title:"The SpongeBob SquarePants Movie", year:2004, studio:"Nickelodeon", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"SpongeBob and Patrick journey to Shell City to clear Mr. Krabs's name and recover a stolen crown."},
+    {title:"The Super Mario Bros. Movie", year:2023, studio:"Illumination", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Mario and Luigi are pulled into the Mushroom Kingdom and have to team up with Princess Peach to save Luigi from Bowser."},
+    {title:"The Super Mario Galaxy Movie", year:2026, studio:"Illumination", cat:"upcoming", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Mario ventures into the cosmos to stop Bowser's latest galaxy-spanning scheme."},
+    {title:"The Tale of the Princess Kaguya", year:2013, studio:"Studio Ghibli", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A tiny girl found inside a bamboo stalk grows impossibly fast and is groomed for a life of nobility she never wanted."},
+    {title:"The Wild Robot", year:2024, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A shipwrecked robot stranded on a remote island slowly adopts an orphaned gosling as her own."},
+    {title:"The Wind Rises", year:2013, studio:"Studio Ghibli", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A dreamer obsessed with flight designs fighter planes for a war he never wanted to see them used in."},
+    {title:"Thor: Tales of Asgard", year:2011, studio:"Marvel", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A young, brash Thor leads a small band on his first great quest beyond Asgard's borders."},
+    {title:"Tokyo Godfathers", year:2003, studio:"Madhouse", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Three homeless friends in Tokyo find an abandoned baby on Christmas Eve and set out to find her parents."},
+    {title:"Tom & Jerry", year:2021, studio:"Warner Bros.", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The eternal cat-and-mouse rivalry crashes a luxury hotel's biggest wedding of the year."},
+    {title:"Toy Story", year:1995, studio:"Pixar", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A cowboy doll's world is upended when a flashy new spaceman toy steals his kid's affection."},
+    {title:"Toy Story 2", year:1999, studio:"Pixar", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Woody is stolen by a toy collector planning to sell him to a museum in Japan."},
+    {title:"Toy Story 3", year:2010, studio:"Pixar", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The toys are accidentally donated to a daycare as their kid heads off to college."},
+    {title:"Toy Story 4", year:2019, studio:"Pixar", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Woody helps a handmade spork-toy find his place while wrestling with his own sense of purpose."},
+    {title:"Toy Story 5", year:2026, studio:"Pixar", cat:"upcoming", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Woody and the gang face a new kind of rival toy in the form of a tablet."},
+    {title:"Trolls", year:2016, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A relentlessly optimistic troll sets out to rescue her friends from the gloomy Bergens who want to eat them."},
+    {title:"Trolls Band Together", year:2023, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Poppy and Branch reunite Branch's long-lost boy band brothers to save one of them from a rival act."},
+    {title:"Trolls World Tour", year:2020, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Poppy discovers six different troll tribes, each built around a different kind of music, and a plot to unite them by force."},
+    {title:"Turbo", year:2013, studio:"DreamWorks", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A garden snail obsessed with speed gets accidentally supercharged and enters the Indianapolis 500."},
+    {title:"Turning Red", year:2022, studio:"Pixar", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A thirteen-year-old discovers that strong emotions turn her into a giant red panda."},
+    {title:"Ultimate Avengers 2: Rise of the Panther", year:2006, studio:"Marvel", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"The Avengers head to Wakanda to help Black Panther stop an alien remnant from the first invasion."},
+    {title:"Ultimate Avengers: The Movie", year:2006, studio:"Marvel", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A revived Captain America helps assemble the first Avengers team to stop a new alien threat."},
+    {title:"Up", year:2009, studio:"Pixar", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A widower ties thousands of balloons to his house to finally take the adventure he promised his late wife."},
+    {title:"Vivo", year:2021, studio:"Sony", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A kinkajou musician crosses Havana to Miami to deliver his late owner's last love song."},
+    {title:"WALL-E", year:2008, studio:"Pixar", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A lonely trash-compacting robot left behind on Earth falls for a sleek scout robot searching for life."},
+    {title:"Wallace & Gromit: The Curse of the Were-Rabbit", year:2005, studio:"Aardman", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"An inventor and his dog investigate a giant rabbit terrorizing the town's prize vegetable competition."},
+    {title:"Watership Down", year:1978, studio:"Nepenthe Productions", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A warren of rabbits flees their doomed home to find a new one, hunted the whole way."},
+    {title:"Weathering with You", year:2019, studio:"CoMix Wave Films", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A runaway teen falls for a girl who can control the weather, in a Tokyo drowning in endless rain."},
+    {title:"When Marnie Was There", year:2014, studio:"Studio Ghibli", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A withdrawn girl sent to the countryside befriends a mysterious girl living in an old mansion by the marsh."},
+    {title:"Winnie the Pooh", year:2011, studio:"Disney", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Pooh's search for honey accidentally convinces the Hundred Acre Wood that Eeyore has been kidnapped."},
+    {title:"Wish", year:2023, studio:"Disney", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A teenager wishes on a star that turns out to be a literal, sentient being ready to fight for her kingdom."},
+    {title:"Wolf Children", year:2012, studio:"Studio Chizu", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A young widow raises her two half-wolf children alone, torn between their human and wild sides."},
+    {title:"Your Name", year:2016, studio:"CoMix Wave Films", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Two teenagers who keep swapping bodies across time try to find each other before a comet ends everything."},
+    {title:"Zootopia 2", year:2025, studio:"Disney", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Judy and Nick chase a new case that pulls them into corners of Zootopia they've never seen."},
+    {title:"Anastasia", year:1997, studio:"20th Century Fox", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A Russian orphan with no memory of her past is coached to impersonate a lost grand duchess — except she might actually be her."},
+    {title:"Rango", year:2011, studio:"Paramount", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A pet chameleon with an identity crisis stumbles into a drought-stricken frontier town in need of a sheriff."},
+    {title:"Klaus", year:2019, studio:"Netflix Animation", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A spoiled postman exiled to a feuding arctic town accidentally kickstarts the Santa Claus legend."},
+    {title:"Missing Link", year:2019, studio:"Laika", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"An explorer and a lonely sasquatch cross the world together to find the creature's long-lost relatives."},
+    {title:"All Dogs Go to Heaven", year:1989, studio:"Don Bluth/MGM", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A con-artist dog cheats his way back from heaven to get revenge on the casino partner who had him killed."},
+    {title:"FernGully: The Last Rainforest", year:1992, studio:"20th Century Fox", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A fairy shrinks a logger down to her size to show him what his machine is about to destroy."},
+    {title:"James and the Giant Peach", year:1996, studio:"Disney", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"An orphan boy escapes his cruel aunts inside a giant peach crewed by oversized talking insects."},
+    {title:"The Nut Job", year:2014, studio:"Open Road Films", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A scheming squirrel plans the biggest nut heist in park history to save his crew for winter."},
+    {title:"Free Birds", year:2013, studio:"Relativity Media", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Two turkeys travel back in time to get turkey off the Thanksgiving menu for good."},
+    {title:"Rugrats: The Movie", year:1998, studio:"Nickelodeon", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"Tommy Pickles's new baby brother gets the babies lost in the woods on the way home from the hospital."},
+    {title:"Ernest & Celestine", year:2012, studio:"StudioCanal/GKIDS", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"An unlikely friendship between a bear and a mouse defies everything both their societies say is forbidden."},
+    {title:"Nausicaa of the Valley of the Wind", year:1984, studio:"Studio Ghibli", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A princess tries to keep the peace between her people and a toxic jungle full of giant insects."},
+    {title:"Balto", year:1995, studio:"Amblin/Universal", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A half-wolf sled dog nobody trusts is the only one who can deliver medicine through an Alaskan blizzard in time."},
+    {title:"Song of the Sea", year:2014, studio:"Cartoon Saloon", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A boy and his silent little sister discover she's a selkie who must complete a magical journey to save the fairy world."},
+    {title:"The Secret of Kells", year:2009, studio:"Cartoon Saloon", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A young monk risks a Viking siege to help complete an illuminated manuscript said to hold magical power."},
+    {title:"Wolfwalkers", year:2020, studio:"Cartoon Saloon", cat:"previous", yt:null, hi:null, es:null, fr:null, zh:null, ar:null, ja:null, blurb:"A hunter's daughter befriends a wild girl who can transform into a wolf, and has to choose a side."}
+  ];
+  var STATUS_LABEL = {previous:"Previous", streaming:"Streaming now", upcoming:"Upcoming"};
+  // LANG_FIELD maps a language code to the property on each movie object that holds its YouTube id.
+  var LANG_FIELD = {en:"yt", hi:"hi", es:"es", fr:"fr", zh:"zh", ar:"ar", ja:"ja"};
+  var LANG_LABEL = {en:"English", hi:"Hindi", es:"Spanish", fr:"French", zh:"Mandarin", ar:"Arabic", ja:"Japanese"};
+  var LANG_ORDER = ["en","hi","es","fr","zh","ar","ja"];
+
+  // ---------- Trailer count (updates itself as titles are added) ----------
+  var countEl = document.getElementById('trailerCount');
+  if(countEl){
+    var perLang = LANG_ORDER.map(function(code){
+      var n = MOVIES.filter(function(m){ return !!m[LANG_FIELD[code]]; }).length;
+      return LANG_LABEL[code] + ' (' + n + ')';
+    }).join(', ');
+    countEl.textContent = MOVIES.length + ' movies on the marquee — trailers available in: ' + perLang + '.';
+  }
+
+  // ---------- Render Archive stubs ----------
+  var archiveRow = document.getElementById('archiveRow');
+  if(archiveRow){
+    archiveRow.innerHTML = MOVIES.map(function(m){
+      return '<div class="stub">'
+        + '<span class="stub-year">'+m.year+'</span>'
+        + '<h4>'+m.title+'</h4>'
+        + '<p class="stub-tag">'+m.studio+' · '+STATUS_LABEL[m.cat]+'</p>'
+        + '<p class="stub-line">'+m.blurb+'</p>'
+        + '</div>';
+    }).join('');
+  }
+
+  // ---------- Render Trailer grid ----------
+  var grid = document.getElementById('trailerGrid');
+  var emptyMsg = document.getElementById('trailerEmpty');
+  var searchInput = document.getElementById('trailerSearch');
+  var pills = document.querySelectorAll('#filterPills .filter-pill');
+  var langPills = document.querySelectorAll('#langPills .filter-pill');
+  var langNote = document.getElementById('langNote');
+  var activeFilter = 'all';
+  var activeLang = 'en';
+
+  function renderTrailers(){
+    var q = (searchInput.value || '').trim().toLowerCase();
+    var field = LANG_FIELD[activeLang];
+    var list = MOVIES.filter(function(m){
+      var matchesFilter = activeFilter === 'all' || m.cat === activeFilter;
+      var matchesSearch = !q || m.title.toLowerCase().indexOf(q) !== -1;
+      return matchesFilter && matchesSearch && !!m[field];
+    });
+
+    if(activeLang !== 'en'){
+      var totalMatchingFilterSearch = MOVIES.filter(function(m){
+        var matchesFilter = activeFilter === 'all' || m.cat === activeFilter;
+        var matchesSearch = !q || m.title.toLowerCase().indexOf(q) !== -1;
+        return matchesFilter && matchesSearch;
+      }).length;
+      var missing = totalMatchingFilterSearch - list.length;
+      langNote.textContent = missing > 0
+        ? 'Showing official ' + LANG_LABEL[activeLang] + ' trailers only — ' + missing + ' title' + (missing === 1 ? '' : 's') + ' on this list don\'t have an official ' + LANG_LABEL[activeLang] + ' trailer yet.'
+        : '';
+    } else {
+      langNote.textContent = '';
+    }
+
+    grid.innerHTML = list.map(function(m){
+      var ytId = m[field];
+      return '<button class="trailer-card" data-yt="'+ytId+'" data-title="'+m.title.replace(/"/g,'&quot;')+'">'
+        + '<span class="trailer-thumb">'
+          + '<img src="https://img.youtube.com/vi/'+ytId+'/hqdefault.jpg" alt="'+m.title+' trailer thumbnail" loading="lazy">'
+          + '<span class="trailer-status">'+STATUS_LABEL[m.cat]+' · '+LANG_LABEL[activeLang]+'</span>'
+          + '<span class="trailer-play"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 5V19L19 12L8 5Z" fill="currentColor"/></svg></span>'
+        + '</span>'
+        + '<span class="trailer-meta"><h4>'+m.title+'</h4><p>'+m.studio+' · '+m.year+'</p>'
+          + (m.src === 'archival' ? '<span class="lang-tag archival-tag">Archival upload — see credits</span>' : '')
+        + '</span>'
+        + '</button>';
+    }).join('');
+    emptyMsg.hidden = list.length !== 0;
+    emptyMsg.textContent = activeLang !== 'en' && list.length === 0
+      ? ("No official " + LANG_LABEL[activeLang] + " trailers match that search or filter yet.")
+      : "No titles match that search.";
+
+    grid.querySelectorAll('.trailer-card').forEach(function(card){
+      card.addEventListener('click', function(){
+        openTrailerModal(card.getAttribute('data-yt'), card.getAttribute('data-title'));
+      });
+    });
+  }
+
+  searchInput.addEventListener('input', renderTrailers);
+  pills.forEach(function(p){
+    p.addEventListener('click', function(){
+      pills.forEach(function(x){ x.classList.remove('active'); });
+      p.classList.add('active');
+      activeFilter = p.getAttribute('data-filter');
+      renderTrailers();
+    });
+  });
+  langPills.forEach(function(p){
+    p.addEventListener('click', function(){
+      langPills.forEach(function(x){ x.classList.remove('active'); });
+      p.classList.add('active');
+      activeLang = p.getAttribute('data-lang');
+      renderTrailers();
+    });
+  });
+  renderTrailers();
+
+  // ---------- Trailer modal ----------
+  var modal = document.getElementById('trailerModal');
+  var modalFrame = document.getElementById('trailerModalFrame');
+  var modalTitle = document.getElementById('trailerModalTitle');
+  function openTrailerModal(ytId, title){
+    modalFrame.innerHTML = '<iframe src="https://www.youtube.com/embed/'+ytId+'?autoplay=1&rel=0" title="'+title+' trailer" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
+    modalTitle.textContent = title;
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+  }
+  function closeTrailerModal(){
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+    modalFrame.innerHTML = '';
+  }
+  document.getElementById('trailerModalClose').addEventListener('click', closeTrailerModal);
+  document.getElementById('trailerModalBackdrop').addEventListener('click', closeTrailerModal);
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && modal.classList.contains('open')) closeTrailerModal();
+  });
+
+  // ---------- Slate arrow: nudge scroll forward into the pinned track ----------
+  var arrowBtn = document.getElementById('slateArrow');
+  if(arrowBtn){
+    arrowBtn.addEventListener('click', function(){
+      window.scrollBy({top: window.innerHeight * 0.9, behavior:'smooth'});
+    });
+  }
+
+  // ---------- Footer notify form (real email confirmation via EmailJS) ----------
+  // To make this actually send a confirmation email:
+  //   1. Create a free account at https://www.emailjs.com
+  //   2. Add an Email Service and connect it to primeplay345@gmail.com — that's the inbox
+  //      this form is meant to send from. Only whoever can log into that Gmail account can
+  //      do this step; it can't be done by editing this file.
+  //   3. Create an Email Template with {{to_email}} and {{message}} variables (the full welcome
+  //      copy is already written below in the JS — the template just needs to display it).
+  //   4. Copy your Public Key, Service ID, and Template ID into EMAILJS_CONFIG below.
+  // Until all three are filled in, the form tells the person honestly that alerts aren't live yet.
+  var EMAILJS_CONFIG = {
+    publicKey: 'YOUR_EMAILJS_PUBLIC_KEY',
+    serviceId: 'YOUR_EMAILJS_SERVICE_ID',
+    templateId: 'YOUR_EMAILJS_TEMPLATE_ID',
+    fromEmail: 'primeplay345@gmail.com'
+  };
+  var emailjsReady = typeof emailjs !== 'undefined'
+    && EMAILJS_CONFIG.publicKey.indexOf('YOUR_') !== 0
+    && EMAILJS_CONFIG.serviceId.indexOf('YOUR_') !== 0
+    && EMAILJS_CONFIG.templateId.indexOf('YOUR_') !== 0;
+  if(emailjsReady){ emailjs.init({publicKey: EMAILJS_CONFIG.publicKey}); }
+
+  var form = document.getElementById('notifyForm');
+  var emailInput = document.getElementById('notifyEmail');
+  var notifyBtn = document.getElementById('notifyBtn');
+  var clearBtn = document.getElementById('notifyClear');
+  var msg = document.getElementById('notifyMsg');
+
+  function buildWelcomeMessage(email){
+    return "Hey — you're officially on the list.\n\n"
+      + "Welcome to MARQUEE. From here on, we've got your seat held for everything on the slate — "
+      + "the ones already lighting up screens, and the ones still queued behind the curtain.\n\n"
+      + "Here's what that actually means: you'll hear from us 10 days before anything on our list "
+      + "releases, so you're never the last one finding out. No spam, no daily noise — just a heads-up "
+      + "exactly when it matters.\n\n"
+      + "Glad to have you in the seats. We'll see you at the marquee.\n\n"
+      + "— The MARQUEE team";
+  }
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var email = (emailInput.value || '').trim();
+    if(!email){ return; }
+
+    if(!emailjsReady){
+      msg.textContent = "Alerts aren't wired up to send real email yet — add your EmailJS keys in the code (see README) to make this live. Your address wasn't sent anywhere.";
+      return;
+    }
+
+    notifyBtn.disabled = true;
+    notifyBtn.textContent = 'Sending…';
+    emailjs.send(EMAILJS_CONFIG.serviceId, EMAILJS_CONFIG.templateId, {
+      to_email: email,
+      from_email: EMAILJS_CONFIG.fromEmail,
+      message: buildWelcomeMessage(email)
+    }).then(function(){
+      msg.textContent = "You're on the list — check " + email + " for a welcome email.";
+      form.reset();
+    }, function(err){
+      msg.textContent = "That didn't send — please try again in a moment.";
+      console.error('EmailJS error:', err);
+    }).finally(function(){
+      notifyBtn.disabled = false;
+      notifyBtn.textContent = 'Notify me';
+    });
+  });
+
+  clearBtn.addEventListener('click', function(){
+    form.reset();
+    msg.textContent = '';
+  });
+
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---------- Hero load sequence ----------
+  function heroIntro(){
+    if(reduced || typeof gsap === 'undefined'){
+      document.querySelectorAll('.hero-eyebrow span, .hero h1 .line span').forEach(function(el){el.style.transform='translateY(0)';});
+      document.querySelectorAll('.hero-sub, .hero-cta').forEach(function(el){el.style.opacity=1; el.style.transform='translateY(0)';});
+      return;
+    }
+    var tl = gsap.timeline({defaults:{ease:'power3.out'}});
+    tl.to('.hero-eyebrow span', {y:0, duration:.7, delay:.2})
+      .to('.hero h1 .l1 span', {y:0, duration:.9}, '-=0.4')
+      .to('.hero h1 .l2 span', {y:0, duration:1}, '-=0.65')
+      .to('.hero-sub', {opacity:1, y:0, duration:.8}, '-=0.5')
+      .to('.hero-cta', {opacity:1, y:0, duration:.8}, '-=0.55');
+  }
+  heroIntro();
+
+  // ---------- Reveal-on-scroll (simple, once) ----------
+  if('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); }
+      });
+    }, {threshold:0.15});
+    document.querySelectorAll('.reveal').forEach(function(el){ io.observe(el); });
+  } else {
+    document.querySelectorAll('.reveal').forEach(function(el){ el.classList.add('in'); });
+  }
+
+  // ---------- GSAP ScrollTrigger: horizontal slate + parallax ----------
+  if(typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined' && !reduced){
+    gsap.registerPlugin(ScrollTrigger);
+
+    var mm = gsap.matchMedia();
+
+    mm.add('(min-width: 901px)', function(){
+      var track = document.getElementById('slateTrack');
+      var panels = gsap.utils.toArray('.slate-panel');
+      var getDistance = function(){ return -(track.scrollWidth - window.innerWidth); };
+
+      var st = gsap.to(track, {
+        x: getDistance,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '#slate',
+          start: 'top top',
+          end: function(){ return '+=' + (track.scrollWidth - window.innerWidth); },
+          scrub: 0.6,
+          pin: true,
+          invalidateOnRefresh: true
+        }
+      });
+
+      return function(){ st.kill(); };
+    });
+
+    // Parallax on spotlight images
+    gsap.utils.toArray('.spot-media img').forEach(function(img){
+      gsap.fromTo(img, {yPercent:-6}, {
+        yPercent:6, ease:'none',
+        scrollTrigger:{ trigger: img.closest('.spot-media'), start:'top bottom', end:'bottom top', scrub:true }
+      });
+    });
+  }
+})();
+</script>
+</body>
+</html>
