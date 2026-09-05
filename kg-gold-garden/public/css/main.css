@@ -984,6 +984,113 @@ output { color: var(--accent-text); font-weight: 700; font-variant-numeric: tabu
   font-size: var(--step--1); color: var(--text-dim); text-align: center;
 }
 
+/* --- save & share --------------------------------------------------------- */
+.product__save {
+  position: absolute; top: 10px; right: 10px; z-index: 1;
+  width: 38px; height: 38px; display: grid; place-items: center;
+  border-radius: 50%; color: var(--text-muted);
+  background: rgba(253,251,246,.9); border: 1px solid var(--line);
+  backdrop-filter: blur(6px);
+  transition: color var(--dur-1) var(--ease-out), background-color var(--dur-1) var(--ease-out);
+}
+.product__save:hover { color: var(--danger); background: var(--paper-0); }
+.product__save.is-saved { color: var(--danger); }
+.product__save.is-saved .icon { fill: currentColor; }
+
+.viewer__tools {
+  position: absolute; top: 12px; left: 12px; z-index: 2;
+  display: flex; gap: 8px;
+}
+.viewer__tool {
+  display: inline-flex; align-items: center; gap: 7px;
+  min-height: 38px; padding: 7px 14px; border-radius: var(--r-pill);
+  background: rgba(253,251,246,.92); border: 1px solid var(--line);
+  color: var(--text-muted); font-size: .78rem; font-weight: 600;
+  backdrop-filter: blur(6px);
+}
+.viewer__tool:hover { color: var(--emerald-900); background: var(--paper-0); }
+.viewer__tool.is-saved { color: var(--danger); border-color: rgba(164,48,43,.35); }
+.viewer__tool.is-saved .icon { fill: currentColor; }
+
+/* --- shortlist ------------------------------------------------------------ */
+.shortlist-fab {
+  position: fixed; right: 18px; bottom: 88px; z-index: var(--z-chat);
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 11px 18px; border-radius: var(--r-pill);
+  background: var(--emerald-900); color: var(--paper-1);
+  font-size: var(--step--1); font-weight: 600;
+  box-shadow: var(--shadow-3);
+  transition: scale var(--dur-2) var(--ease-out);
+}
+.shortlist-fab:hover { scale: 1.04; }
+.shortlist-fab__count {
+  min-width: 22px; height: 22px; padding: 0 6px;
+  display: grid; place-items: center; border-radius: var(--r-pill);
+  background: var(--gold-300); color: var(--on-gold);
+  font-size: .76rem; font-weight: 700;
+}
+
+.shortlist { border: 0; padding: 0; background: transparent; width: min(460px, calc(100vw - 32px)); }
+.shortlist::backdrop { background: rgba(14, 53, 39, .6); backdrop-filter: blur(3px); }
+.shortlist__inner {
+  background: var(--paper-0); border: 1px solid var(--line-strong);
+  border-radius: var(--r-lg); box-shadow: var(--shadow-3);
+  padding: clamp(20px, 4vw, 28px);
+  max-height: calc(100svh - 40px); overflow-y: auto;
+}
+.shortlist__head { display: flex; align-items: center; gap: 12px; margin-bottom: var(--sp-5); }
+.shortlist__head h2 { font-size: var(--step-2); color: var(--emerald-900); }
+.shortlist__head button { margin-left: auto; }
+
+.shortlist__items { list-style: none; padding: 0; display: grid; gap: 10px; margin-bottom: var(--sp-5); }
+.shortlist__item {
+  display: grid; grid-template-columns: 54px 1fr auto; align-items: center; gap: 12px;
+  padding: 8px; border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--paper-1);
+}
+.shortlist__item img, .shortlist__thumb {
+  width: 54px; height: 54px; border-radius: var(--r-sm);
+  object-fit: cover; background: var(--paper-3);
+}
+.shortlist__meta { min-width: 0; }
+.shortlist__name { display: block; font-weight: 600; font-size: var(--step--1); color: var(--emerald-900); }
+.shortlist__sub { display: block; font-size: .74rem; color: var(--text-dim); }
+.shortlist__remove {
+  width: 34px; height: 34px; display: grid; place-items: center;
+  border-radius: 50%; color: var(--text-dim);
+}
+.shortlist__remove:hover { color: var(--danger); background: var(--surface-2); }
+.shortlist__empty { color: var(--text-muted); font-size: var(--step--1); text-align: center; padding: var(--sp-6) 0; }
+.shortlist__actions { display: grid; gap: var(--sp-3); }
+
+/* --- muhurat -------------------------------------------------------------- */
+.section--muhurat { background: var(--paper-2); border-block: 1px solid var(--line); }
+.muhurat {
+  list-style: none; padding: 0; margin: 0;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--sp-4);
+}
+.muhurat__item {
+  padding: var(--sp-5); border: 1px solid var(--line); border-radius: var(--r-lg);
+  background: var(--surface); box-shadow: var(--shadow-1);
+  border-top: 3px solid var(--gold-500);
+  border-radius: 0 0 var(--r-lg) var(--r-lg);
+}
+.muhurat__when {
+  display: block; font-size: .72rem; letter-spacing: .13em; text-transform: uppercase;
+  color: var(--accent-text); font-weight: 700; margin-bottom: 8px;
+}
+.muhurat__name { display: block; font-family: var(--font-display); font-size: var(--step-1); color: var(--emerald-900); }
+.muhurat__date { display: block; font-size: var(--step--1); color: var(--text-muted); margin-top: 4px; }
+.muhurat__note { display: block; font-size: var(--step--1); color: var(--text-dim); margin-top: 10px; }
+
+/* --- prefixed input ------------------------------------------------------- */
+.field__prefixed { position: relative; }
+.field__prefixed > span {
+  position: absolute; left: 15px; top: 50%; translate: 0 -50%;
+  color: var(--text-dim); font-weight: 600; pointer-events: none;
+}
+.field__prefixed input { padding-left: 32px !important; }
+
 /* --- customer words ------------------------------------------------------- */
 .section--voices { background: var(--paper-2); border-block: 1px solid var(--line); overflow: hidden; }
 
@@ -1150,6 +1257,8 @@ output { color: var(--accent-text); font-weight: 700; font-variant-numeric: tabu
   .footer__inner { grid-template-columns: 1fr; gap: var(--sp-5); }
   .chat { right: 8px; left: 8px; width: auto; bottom: 82px; }
   .chat-fab { right: 14px; bottom: 14px; }
+  .shortlist-fab { right: 14px; bottom: 82px; padding: 9px 14px; }
+  .shortlist-fab span:not(.shortlist-fab__count) { display: none; }
   .bullion-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
 
   /* Keep the three stats on one line — stacking them loses the comparison. */

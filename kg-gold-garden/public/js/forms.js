@@ -176,6 +176,8 @@ export function initSubscribe() {
     if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(String(body.email ?? ''))) {
       return showErrors(form, { email: 'Please enter a valid email address.' });
     }
+    // An empty box means "no alert", not "alert me at zero".
+    if (!String(body.alertBelow ?? '').trim()) delete body.alertBelow;
 
     setBusy(submit, true);
     try {

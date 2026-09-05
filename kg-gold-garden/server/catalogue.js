@@ -106,6 +106,49 @@ export async function getProducts() {
   };
 }
 
+const MUHURAT_FILE = 'muhurat.json';
+
+/**
+ * Auspicious buying dates.
+ *
+ * Seeded EMPTY on purpose. Dhanteras, Akshaya Tritiya and Pushya Nakshatra move
+ * every year and differ between panchangs — a wrong date on a jeweller's website
+ * is the kind of mistake customers notice. The showroom fills these in and the
+ * section stays hidden until they do.
+ */
+const MUHURAT_SEED = {
+  note: 'Add the dates you want shown. Format: {"date": "2026-11-08", "name": "Dhanteras", "note": "one short line"}. Dates in the past are dropped automatically, so last year\'s entries are harmless. The section on the website stays hidden while this list is empty.',
+  items: [],
+};
+
+export async function getMuhurat() {
+  let file = await readJson(MUHURAT_FILE, null);
+  if (!file) {
+    await writeJson(MUHURAT_FILE, MUHURAT_SEED);
+    file = MUHURAT_SEED;
+  }
+
+  // Compare on the date only, so today's muhurat still counts as upcoming.
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const items = (file.items ?? [])
+    .map((m) => ({ ...m, when: new Date(`${m.date}T00:00:00`) }))
+    .filter((m) => !Number.isNaN(m.when.getTime()) && m.when >= today)
+    .sort((a, b) => a.when - b.when)
+    .slice(0, 6)
+    .map((m) => ({
+      date: m.date,
+      name: m.name,
+      note: m.note ?? null,
+      label: m.when.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' }),
+      daysAway: Math.round((m.when - today) / 86400000),
+      year: m.when.getFullYear(),
+    }));
+
+  return { items, empty: items.length === 0 };
+}
+
 export async function getTestimonials() {
   let file = await readJson(TESTIMONIALS_FILE, null);
   if (!file) {

@@ -381,8 +381,83 @@ ${adminUrl}
   return { subject: `Enter today's gold rate — ${dateLabel}`, text, html };
 }
 
+/** Sent once, when 22K reaches the figure a subscriber asked to be told about. */
+export function rateDropEmail({ name, target, rates }) {
+  const greeting = name ? `Dear ${name},` : 'Dear Customer,';
+  const money = (n) => `₹${Number(n).toLocaleString('en-IN')}`;
+
+  const text = `${greeting}
+
+You asked us to tell you when our 22K rate came down to ${money(target)}.
+
+It has. Today 22K (916) is ${money(rates.gold22)} per gram, and 24K is ${money(rates.gold24)}.
+
+We are not going to tell you this is the bottom, because nobody knows that. What
+we can tell you is that the figure you were waiting for has been reached, and
+that we have it in stock today.
+
+If you would like to come in, we are open ${BUSINESS.hours.label}.
+${BUSINESS.hours.closedLabel}.
+
+${ADDRESS_TEXT}
+
+You are welcome to walk in, or to book a private viewing on our website so one of
+us can set the time aside for you.
+
+${contactsText}
+
+With sincere regards,
+${BUSINESS.name}
+${PRIMARY}
+
+You will not get another one of these until the rate rises above ${money(target)}
+and comes back down again. Reply "stop" at any time and the alerts end.`;
+
+  const html = shell(
+    `22K has reached ${money(target)}`,
+    `
+    <p style="margin:0 0 6px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5C6B58;">
+      The rate you were waiting for</p>
+    <h1 style="margin:0 0 20px;font:400 30px/1.2 Georgia,serif;color:#12211A;">
+      22K is now ${money(rates.gold22)}</h1>
+
+    <p style="margin:0 0 18px;">${greeting}</p>
+    <p style="margin:0 0 20px;">You asked us to tell you when our 22K rate came down to
+      <strong>${money(target)}</strong>. It has.</p>
+
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%"
+           style="background:#F7F3E9;border-left:3px solid #A97722;padding:8px 18px;margin:0 0 22px;">
+      <tr><td style="padding:9px 16px 9px 0;color:#5C6B58;font-size:13px;text-transform:uppercase;letter-spacing:.06em;">22K &middot; 916</td>
+          <td style="padding:9px 0;font-weight:700;color:#12211A;">${money(rates.gold22)} / gram</td></tr>
+      <tr><td style="padding:9px 16px 9px 0;color:#5C6B58;font-size:13px;text-transform:uppercase;letter-spacing:.06em;">24K &middot; 999</td>
+          <td style="padding:9px 0;font-weight:700;color:#12211A;">${money(rates.gold24)} / gram</td></tr>
+    </table>
+
+    <p style="margin:0 0 18px;">We are not going to tell you this is the bottom, because
+      nobody knows that. What we can tell you is that the figure you were waiting for has
+      been reached, and that we have it in stock today.</p>
+
+    <p style="margin:0 0 22px;">We are open ${BUSINESS.hours.label}. ${BUSINESS.hours.closedLabel}.
+      Walk in, or book a private viewing and one of us will set the time aside for you.</p>
+
+    <p style="margin:0 0 22px;">With sincere regards,<br>
+      <strong>Sunil Patwari</strong> and <strong>Anil Patwari</strong></p>
+
+    <p style="margin:0;padding-top:16px;border-top:1px solid #E2D9C4;font-size:12px;color:#7C8A78;">
+      You will not get another one of these until the rate rises above ${money(target)} and comes
+      back down again. Reply &ldquo;stop&rdquo; at any time and the alerts end.</p>
+  `
+  );
+
+  return { subject: `22K has reached ${money(target)} — ${BUSINESS.name}`, text, html };
+}
+
 export function ownerSubscriberNotice(s) {
-  const lines = [`Name  : ${s.name || '—'}`, `Email : ${s.email}`].join('\n');
+  const lines = [
+    `Name  : ${s.name || '—'}`,
+    `Email : ${s.email}`,
+    `Alert : ${s.alertBelow ? `wants to be told when 22K reaches ₹${Number(s.alertBelow).toLocaleString('en-IN')}` : 'daily rates only'}`,
+  ].join('\n');
   return {
     subject: `New rate-alert subscriber — ${s.email}`,
     text: `Someone subscribed to gold rate alerts.\n\n${lines}\n`,

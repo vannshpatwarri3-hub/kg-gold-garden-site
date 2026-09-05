@@ -88,6 +88,12 @@ export function initRates({ config, rates }) {
     }
   }
 
+  // Anchor the alert box to what 22K actually costs today.
+  const alertHint = $('#subAlertHint');
+  if (alertHint && Number.isFinite(rates.gold22)) {
+    alertHint.textContent = `22K is ${inr(rates.gold22)} today. Leave blank for the daily rates only.`;
+  }
+
   // --- "open today" in the hero -------------------------------------------
   const openEl = $('[data-open-state]');
   if (openEl) {

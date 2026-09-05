@@ -6,7 +6,8 @@ import { fileURLToPath } from 'node:url';
 
 import { BUSINESS, CATEGORIES, PURITY, BULLION, FINISHES } from './config.js';
 import { startReminderSchedule, runReminder } from './reminder.js';
-import { getProducts, getTestimonials } from './catalogue.js';
+import { getProducts, getTestimonials, getMuhurat } from './catalogue.js';
+import { runRateDropAlerts, validateAlertBelow } from './alerts.js';
 import {
   COOKIE,
   createSession,
@@ -17,7 +18,7 @@ import {
   verifySession,
   verifyUsername,
 } from './auth.js';
-import { ensureDirs, readJson, append } from './store.js';
+import { ensureDirs, readJson, writeJson, append } from './store.js';
 import { getRates, setRates, computePrice } from './rates.js';
 import { reply as chatReply, chatMeta, whatsappLink } from './chat.js';
 import {
@@ -267,6 +268,9 @@ app.post('/api/rates', limit('rates', 30, 60e3), requireAdmin, async (req, res, 
   try {
     const rates = await setRates(req.body ?? {}, clean(req.body?.actor, 60) || 'showroom');
     res.json({ ok: true, rates });
+
+    // After replying — nobody should wait on the post for an email run.
+    runRateDropAlerts(rates).catch((err) => console.error('[alerts]', err));
   } catch (err) {
     next(err);
   }
@@ -291,6 +295,14 @@ app.get('/api/products', async (_req, res, next) => {
 app.get('/api/testimonials', async (_req, res, next) => {
   try {
     res.json({ ok: true, ...(await getTestimonials()) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.get('/api/muhurat', async (_req, res, next) => {
+  try {
+    res.json({ ok: true, ...(await getMuhurat()) });
   } catch (err) {
     next(err);
   }
@@ -447,8 +459,29 @@ app.post('/api/subscribe', limit('sub', 6, 10 * 60e3), async (req, res, next) =>
       return res.status(400).json({ ok: false, errors: { email: 'Please enter a valid email address.' } });
     }
 
+    const rates = await getRates();
+    const alert = validateAlertBelow(req.body?.alertBelow, rates);
+    if (!alert.ok) {
+      return res.status(400).json({ ok: false, errors: { alertBelow: alert.error } });
+    }
+
     const list = await readJson('subscribers.json', []);
-    if (list.some((s) => s.email.toLowerCase() === email.toLowerCase())) {
+    const existing = list.find((s) => s.email.toLowerCase() === email.toLowerCase());
+
+    if (existing) {
+      // Let someone come back and set, change or clear their figure.
+      if (alert.value !== existing.alertBelow) {
+        existing.alertBelow = alert.value;
+        existing.alertedAt = null;
+        await writeJson('subscribers.json', list);
+        return res.json({
+          ok: true,
+          alreadySubscribed: true,
+          message: alert.value
+            ? `Updated. We will write to you when 22K reaches ₹${alert.value.toLocaleString('en-IN')}.`
+            : 'Updated. Your rate alert has been turned off — you will still get the daily rates.',
+        });
+      }
       return res.json({
         ok: true,
         alreadySubscribed: true,
@@ -459,6 +492,8 @@ app.post('/api/subscribe', limit('sub', 6, 10 * 60e3), async (req, res, next) =>
     const record = {
       name: name || null,
       email,
+      alertBelow: alert.value,
+      alertedAt: null,
       subscribedAt: new Date().toISOString(),
       status: 'active',
     };
@@ -471,9 +506,13 @@ app.post('/api/subscribe', limit('sub', 6, 10 * 60e3), async (req, res, next) =>
       ok: true,
       emailSent: welcome.delivered,
       mailConfigured: isMailConfigured(),
-      message: welcome.delivered
-        ? 'You are on the list. A welcome note is on its way to your inbox.'
-        : 'You are on the list. Our email delivery is not switched on yet, so your welcome note is saved and will be sent as soon as it is.',
+      message:
+        (welcome.delivered
+          ? 'You are on the list. A welcome note is on its way to your inbox.'
+          : 'You are on the list. Our email delivery is not switched on yet, so your welcome note is saved and will be sent as soon as it is.') +
+        (alert.value
+          ? ` We will write to you separately the day 22K reaches ₹${alert.value.toLocaleString('en-IN')}.`
+          : ''),
     });
   } catch (err) {
     next(err);

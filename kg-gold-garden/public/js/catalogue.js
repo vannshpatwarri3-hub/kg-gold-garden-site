@@ -1,4 +1,5 @@
 import { $, api, inr, esc, reducedMotion } from './lib.js';
+import { initShortlist } from './shortlist.js';
 
 /**
  * The standing band under the hero.
@@ -176,6 +177,10 @@ export async function initProducts({ config }) {
               : placeholderSvg(p.category)
           }
           ${p.image ? '' : '<span class="product__soon">Photograph coming soon</span>'}
+          <button type="button" class="product__save" data-save="${esc(p.id)}"
+                  aria-pressed="false" aria-label="Save ${esc(p.name)} to your shortlist">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-9.3A4 4 0 0 1 12 8a4 4 0 0 1 7 2.7c0 4.9-7 9.3-7 9.3Z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></svg>
+          </button>
         </span>
         <span class="product__body">
           <span class="product__name">${esc(p.name)}</span>
@@ -220,7 +225,41 @@ export async function initProducts({ config }) {
     )
     .join('');
 
-  initViewer({ grid, lookup });
+  const shortlist = initShortlist({ lookup, config });
+
+  // Keep every heart on the page in step with the saved list.
+  const syncHearts = () => {
+    grid.querySelectorAll('[data-save]').forEach((btn) => {
+      const on = shortlist.has(btn.dataset.save);
+      btn.setAttribute('aria-pressed', String(on));
+      btn.classList.toggle('is-saved', on);
+    });
+  };
+  shortlist.onChange(syncHearts);
+
+  grid.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-save]');
+    if (!btn) return;
+    // The heart sits inside the card's link — don't follow it.
+    e.preventDefault();
+    e.stopPropagation();
+    shortlist.toggle(btn.dataset.save);
+  });
+
+  initViewer({ grid, lookup, shortlist });
+  openFromLink(lookup);
+}
+
+/** Opens a piece straight away when someone follows a shared link. */
+function openFromLink(lookup) {
+  const id = new URLSearchParams(location.search).get('piece');
+  if (!id || !lookup.has(id)) return;
+  const card = document.querySelector(`[data-product="${CSS.escape(id)}"]`);
+  if (!card) return;
+  requestAnimationFrame(() => {
+    card.scrollIntoView({ behavior: 'auto', block: 'center' });
+    card.click();
+  });
 }
 
 /**
@@ -361,7 +400,7 @@ function createZoom(media, img) {
  * The card stays a real WhatsApp link underneath, so it still works with
  * JavaScript off and can be opened in a new tab deliberately.
  */
-function initViewer({ grid, lookup }) {
+function initViewer({ grid, lookup, shortlist }) {
   const dialog = $('#pieceViewer');
   if (!dialog) return;
 
@@ -369,8 +408,61 @@ function initViewer({ grid, lookup }) {
   const media = $('#viewerMedia');
   const zoom = createZoom(media, img);
   let lastFocus = null;
+  let current = null;
+
+  // --- save and share ------------------------------------------------------
+  const saveBtn = $('#viewerSave');
+  const saveText = $('#viewerSaveText');
+  const shareBtn = $('#viewerShare');
+  const shareText = $('#viewerShareText');
+
+  const paintSave = () => {
+    if (!saveBtn || !current) return;
+    const on = shortlist.has(current.id);
+    saveBtn.setAttribute('aria-pressed', String(on));
+    saveBtn.classList.toggle('is-saved', on);
+    saveText.textContent = on ? 'Saved' : 'Save';
+  };
+
+  saveBtn?.addEventListener('click', () => {
+    if (!current) return;
+    shortlist.toggle(current.id);
+    paintSave();
+  });
+
+  const linkFor = (piece) => {
+    const url = new URL(location.href);
+    url.search = `?piece=${encodeURIComponent(piece.id)}`;
+    url.hash = '';
+    return url.toString();
+  };
+
+  shareBtn?.addEventListener('click', async () => {
+    if (!current) return;
+    const url = linkFor(current);
+
+    // The native sheet on a phone, clipboard everywhere else.
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: current.name, text: current.name, url });
+        return;
+      } catch {
+        /* dismissed — fall through to copying */
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      shareText.textContent = 'Link copied';
+    } catch {
+      shareText.textContent = 'Copy failed';
+    }
+    setTimeout(() => (shareText.textContent = 'Share'), 2000);
+  });
 
   const open = (piece) => {
+    current = piece;
+    paintSave();
+    if (shareText) shareText.textContent = 'Share';
     $('#viewerCollection').textContent = piece.groupName ?? '';
     $('#viewerName').textContent = piece.name;
     $('#viewerBlurb').textContent = piece.blurb ?? '';
@@ -506,6 +598,41 @@ export async function initVoices() {
 }
 
 // ---------------------------------------------------------------------------
+
+/**
+ * Auspicious buying dates. Stays hidden until the showroom puts real dates in
+ * data/muhurat.json — these move every year and a wrong one is worse than none.
+ */
+export async function initMuhurat() {
+  const section = $('#muhurat');
+  const list = $('#muhuratList');
+  if (!section || !list) return;
+
+  let data;
+  try {
+    data = await api('/api/muhurat');
+  } catch {
+    return;
+  }
+  if (data.empty) return;
+
+  const away = (d) =>
+    d === 0 ? 'Today' : d === 1 ? 'Tomorrow' : d < 30 ? `In ${d} days` : `In ${Math.round(d / 30)} months`;
+
+  list.innerHTML = data.items
+    .map(
+      (m) => `
+      <li class="muhurat__item">
+        <span class="muhurat__when">${esc(away(m.daysAway))}</span>
+        <span class="muhurat__name">${esc(m.name)}</span>
+        <span class="muhurat__date">${esc(m.label)} ${esc(String(m.year))}</span>
+        ${m.note ? `<span class="muhurat__note">${esc(m.note)}</span>` : ''}
+      </li>`
+    )
+    .join('');
+
+  section.hidden = false;
+}
 
 /** Show the footer QR block only for codes that actually exist. */
 export function initFooterQr() {

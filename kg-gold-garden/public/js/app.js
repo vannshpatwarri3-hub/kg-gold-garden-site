@@ -5,7 +5,7 @@ import { initRates, initCalculator, initBullion } from './calculator.js';
 import { initAppointment, initSubscribe } from './forms.js';
 import { initChat } from './chat.js';
 import { initCallSheet } from './call.js';
-import { initProducts, initVoices, initFooterQr, initStanding } from './catalogue.js';
+import { initProducts, initVoices, initFooterQr, initStanding, initMuhurat } from './catalogue.js';
 
 const ASSURANCE_ICON = {
   bis: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6 4.2 5.9v5.4c0 4.7 3.3 9.1 7.8 10.2 4.5-1.1 7.8-5.5 7.8-10.2V5.9L12 2.6Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m8.8 12 2.2 2.3 4.2-4.4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>',
@@ -197,6 +197,7 @@ async function boot() {
   // These two fetch their own data and reveal their sections when it arrives.
   initProducts({ config });
   initVoices();
+  initMuhurat();
 
   // Filling the calculator and the bullion grid changes the height of the page
   // above wherever a deep link pointed, so re-settle on the target once.
