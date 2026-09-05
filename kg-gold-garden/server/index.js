@@ -83,9 +83,13 @@ function limit(name, max, windowMs) {
     const now = Date.now();
     const hits = (buckets.get(key) ?? []).filter((t) => now - t < windowMs);
     if (hits.length >= max) {
+      // Say how long, rather than leaving someone guessing when to retry.
+      const waitMs = windowMs - (now - Math.min(...hits));
+      const mins = Math.ceil(waitMs / 60000);
       return res.status(429).json({
         ok: false,
-        error: 'Too many requests. Please wait a moment and try again.',
+        error: `Too many attempts. Please wait ${mins} minute${mins === 1 ? '' : 's'} and try again.`,
+        retryAfterSeconds: Math.ceil(waitMs / 1000),
       });
     }
     hits.push(now);
@@ -93,6 +97,9 @@ function limit(name, max, windowMs) {
     next();
   };
 }
+
+/** Forget a visitor's attempts — called once they prove who they are. */
+const clearLimit = (name, req) => buckets.delete(`${name}:${req.ip}`);
 setInterval(() => buckets.clear(), 15 * 60e3).unref();
 
 // --- admin auth -------------------------------------------------------------
@@ -127,8 +134,9 @@ app.get('/api/admin/session', (req, res) => {
   });
 });
 
-// Deliberately strict: five attempts per fifteen minutes, per IP.
-app.post('/api/admin/login', limit('login', 5, 15 * 60e3), (req, res) => {
+// Enough to stop guessing at scale, forgiving enough for a shopkeeper who
+// mistypes. A successful login clears the count entirely (see below).
+app.post('/api/admin/login', limit('login', 12, 10 * 60e3), (req, res) => {
   if (!isPasswordConfigured()) {
     return res.status(503).json({
       ok: false,
@@ -146,6 +154,8 @@ app.post('/api/admin/login', limit('login', 5, 15 * 60e3), (req, res) => {
     return res.status(401).json({ ok: false, error: 'That ID or password is not correct.' });
   }
 
+  // Proved who they are — a few earlier typos should not count against them.
+  clearLimit('login', req);
   res.setHeader('Set-Cookie', sessionCookie(createSession(), { secure: req.secure }));
   res.json({ ok: true });
 });
