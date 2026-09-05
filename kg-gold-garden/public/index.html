@@ -67,6 +67,7 @@
     <nav class="nav__links" aria-label="Primary">
       <a href="#rate">Today's rate</a>
       <a href="#collection">Collection</a>
+      <a href="#products">Our pieces</a>
       <a href="#bullion">Gold biscuits</a>
       <a href="#visit">Visit us</a>
     </nav>
@@ -143,6 +144,15 @@
   </a>
 </section>
 
+<!-- ===================== STANDING ===================== -->
+<section class="standing" id="standing" hidden aria-label="About the showroom">
+  <div class="wrap">
+    <span class="standing__rule" aria-hidden="true"></span>
+    <p class="standing__kicker" id="standingKicker"></p>
+    <dl class="standing__row" id="standingRow"></dl>
+  </div>
+</section>
+
 <!-- ===================== RATE + CALCULATOR ===================== -->
 <section class="section section--rate" id="rate">
   <div class="wrap">
@@ -213,12 +223,18 @@
 
         <div class="field">
           <label for="calcWeight">Weight <output id="calcWeightOut" for="calcWeight">10 g</output></label>
-          <input type="range" id="calcWeight" name="weight" min="1" max="100" step="0.5" value="10">
+          <div class="slider">
+            <input type="range" id="calcWeight" name="weight" min="1" max="100" step="0.1" value="10">
+          </div>
         </div>
 
         <div class="field">
           <label for="calcMaking">Making charge <output id="calcMakingOut" for="calcMaking">12%</output></label>
-          <input type="range" id="calcMaking" name="making" min="0" max="30" step="0.5" value="12">
+          <div class="slider">
+            <!-- Tints the stretch we normally quote for the chosen category. -->
+            <span class="slider__band" id="calcMakingBand" aria-hidden="true"></span>
+            <input type="range" id="calcMaking" name="making" min="0" max="30" step="0.25" value="12">
+          </div>
           <p class="field__hint" id="calcMakingHint"></p>
         </div>
 
@@ -298,6 +314,28 @@
   </div>
 </section>
 
+<!-- ===================== PRODUCTS ===================== -->
+<section class="section section--products" id="products">
+  <div class="wrap">
+    <header class="section__head reveal">
+      <p class="section__kicker">Our pieces</p>
+      <h2 class="section__title">Priced the moment you look at them.</h2>
+      <p class="section__lede">
+        Every figure below is worked out from today's rate — metal, making and 3% GST.
+        Tap any piece and it opens WhatsApp with its details already written, so you
+        only have to press send.
+      </p>
+    </header>
+
+    <div class="rate-banner reveal" id="productsBanner" hidden>
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18.4A2 2 0 0 0 3.5 21.4h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span id="productsBannerText"></span>
+    </div>
+
+    <div class="products" id="productsGrid" role="list"></div>
+  </div>
+</section>
+
 <!-- ===================== BULLION ===================== -->
 <section class="section section--bullion" id="bullion">
   <div class="wrap">
@@ -334,6 +372,28 @@
 
       <ul class="assurance__list" id="assuranceList"></ul>
     </div>
+  </div>
+</section>
+
+<!-- ===================== CUSTOMERS ===================== -->
+<section class="section section--voices" id="voices" hidden>
+  <div class="wrap">
+    <header class="section__head section__head--center reveal">
+      <p class="section__kicker">Our customers</p>
+      <h2 class="section__title">In their words.</h2>
+    </header>
+
+    <div class="rate-banner reveal" id="voicesBanner" hidden style="margin-inline:auto">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18.4A2 2 0 0 0 3.5 21.4h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span id="voicesBannerText"></span>
+    </div>
+  </div>
+
+  <!-- Two rows drifting in opposite directions; pauses on hover and for
+       anyone who has asked for reduced motion. -->
+  <div class="voices" aria-label="What our customers say">
+    <div class="voices__row" id="voicesRowA" data-direction="left"></div>
+    <div class="voices__row" id="voicesRowB" data-direction="right"></div>
   </div>
 </section>
 
@@ -498,6 +558,7 @@
     <nav class="footer__nav" aria-label="Footer">
       <a href="#rate">Today's rate</a>
       <a href="#collection">Collection</a>
+      <a href="#products">Our pieces</a>
       <a href="#bullion">Gold biscuits</a>
       <a href="#assurance">Our assurance</a>
       <a href="#visit">Visit us</a>
@@ -507,11 +568,43 @@
     <div class="footer__contact" id="footerContact"></div>
   </div>
 
+  <!-- Shown only once the QR images actually exist in /assets/qr/. -->
+  <div class="wrap footer__qr" id="footerQr" hidden>
+    <figure class="footer__qr-item" data-qr="instagram">
+      <img src="/assets/qr/instagram.png" alt="QR code linking to the KG Gold Garden Instagram page" loading="lazy">
+      <figcaption>Follow us on Instagram</figcaption>
+    </figure>
+    <figure class="footer__qr-item" data-qr="website">
+      <img src="/assets/qr/website.png" alt="QR code linking to the KG Gold Garden website" loading="lazy">
+      <figcaption>Share this website</figcaption>
+    </figure>
+  </div>
+
   <div class="wrap footer__legal">
     <p>&copy; <span id="year"></span> KG Gold Garden, Shahibaug, Ahmedabad.</p>
     <p class="dim">Rates shown are indicative and change through the trading day.</p>
   </div>
 </footer>
+
+<!-- ===================== CALL SHEET =====================
+     A tel: link does nothing in a desktop browser, and with two owners a single
+     "Call" button is ambiguous. This chooser works on every device. -->
+<dialog class="callsheet" id="callSheet" aria-labelledby="callSheetTitle">
+  <div class="callsheet__inner">
+    <header class="callsheet__head">
+      <h2 id="callSheetTitle">Speak to us</h2>
+      <button class="callsheet__close" id="callSheetClose" aria-label="Close">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </header>
+    <p class="callsheet__lede">
+      Both of us answer the phone ourselves. WhatsApp is usually quickest during
+      showroom hours.
+    </p>
+    <ul class="callsheet__list" id="callSheetList"></ul>
+    <p class="callsheet__hours">Monday – Saturday, 11:00 AM – 8:00 PM &middot; Closed on Sunday</p>
+  </div>
+</dialog>
 
 <!-- ===================== CHAT ===================== -->
 <button class="chat-fab" id="chatFab" aria-label="Chat with us" aria-expanded="false" aria-controls="chatPanel">

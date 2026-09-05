@@ -64,6 +64,24 @@ the owners will receive.
 > figure on the site is the figure an owner gave you. That is the entire point
 > of the reminder.
 
+### 1c. Set the admin password
+
+The rate page is password protected. Set the password yourself — nobody else,
+including whoever set this project up, ever sees it:
+
+```bash
+npm run set-password
+```
+
+Type the password at the prompt (it is not echoed), and paste the single
+`ADMIN_PASSWORD_HASH=…` line it prints into your `.env`. Restart, and `/admin`
+asks for that password. Only a scrypt hash is stored, so the password cannot be
+read back out of the file.
+
+Until a password is set, `/admin` refuses to show the rate form and tells you to
+run that command. Five wrong attempts per quarter-hour, per visitor, then it
+locks out.
+
 ### 2. Turn on email
 
 The site sends from **primeplay345@gmail.com** and copies every enquiry to the
@@ -86,11 +104,37 @@ Drop an MP4 at `public/assets/video/hero.mp4`. The page probes for it on load an
 uses it automatically. With no file, the animated liquid-gold background renders
 in WebGL — it loops forever and costs no bandwidth.
 
-### 4. Add product photographs (optional)
+### 4. Put your own pieces in
 
-There are none yet, so the collection is rendered in real 3D from geometry rather
-than with stock imagery. Put files in `public/assets/` and reference them from
-`public/js/showcase.js`.
+`data/products.json` drives the "Our pieces" section. Each entry needs a weight,
+karat, finish and making percentage — the price is then worked out live from
+whatever rate is set that morning, so you never restate a price by hand. Tapping
+a piece opens WhatsApp with its name, weight and price already written.
+
+Photographs go in `public/assets/products/` (see the README in that folder) and
+are referenced by the `image` field. Leave `image` as `null` and the card draws a
+gold outline of that category with "photograph coming soon" underneath, rather
+than a broken picture.
+
+When your own pieces are in, set `"status": "live"` at the top of the file and
+the "these are sample pieces" banner disappears.
+
+The 3D viewer higher up the page is separate — those four objects are built from
+geometry in code and need no photographs at all.
+
+### 4b. Customer quotes (off by default)
+
+`data/testimonials.json` drives an animated row of customer quotes. It ships with
+`"status": "hidden"` so nothing appears until you put real words in it and set
+`"status": "live"`. Please only use things customers have actually said to you.
+
+### 4c. The standing band
+
+The row under the hero (years, rating, clients) lives in `BUSINESS.stats` in
+`server/config.js`. The Google rating is `null` and therefore hidden — put your
+real figure from your Google Business profile in, and the stat appears and the
+row rebalances to three. Do not put an estimate there; it is a claim customers
+can check.
 
 ### 5. Give the chatbot a brain (optional)
 

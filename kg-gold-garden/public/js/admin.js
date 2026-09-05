@@ -1,16 +1,5 @@
 import { $, api, inr, esc } from './lib.js';
 
-const TOKEN_KEY = 'kgg.adminToken';
-
-// Convenience only — this is the shop's own device, and the token still has to
-// be correct on the server for anything to change.
-try {
-  const saved = localStorage.getItem(TOKEN_KEY);
-  if (saved) $('#token').value = saved;
-} catch {
-  /* private mode — the field just starts empty */
-}
-
 function status(el, message, kind = '') {
   el.textContent = message;
   el.className = `admin__status${kind ? ` status--${kind}` : ''}`;
@@ -20,6 +9,33 @@ function busy(btn, on) {
   btn.classList.toggle('is-busy', on);
   btn.disabled = on;
 }
+
+// ---------------------------------------------------------------------------
+// Which of the three states is this page in?
+// ---------------------------------------------------------------------------
+
+function show(state) {
+  const authed = state === 'authed';
+  $('#loginForm').hidden = state !== 'login';
+  $('#setupCard').hidden = state !== 'setup';
+  $('#rateForm').hidden = !authed;
+  $('#reminderCard').hidden = !authed;
+  $('#signOutWrap').hidden = !authed;
+}
+
+async function refreshState() {
+  try {
+    const s = await api('/api/admin/session');
+    if (s.authenticated) return show('authed');
+    return show(s.passwordConfigured ? 'login' : 'setup');
+  } catch {
+    show('login');
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Current rates (public — readable whether or not you are logged in)
+// ---------------------------------------------------------------------------
 
 async function paintCurrent() {
   const { rates } = await api('/api/rates');
@@ -45,20 +61,55 @@ async function paintCurrent() {
     })}${rates.isStale ? ' — that is over a day ago.' : '.'}`;
   }
 
-  // Pre-fill so a small correction doesn't mean retyping everything.
   for (const key of ['gold24', 'gold22', 'gold18', 'silver']) {
     const input = $(`#${key}`);
     if (input && !input.value && Number.isFinite(rates[key])) input.value = rates[key];
   }
 }
 
+// ---------------------------------------------------------------------------
+// Login
+// ---------------------------------------------------------------------------
+
+$('#loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = $('#loginBtn');
+  const statusEl = $('#loginStatus');
+  const password = $('#password').value;
+
+  if (!password) return status(statusEl, 'Please enter the password.', 'err');
+
+  busy(btn, true);
+  try {
+    await api('/api/admin/login', { method: 'POST', body: { password } });
+    $('#password').value = '';
+    status(statusEl, '');
+    await refreshState();
+    await paintCurrent();
+  } catch (err) {
+    status(statusEl, err.message, 'err');
+  } finally {
+    busy(btn, false);
+  }
+});
+
+$('#logout').addEventListener('click', async () => {
+  try {
+    await api('/api/admin/logout', { method: 'POST', body: {} });
+  } catch {
+    /* fall through — we re-check state either way */
+  }
+  await refreshState();
+});
+
+// ---------------------------------------------------------------------------
+// Publish the rate
+// ---------------------------------------------------------------------------
+
 $('#rateForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const btn = $('#save');
   const statusEl = $('#status');
-  const token = $('#token').value.trim();
-
-  if (!token) return status(statusEl, 'Enter the admin token first.', 'err');
 
   const body = {};
   for (const key of ['gold24', 'gold22', 'gold18', 'silver']) {
@@ -72,38 +123,28 @@ $('#rateForm').addEventListener('submit', async (e) => {
 
   busy(btn, true);
   try {
-    await api('/api/rates', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
-      body,
-    });
-    try {
-      localStorage.setItem(TOKEN_KEY, token);
-    } catch {
-      /* ignore */
-    }
+    await api('/api/rates', { method: 'POST', body });
     status(statusEl, 'Published. The website is now showing today’s rate.', 'ok');
     await paintCurrent();
   } catch (err) {
     status(statusEl, err.message, 'err');
+    if (err.data?.needsLogin) await refreshState();
   } finally {
     busy(btn, false);
   }
 });
 
+// ---------------------------------------------------------------------------
+// Reminder
+// ---------------------------------------------------------------------------
+
 $('#runReminder').addEventListener('click', async () => {
   const btn = $('#runReminder');
   const statusEl = $('#reminderStatus');
-  const token = $('#token').value.trim();
-  if (!token) return status(statusEl, 'Enter the admin token first.', 'err');
 
   busy(btn, true);
   try {
-    const res = await api('/api/reminder/run', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
-      body: { force: true },
-    });
+    const res = await api('/api/reminder/run', { method: 'POST', body: { force: true } });
     const wa = (res.whatsapp ?? [])
       .map((w) => `${w.owner}: ${w.sent ? 'sent' : w.reason.replace(/_/g, ' ')}`)
       .join(' · ');
@@ -116,9 +157,13 @@ $('#runReminder').addEventListener('click', async () => {
     );
   } catch (err) {
     status(statusEl, err.message, 'err');
+    if (err.data?.needsLogin) await refreshState();
   } finally {
     busy(btn, false);
   }
 });
 
+// ---------------------------------------------------------------------------
+
+await refreshState();
 paintCurrent().catch((err) => status($('#status'), err.message, 'err'));

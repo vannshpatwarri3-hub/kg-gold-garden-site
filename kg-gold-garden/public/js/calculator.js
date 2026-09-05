@@ -1,4 +1,40 @@
-import { $, $$, inr, esc, countTo } from './lib.js';
+import { $, $$, inr, esc, countTo, reducedMotion } from './lib.js';
+
+/**
+ * Eases a displayed number toward its target instead of snapping to it. Dragging
+ * a slider then reads as one continuous movement rather than a flicker of
+ * unrelated figures, and it stays responsive because each new input just moves
+ * the target — it never queues up another animation.
+ */
+function smoothNumber(el, format) {
+  let current = null;
+  let target = 0;
+  let raf = 0;
+
+  const tick = () => {
+    const diff = target - current;
+    // Close enough that another frame would not be visible.
+    if (Math.abs(diff) < Math.max(0.5, Math.abs(target) * 0.0004)) {
+      current = target;
+      el.textContent = format(current);
+      raf = 0;
+      return;
+    }
+    current += diff * 0.3;
+    el.textContent = format(current);
+    raf = requestAnimationFrame(tick);
+  };
+
+  return (value) => {
+    target = value;
+    if (current === null || reducedMotion()) {
+      current = value;
+      el.textContent = format(value);
+      return;
+    }
+    if (!raf) raf = requestAnimationFrame(tick);
+  };
+}
 
 /**
  * Mirrors server/rates.js computePrice() exactly, so the slider can respond
@@ -91,6 +127,21 @@ export function initCalculator({ config, rates }) {
     input.style.setProperty('--fill', `${pct}%`);
   };
 
+  const setMetal = smoothNumber($('#calcMetal'), inr);
+  const setMaking = smoothNumber($('#calcMaking2'), inr);
+  const setGst = smoothNumber($('#calcGst'), inr);
+  const setTotal = smoothNumber($('#calcTotal'), inr);
+
+  /** Tint the stretch of the track we usually quote for this category. */
+  const paintBand = () => {
+    const band = $('#calcMakingBand');
+    if (!band) return;
+    const [lo, hi] = currentCategory().makingPct;
+    const span = Number(making.max) - Number(making.min);
+    band.style.setProperty('--band-lo', String((lo - making.min) / span));
+    band.style.setProperty('--band-hi', String((hi - making.min) / span));
+  };
+
   function currentCategory() {
     return cats.find((c) => c.id === categorySel.value) ?? cats[0];
   }
@@ -141,6 +192,7 @@ export function initCalculator({ config, rates }) {
 
     paintKarats();
     paintFinishes();
+    paintBand();
     update();
   }
 
@@ -155,15 +207,16 @@ export function initCalculator({ config, rates }) {
     const pct = Number(making.value);
     const ratePerGram = rates[RATE_KEY[karat]];
 
-    weightOut.textContent = `${grams} g`;
-    makingOut.textContent = `${pct}%`;
+    // Only show a decimal when there actually is one.
+    weightOut.textContent = `${Number(grams.toFixed(1))} g`;
+    makingOut.textContent = `${Number(pct.toFixed(2))}%`;
 
     const p = priceOf({ ratePerGram, grams, makingPct: pct, gstRate: config.business.gstRate });
 
-    $('#calcMetal').textContent = inr(p.metal);
-    $('#calcMaking2').textContent = inr(p.making);
-    $('#calcGst').textContent = inr(p.gst);
-    $('#calcTotal').textContent = inr(p.total);
+    setMetal(p.metal);
+    setMaking(p.making);
+    setGst(p.gst);
+    setTotal(p.total);
 
     const owner = config.business.owners[0];
     const msg =

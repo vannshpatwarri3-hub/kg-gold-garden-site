@@ -59,6 +59,26 @@ export const BUSINESS = {
     closedLabel: 'Closed on Sunday',
   },
 
+  /**
+   * The band under the hero.
+   *
+   * `years` and `clients` were given to us directly by the owner about their own
+   * business, which is the only acceptable source for a claim like this.
+   *
+   * `googleRating` is deliberately null. A star rating is a third-party claim a
+   * customer can go and check, so it must be the real figure from the shop's
+   * Google Business profile — never an estimate and never a plausible-looking
+   * number. Set it and the stat appears; leave it null and it stays hidden.
+   */
+  stats: {
+    kicker: "Ahmedabad's premium jewellery store",
+    items: [
+      { key: 'years', value: 30, suffix: '+', label: 'Years experience', note: 'In the industry' },
+      { key: 'googleRating', value: null, decimals: 1, label: 'Google rated', note: 'Star rating' },
+      { key: 'clients', value: 10000, suffix: '+', label: 'Happy clients', note: 'And growing' },
+    ],
+  },
+
   // The only two assurances the owner confirmed.
   assurances: [
     {

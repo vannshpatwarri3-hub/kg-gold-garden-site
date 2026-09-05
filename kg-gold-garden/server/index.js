@@ -6,6 +6,16 @@ import { fileURLToPath } from 'node:url';
 
 import { BUSINESS, CATEGORIES, PURITY, BULLION, FINISHES } from './config.js';
 import { startReminderSchedule, runReminder } from './reminder.js';
+import { getProducts, getTestimonials } from './catalogue.js';
+import {
+  COOKIE,
+  createSession,
+  isPasswordConfigured,
+  parseCookies,
+  sessionCookie,
+  verifyPassword,
+  verifySession,
+} from './auth.js';
 import { ensureDirs, readJson, append } from './store.js';
 import { getRates, setRates, computePrice } from './rates.js';
 import { reply as chatReply, chatMeta, whatsappLink } from './chat.js';
@@ -84,6 +94,63 @@ function limit(name, max, windowMs) {
 }
 setInterval(() => buckets.clear(), 15 * 60e3).unref();
 
+// --- admin auth -------------------------------------------------------------
+
+/**
+ * Two ways in: the session cookie set by logging in with the password, or the
+ * ADMIN_TOKEN header (kept so scripts and cron jobs still work). If a password
+ * has been configured, that is the route a human should use.
+ */
+function isAdmin(req) {
+  if (verifySession(parseCookies(req.headers.cookie)[COOKIE])) return true;
+  const token = req.get('x-admin-token');
+  return Boolean(token) && token === ADMIN_TOKEN;
+}
+
+function requireAdmin(req, res, next) {
+  if (isAdmin(req)) return next();
+  res.status(401).json({
+    ok: false,
+    error: isPasswordConfigured()
+      ? 'Please log in to change the rate.'
+      : 'Invalid admin token.',
+    needsLogin: isPasswordConfigured(),
+  });
+}
+
+app.get('/api/admin/session', (req, res) => {
+  res.json({
+    ok: true,
+    authenticated: isAdmin(req),
+    passwordConfigured: isPasswordConfigured(),
+  });
+});
+
+// Deliberately strict: five attempts per fifteen minutes, per IP.
+app.post('/api/admin/login', limit('login', 5, 15 * 60e3), (req, res) => {
+  if (!isPasswordConfigured()) {
+    return res.status(503).json({
+      ok: false,
+      error:
+        'No admin password has been set yet. Run "npm run set-password" and add the line it prints to your .env file.',
+    });
+  }
+
+  const password = String(req.body?.password ?? '');
+  if (!verifyPassword(password, process.env.ADMIN_PASSWORD_HASH)) {
+    // One message for every failure — never hint at which part was wrong.
+    return res.status(401).json({ ok: false, error: 'That password is not correct.' });
+  }
+
+  res.setHeader('Set-Cookie', sessionCookie(createSession(), { secure: req.secure }));
+  res.json({ ok: true });
+});
+
+app.post('/api/admin/logout', (req, res) => {
+  res.setHeader('Set-Cookie', sessionCookie('', { clear: true, secure: req.secure }));
+  res.json({ ok: true });
+});
+
 // --- validation helpers -----------------------------------------------------
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
 const clean = (v, max = 200) => String(v ?? '').trim().slice(0, max);
@@ -155,6 +222,11 @@ app.get('/api/config', async (_req, res) => {
       })),
       email: BUSINESS.email.primary,
       social: BUSINESS.social,
+      // Only stats with a real value reach the browser.
+      stats: {
+        ...BUSINESS.stats,
+        items: BUSINESS.stats.items.filter((s) => s.value !== null && s.value !== undefined),
+      },
       hours: BUSINESS.hours,
       assurances: BUSINESS.assurances,
       gstRate: BUSINESS.gstRate,
@@ -177,12 +249,8 @@ app.get('/api/rates', async (_req, res, next) => {
   }
 });
 
-app.post('/api/rates', limit('rates', 30, 60e3), async (req, res, next) => {
+app.post('/api/rates', limit('rates', 30, 60e3), requireAdmin, async (req, res, next) => {
   try {
-    const token = req.get('x-admin-token');
-    if (!token || token !== ADMIN_TOKEN) {
-      return res.status(401).json({ ok: false, error: 'Invalid admin token.' });
-    }
     const rates = await setRates(req.body ?? {}, clean(req.body?.actor, 60) || 'showroom');
     res.json({ ok: true, rates });
   } catch (err) {
@@ -190,12 +258,25 @@ app.post('/api/rates', limit('rates', 30, 60e3), async (req, res, next) => {
   }
 });
 
-app.post('/api/reminder/run', limit('reminder', 10, 60e3), async (req, res, next) => {
+app.post('/api/reminder/run', limit('reminder', 10, 60e3), requireAdmin, async (req, res, next) => {
   try {
-    if (req.get('x-admin-token') !== ADMIN_TOKEN) {
-      return res.status(401).json({ ok: false, error: 'Invalid admin token.' });
-    }
     res.json({ ok: true, ...(await runReminder({ force: Boolean(req.body?.force) })) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.get('/api/products', async (_req, res, next) => {
+  try {
+    res.json({ ok: true, ...(await getProducts()) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.get('/api/testimonials', async (_req, res, next) => {
+  try {
+    res.json({ ok: true, ...(await getTestimonials()) });
   } catch (err) {
     next(err);
   }
@@ -433,8 +514,14 @@ app.listen(PORT, () => {
   console.log(rule);
   console.log(`  Email      ${isMailConfigured() ? `sending as ${BUSINESS.email.primary}` : 'NOT configured — mail queues to data/outbox/'}`);
   console.log(`  Chatbot    ${process.env.ANTHROPIC_API_KEY ? 'intent engine + Claude' : 'intent engine (set ANTHROPIC_API_KEY to add Claude)'}`);
+  console.log(
+    `  Rate page  http://localhost:${PORT}/admin  ${
+      isPasswordConfigured()
+        ? '(password protected)'
+        : 'NO PASSWORD SET — run "npm run set-password"'
+    }`
+  );
   console.log(`  Admin key  ${ADMIN_TOKEN}${ADMIN_TOKEN_GENERATED ? '  (generated — set ADMIN_TOKEN in .env to keep it stable)' : ''}`);
-  console.log(`  Rate page  http://localhost:${PORT}/admin`);
   startReminderSchedule();
   console.log(`${rule}\n`);
 });

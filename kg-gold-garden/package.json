@@ -6,7 +6,8 @@
   "description": "KG Gold Garden — gold jewellery & bullion retailer, Shahibaug, Ahmedabad",
   "scripts": {
     "start": "node server/index.js",
-    "dev": "node --watch server/index.js"
+    "dev": "node --watch server/index.js",
+    "set-password": "node scripts/set-password.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.70.0",

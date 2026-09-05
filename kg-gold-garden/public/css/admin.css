@@ -47,6 +47,30 @@
 .admin__hint { font-size: var(--step--1); color: var(--text-dim); margin-bottom: var(--sp-5); }
 .admin__status { margin-top: var(--sp-4); font-size: var(--step--1); font-weight: 500; }
 
+.admin__login { border-color: var(--line-strong); }
+
+.admin__setup { border-color: var(--warn-line); background: var(--warn-bg); }
+.admin__setup h2 { color: var(--warn); }
+
+.admin__code {
+  font: 600 .9rem/1.5 Consolas, Menlo, monospace;
+  background: var(--emerald-900); color: var(--gold-200);
+  padding: 14px 16px; border-radius: var(--r-md);
+  margin-bottom: var(--sp-4); overflow-x: auto;
+}
+.admin__setup code {
+  font: 600 .85em/1 Consolas, Menlo, monospace;
+  background: rgba(22,33,28,.08); padding: 2px 5px; border-radius: 3px;
+}
+
+.admin__signout { text-align: center; }
+.admin__signout button {
+  font-size: var(--step--1); color: var(--text-muted);
+  text-decoration: underline; text-underline-offset: 3px;
+  min-height: 44px; padding: 0 12px;
+}
+.admin__signout button:hover { color: var(--danger); }
+
 @media (max-width: 560px) {
   .admin__grid { grid-template-columns: 1fr; gap: 0; }
 }
