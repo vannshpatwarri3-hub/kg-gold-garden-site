@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "kg-gold-garden",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "kg-gold-garden", "start"],
+      "port": 4400
+    }
+  ]
+}

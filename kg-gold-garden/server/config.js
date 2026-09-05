@@ -165,11 +165,10 @@ export const BULLION = [
   { grams: 1, purity: '24K', form: 'Biscuit', image: '/assets/products/bar-1g.webp' },
   { grams: 2, purity: '24K', form: 'Biscuit', image: '/assets/products/bar-2g.webp' },
   { grams: 5, purity: '24K', form: 'Biscuit', image: '/assets/products/bar-5g.webp' },
-  { grams: 10, purity: '24K', form: 'Biscuit', image: '/assets/products/biscuit-10g-a.webp' },
-  // No photograph for these two yet — they fall back to the drawn ingot.
-  { grams: 20, purity: '24K', form: 'Bar', image: null },
+  { grams: 10, purity: '24K', form: 'Biscuit', image: '/assets/products/biscuit-10g.webp' },
+  { grams: 20, purity: '24K', form: 'Bar', image: '/assets/products/bar-20g.webp' },
   { grams: 50, purity: '24K', form: 'Bar', image: '/assets/products/bar-50g.webp' },
-  { grams: 100, purity: '24K', form: 'Bar', image: null },
+  { grams: 100, purity: '24K', form: 'Biscuit', image: '/assets/products/biscuit-100g.webp' },
 ];
 
 export const money = (n) =>

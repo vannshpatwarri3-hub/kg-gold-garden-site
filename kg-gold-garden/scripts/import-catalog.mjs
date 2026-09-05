@@ -71,12 +71,17 @@ const CATALOG = {
     blurb: 'Two grams, 999 fine, sealed in its assay card.' },
   '11_47_38': { id: 'bar-5g', name: '5 g Gold Bar', category: 'coin', karat: '24K', finish: 'yellow', grams: 5, makingPct: 2,
     blurb: 'Five grams, 999 fine. A practical size to buy a little at a time.' },
-  '11_43_09': { id: 'biscuit-10g-a', name: '10 g Gold Biscuit', category: 'coin', karat: '24K', finish: 'yellow', grams: 10, makingPct: 2,
+  '11_43_09': { id: 'biscuit-10g', name: '10 g Gold Biscuit', category: 'coin', karat: '24K', finish: 'yellow', grams: 10, makingPct: 2,
     blurb: 'Ten grams, 999 fine. The size most people buy as savings.' },
-  '11_46_49': { id: 'biscuit-10g-b', name: '10 g Gold Biscuit', category: 'coin', karat: '24K', finish: 'yellow', grams: 10, makingPct: 2,
-    blurb: 'Ten grams, 999 fine, in an alternate mint stamp.' },
   '11_47_08': { id: 'bar-50g', name: '50 g Gold Bar', category: 'coin', karat: '24K', finish: 'yellow', grams: 50, makingPct: 2,
     blurb: 'Fifty grams, 999 fine. Bought outright rather than built up.' },
+  '12_34_07': { id: 'biscuit-100g', name: '100 g Gold Biscuit', category: 'coin', karat: '24K', finish: 'yellow', grams: 100, makingPct: 2,
+    blurb: 'One hundred grams, 999 fine. The largest bar we keep on the counter.' },
+
+  // Processed for the biscuits grid further down the page, but deliberately kept
+  // out of "Our pieces" — the showroom asked for it there and not here.
+  '12_34_31': { id: 'bar-20g', name: '20 g Gold Bar', category: 'coin', karat: '24K', finish: 'yellow', grams: 20, makingPct: 2,
+    bullionOnly: true, blurb: 'Twenty grams, 999 fine.' },
 
   // --- necklace sets -------------------------------------------------------
   '11_43_36': { id: 'set-emerald-drop', name: 'Emerald Drop Bridal Set', category: 'necklace-set', finish: 'yellow',
@@ -163,9 +168,10 @@ for (const file of files.sort()) {
   await composed.clone().webp({ quality: 86 }).toFile(path.join(OUT_DIR, `${spec.id}.webp`));
   await composed.clone().jpeg({ quality: 87, mozjpeg: true }).toFile(path.join(OUT_DIR, `${spec.id}.jpg`));
 
-  const { id, ...rest } = spec;
-  items.push({ id, ...rest, image: `/assets/products/${id}.webp` });
-  console.log(`${meta.width}×${meta.height} → ${WIDTH}×${HEIGHT}`);
+  const { id, bullionOnly, ...rest } = spec;
+  // The image is still produced; only the catalogue entry is withheld.
+  if (!bullionOnly) items.push({ id, ...rest, image: `/assets/products/${id}.webp` });
+  console.log(`${meta.width}×${meta.height} → ${WIDTH}×${HEIGHT}${bullionOnly ? '  (biscuits grid only)' : ''}`);
 }
 
 // Keep COLLECTIONS order stable in the file itself for easier hand-editing.

@@ -205,6 +205,13 @@ h1, h2, h3 {
   border-bottom: 1px solid var(--line); font-size: 1.02rem;
 }
 .nav__mobile a:last-child { border-bottom: 0; }
+.nav__admin {
+  display: flex; align-items: center; gap: 9px;
+  margin-top: var(--sp-3); padding-top: var(--sp-4) !important;
+  border-top: 1px solid var(--line-strong);
+  color: var(--text-muted) !important; font-size: var(--step--1) !important;
+}
+.nav__admin:hover { color: var(--accent-text) !important; }
 
 /* --- hero ----------------------------------------------------------------- */
 .hero {
@@ -697,6 +704,11 @@ output { color: var(--accent-text); font-weight: 700; font-variant-numeric: tabu
 .footer__nav { display: grid; gap: 9px; align-content: start; }
 .footer__nav a { color: var(--text-muted); text-decoration: none; font-size: var(--step--1); }
 .footer__nav a:hover { color: var(--gold-200); }
+.footer__admin {
+  margin-top: var(--sp-3); padding-top: var(--sp-3);
+  border-top: 1px solid var(--line);
+  color: var(--text-dim) !important;
+}
 .footer__contact { display: grid; gap: 9px; align-content: start; font-size: var(--step--1); color: var(--text-muted); }
 .footer__contact a { color: var(--gold-200); text-decoration: none; }
 .footer__contact a:hover { text-decoration: underline; }
@@ -898,12 +910,40 @@ output { color: var(--accent-text); font-weight: 700; font-variant-numeric: tabu
 }
 .viewer__close:hover { background: var(--paper-0); color: var(--emerald-900); }
 
-.viewer__media { margin: 0; background: var(--paper-2); display: grid; place-items: center; }
+.viewer__media {
+  margin: 0; background: var(--paper-2);
+  position: relative; overflow: hidden;
+  display: grid; place-items: center;
+  touch-action: none;            /* we handle pinch and drag ourselves */
+  cursor: zoom-in;
+}
+.viewer__media.is-zoomed { cursor: grab; }
+.viewer__media.is-zoomed:active { cursor: grabbing; }
+
+/* Pinned to the box rather than sized by percentages. A percentage max-height
+   would not resolve against the grid area, so the picture overflowed on phones
+   and was clipped by the overflow:hidden that the zoom needs. Absolute makes the
+   element exactly the box, and object-fit letterboxes the picture safely inside. */
 .viewer__media img {
-  width: 100%; height: 100%; max-height: calc(100svh - 32px);
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
   object-fit: contain;          /* never crop the piece in the large view */
   display: block;
+  transform-origin: center center;
+  will-change: transform;
+  user-select: none; -webkit-user-drag: none;
 }
+
+.viewer__zoomhint {
+  position: absolute; left: 50%; bottom: 12px; translate: -50% 0;
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 7px 14px; border-radius: var(--r-pill);
+  background: rgba(253,251,246,.92); border: 1px solid var(--line);
+  color: var(--text-muted); font-size: .72rem; letter-spacing: .06em;
+  pointer-events: none; backdrop-filter: blur(6px);
+  transition: opacity var(--dur-2) var(--ease-out);
+}
+.viewer__media.is-zoomed .viewer__zoomhint { opacity: 0; }
 
 .viewer__panel {
   padding: clamp(22px, 3vw, 38px);
@@ -1122,10 +1162,13 @@ output { color: var(--accent-text); font-weight: 700; font-variant-numeric: tabu
   .collection__grid { grid-template-columns: 1fr; }
   .collection__count { display: none; }
 
-  /* Stack the viewer: picture first, then everything about the piece. */
+  /* Stack the viewer: picture first, then everything about the piece.
+     The image row needs a DEFINITE height — with `auto` the image's own
+     height:100% resolves against nothing and collapses to zero, which is
+     exactly why the picture went missing on phones. */
   .viewer { width: calc(100vw - 16px); }
-  .viewer__inner { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
-  .viewer__media img { max-height: 46svh; }
+  .viewer__inner { grid-template-columns: 1fr; grid-template-rows: 46svh 1fr; }
+  .viewer__media { min-height: 46svh; }
   .voice { width: 78vw; }
   .voices__row { animation-duration: 44s; }
   .callsheet { max-width: calc(100vw - 20px); }

@@ -5,8 +5,10 @@
  * environment map, so the gold reflects an actual surrounding rather than being
  * painted yellow. Drag to rotate; it idles with a slow turn.
  *
- * There are no product photographs, so nothing here pretends to be a specific
- * item in stock — these are honest representations of the forms we retail.
+ * The ring and the bangle are modelled on two pieces in the catalogue — the
+ * Emerald Knot ring and the Baguette Line bangle — so the shape, the setting and
+ * the stone placement match. Both are made in yellow and rose; only the metal
+ * changes between them, never the design.
  */
 import * as THREE from '/vendor/three/three.module.js';
 import { reducedMotion } from './lib.js';
@@ -24,22 +26,22 @@ export const PIECES = {
   },
   ring: {
     supportsFinish: true,
-    name: '22K Ring',
-    copy: 'A 916 band with a single set stone. The shank is finished by hand, which is where most of the making charge on a ring actually goes.',
+    name: 'Emerald Knot Ring',
+    copy: 'The piece from our collection, rebuilt in 3D — a split shank, two pavé arcs crossing over the finger, and an emerald-cut green stone held between them.',
     spec: [
-      ['Purity', '22K · 916 hallmarked'],
-      ['Typical weight', '2 g to 15 g'],
-      ['Making charge', 'Rises with the setting work'],
+      ['Centre stone', 'Emerald cut'],
+      ['Setting', 'Pavé, two crossing rows'],
+      ['Finish', 'Made in yellow and rose'],
     ],
   },
   bangle: {
     supportsFinish: true,
-    name: '22K Bangle',
-    copy: 'A plain round kada. Weight is the whole conversation here — a heavier bangle is not a better one, it is simply more gold.',
+    name: 'Baguette Line Bangle',
+    copy: 'A full circle of baguette-cut stones stood between two rails and held by bead claws, closed with a box clasp. Rebuilt in 3D from the piece itself.',
     spec: [
-      ['Purity', '22K · 916 hallmarked'],
-      ['Typical weight', '10 g to 40 g'],
-      ['Making charge', 'Lower on plain, higher on carved'],
+      ['Stones', 'Baguette cut, full circle'],
+      ['Closure', 'Box clasp'],
+      ['Finish', 'Made in yellow and rose'],
     ],
   },
   coin: {
@@ -79,10 +81,14 @@ function buildEnvironment(renderer) {
   g.fillStyle = grad;
   g.fillRect(0, 0, 512, 256);
 
-  // Two warm highlights give the surface something to catch as it turns.
+  // Bright spots for the metal to catch as it turns. More of them, and harder,
+  // means more moving highlights — which is what reads to the eye as lustre.
   for (const [x, y, r, a] of [
-    [110, 74, 86, 0.85],
-    [372, 108, 104, 0.55],
+    [110, 70, 76, 1.0],
+    [372, 100, 92, 0.75],
+    [248, 48, 44, 0.9],
+    [64, 132, 38, 0.6],
+    [458, 62, 40, 0.7],
   ]) {
     const hl = g.createRadialGradient(x, y, 0, x, y, r);
     hl.addColorStop(0, `rgba(255,255,255,${a})`);
@@ -199,10 +205,10 @@ function goldMaterial(extra = {}, tintable = false) {
   const m = new THREE.MeshPhysicalMaterial({
     color: 0xffc85c,
     metalness: 1,
-    roughness: 0.17,
-    envMapIntensity: 1.75,
-    clearcoat: 0.18,
-    clearcoatRoughness: 0.3,
+    roughness: 0.1,          // polished, not satin — this is where the lustre comes from
+    envMapIntensity: 2.15,
+    clearcoat: 0.35,
+    clearcoatRoughness: 0.12,
     ...extra,
   });
   m.userData.tintable = tintable;
@@ -233,60 +239,206 @@ function buildBar() {
   return mesh;
 }
 
-function buildRing() {
-  const group = new THREE.Group();
+// ---------------------------------------------------------------------------
+// Stones
+//
+// All reflective rather than refractive: `transmission` needs something behind
+// the canvas to bend, and on a transparent canvas it renders as an opaque lump.
+// Stone materials are never tintable — changing the metal must not change the
+// stones, so the two finishes stay the same piece.
+// ---------------------------------------------------------------------------
 
-  const band = new THREE.Mesh(new THREE.TorusGeometry(0.86, 0.17, 40, 140), goldMaterial({ roughness: 0.16 }, true));
-  group.add(band);
-
-  // Four-claw setting with a faceted stone.
-  const seat = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.3, 0.16, 28), goldMaterial({}, true));
-  seat.position.y = 0.94;
-  group.add(seat);
-
-  // Reflective rather than refractive: `transmission` needs something behind the
-  // canvas to bend, and on a transparent canvas it just renders an opaque cone.
-  const gemMat = new THREE.MeshPhysicalMaterial({
+const brilliantMaterial = () =>
+  new THREE.MeshPhysicalMaterial({
     color: 0xffffff,
     metalness: 0,
     roughness: 0,
-    envMapIntensity: 4.2,
+    envMapIntensity: 5.2,
     clearcoat: 1,
     clearcoatRoughness: 0,
-    iridescence: 0.6,
-    iridescenceIOR: 2.0,
-    emissive: 0xdff0ff,
-    emissiveIntensity: 0.16, // keeps the facets from reading as grey shards
+    iridescence: 0.7,
+    iridescenceIOR: 2.2,
+    emissive: 0xe6f3ff,
+    emissiveIntensity: 0.2, // stops small facets reading as grey specks
   });
 
-  // Cut like a real stone: a deep pavilion below the girdle, a short crown and a
-  // flat table on top. An 8-sided octahedron on its own just looks like a shard.
-  const pavilion = new THREE.Mesh(new THREE.ConeGeometry(0.185, 0.26, 8), gemMat);
-  pavilion.rotation.x = Math.PI; // point downwards, into the setting
-  pavilion.position.y = 1.06;
-  group.add(pavilion);
+const emeraldMaterial = () =>
+  new THREE.MeshPhysicalMaterial({
+    color: 0x0f9b63,
+    metalness: 0,
+    roughness: 0.02,
+    envMapIntensity: 4.6,
+    clearcoat: 1,
+    clearcoatRoughness: 0,
+    emissive: 0x0a5c3a,
+    emissiveIntensity: 0.34,
+  });
 
-  const crown = new THREE.Mesh(new THREE.CylinderGeometry(0.115, 0.185, 0.075, 8), gemMat);
-  crown.position.y = 1.226;
-  group.add(crown);
+/** An emerald cut's outline: a rectangle with the corners taken off. */
+function emeraldCutGeometry(w, h, depth) {
+  const c = Math.min(w, h) * 0.26;
+  const s = new THREE.Shape();
+  s.moveTo(-w / 2 + c, -h / 2);
+  s.lineTo(w / 2 - c, -h / 2);
+  s.lineTo(w / 2, -h / 2 + c);
+  s.lineTo(w / 2, h / 2 - c);
+  s.lineTo(w / 2 - c, h / 2);
+  s.lineTo(-w / 2 + c, h / 2);
+  s.lineTo(-w / 2, h / 2 - c);
+  s.lineTo(-w / 2, -h / 2 + c);
+  s.closePath();
 
-  group.rotation.x = 0.34;
+  const geo = new THREE.ExtrudeGeometry(s, {
+    depth,
+    bevelEnabled: true,
+    bevelThickness: depth * 0.42,
+    bevelSize: Math.min(w, h) * 0.15,
+    bevelSegments: 2,
+  });
+  geo.center();
+  return geo;
+}
+
+/** A run of small stones following an arc — how a pavé row is actually set. */
+function paveArc({ radius, count, from, to, size, material, z = 0 }) {
+  const mesh = new THREE.InstancedMesh(new THREE.OctahedronGeometry(size, 0), material, count);
+  const m = new THREE.Matrix4();
+  const q = new THREE.Quaternion();
+  const p = new THREE.Vector3();
+  const s = new THREE.Vector3(1, 0.6, 1);
+
+  for (let i = 0; i < count; i++) {
+    const t = from + (to - from) * (count === 1 ? 0.5 : i / (count - 1));
+    p.set(Math.cos(t) * radius, Math.sin(t) * radius, z);
+    q.setFromEuler(new THREE.Euler(Math.PI / 2, 0, t));
+    m.compose(p, q, s);
+    mesh.setMatrixAt(i, m);
+  }
+  mesh.instanceMatrix.needsUpdate = true;
+  return mesh;
+}
+
+/**
+ * The Emerald Knot ring: a split shank, two pavé-set arcs crossing over the
+ * finger, and a rectangular green stone held between them.
+ */
+function buildRing() {
+  const group = new THREE.Group();
+  const gold = () => goldMaterial({ roughness: 0.13 }, true);
+  const diamond = brilliantMaterial();
+
+  // Split shank — two slim bands rather than one thick one.
+  for (const z of [-0.085, 0.085]) {
+    const band = new THREE.Mesh(new THREE.TorusGeometry(0.86, 0.046, 20, 120), gold());
+    band.position.z = z;
+    group.add(band);
+  }
+
+  const head = new THREE.Group();
+  head.position.y = 1.0;
+
+  // The knot: two arcs crossing, each outlined in small stones.
+  for (const [tilt, z] of [
+    [0.6, 0.085],
+    [-0.6, -0.085],
+  ]) {
+    const arc = new THREE.Mesh(
+      new THREE.TorusGeometry(0.44, 0.04, 14, 72, Math.PI * 1.2),
+      gold()
+    );
+    arc.rotation.z = tilt;
+    arc.position.z = z;
+    head.add(arc);
+
+    const row = paveArc({
+      radius: 0.44,
+      count: 24,
+      from: 0,
+      to: Math.PI * 1.2,
+      size: 0.035,
+      material: diamond,
+      z,
+    });
+    row.rotation.z = tilt;
+    head.add(row);
+  }
+
+  // The centre stone in a plain rub-over seat.
+  const seat = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.1, 0.3), gold());
+  head.add(seat);
+
+  const stone = new THREE.Mesh(emeraldCutGeometry(0.4, 0.25, 0.2), emeraldMaterial());
+  stone.rotation.x = -Math.PI / 2; // table upward
+  stone.position.y = 0.1;
+  head.add(stone);
+
+  group.add(head);
+  group.rotation.x = 0.3;
   return group;
 }
 
+/**
+ * The Baguette Line bangle: a full circle of rectangular stones stood between
+ * two rails, held by bead claws, closed with a box clasp.
+ */
 function buildBangle() {
   const group = new THREE.Group();
-  group.add(new THREE.Mesh(new THREE.TorusGeometry(1.22, 0.145, 32, 180), goldMaterial({ roughness: 0.14 }, true)));
+  const gold = () => goldMaterial({ roughness: 0.12 }, true);
+  const diamond = brilliantMaterial();
 
-  // A pair of raised bands, the way a plain kada is usually finished.
-  for (const y of [-0.62, 0.62]) {
-    const ridge = new THREE.Mesh(new THREE.TorusGeometry(1.22, 0.028, 16, 180), goldMaterial({ roughness: 0.32 }, true));
-    ridge.position.z = y * 0.14;
-    group.add(ridge);
+  const R = 1.18;
+  const COUNT = 44;
+
+  for (const z of [-0.095, 0.095]) {
+    const rail = new THREE.Mesh(new THREE.TorusGeometry(R, 0.03, 14, 200), gold());
+    rail.position.z = z;
+    group.add(rail);
   }
 
-  group.rotation.x = 1.06;
-  group.rotation.z = 0.2;
+  // Baguettes are rectangular, set shoulder to shoulder all the way round.
+  const stones = new THREE.InstancedMesh(
+    new THREE.BoxGeometry(0.085, 0.13, 0.165),
+    diamond,
+    COUNT
+  );
+  const claws = new THREE.InstancedMesh(
+    new THREE.SphereGeometry(0.024, 8, 8),
+    gold(),
+    COUNT * 2
+  );
+
+  const m = new THREE.Matrix4();
+  const q = new THREE.Quaternion();
+  const p = new THREE.Vector3();
+  const one = new THREE.Vector3(1, 1, 1);
+  let c = 0;
+
+  for (let i = 0; i < COUNT; i++) {
+    const t = (i / COUNT) * Math.PI * 2;
+    q.setFromEuler(new THREE.Euler(0, 0, t));
+
+    p.set(Math.cos(t) * R, Math.sin(t) * R, 0);
+    m.compose(p, q, one);
+    stones.setMatrixAt(i, m);
+
+    // A bead either side of every stone, sitting on the rails.
+    const g = t + Math.PI / COUNT;
+    for (const z of [-0.095, 0.095]) {
+      p.set(Math.cos(g) * R, Math.sin(g) * R, z);
+      m.compose(p, q, one);
+      claws.setMatrixAt(c++, m);
+    }
+  }
+  stones.instanceMatrix.needsUpdate = true;
+  claws.instanceMatrix.needsUpdate = true;
+  group.add(stones, claws);
+
+  const clasp = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.18, 0.26), gold());
+  clasp.position.set(R, 0, 0);
+  group.add(clasp);
+
+  group.rotation.x = 1.0;
+  group.rotation.z = 0.25;
   return group;
 }
 

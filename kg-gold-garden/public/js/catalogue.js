@@ -167,7 +167,7 @@ export async function initProducts({ config }) {
 
     return `
       <a class="product" role="listitem" href="${esc(href)}" target="_blank" rel="noopener"
-         data-piece="${esc(p.id)}"
+         data-product="${esc(p.id)}"
          aria-label="View ${esc(p.name)}">
         <span class="product__media${p.image ? ' has-photo' : ''}">
           ${
@@ -224,6 +224,136 @@ export async function initProducts({ config }) {
 }
 
 /**
+ * Pinch-and-drag zoom for the enlarged photograph.
+ *
+ * Pointer Events cover mouse, touch and pen in one code path, so a phone gets
+ * pinch and a laptop gets the wheel without two separate implementations.
+ * Panning is clamped so the picture can never be dragged off the screen.
+ */
+function createZoom(media, img) {
+  if (!media || !img) return { reset() {} };
+
+  const MIN = 1;
+  const MAX = 4;
+  let scale = 1;
+  let x = 0;
+  let y = 0;
+
+  const pointers = new Map();
+  let startDist = 0;
+  let startScale = 1;
+  let panFrom = null;
+
+  const apply = () => {
+    // Never let the image be dragged past its own edges.
+    const box = media.getBoundingClientRect();
+    const limitX = Math.max(0, (box.width * scale - box.width) / 2);
+    const limitY = Math.max(0, (box.height * scale - box.height) / 2);
+    x = Math.min(limitX, Math.max(-limitX, x));
+    y = Math.min(limitY, Math.max(-limitY, y));
+
+    img.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+    media.classList.toggle('is-zoomed', scale > 1.01);
+  };
+
+  const setScale = (next) => {
+    scale = Math.min(MAX, Math.max(MIN, next));
+    if (scale === 1) {
+      x = 0;
+      y = 0;
+    }
+    apply();
+  };
+
+  media.addEventListener('pointerdown', (e) => {
+    // Throws if the pointer is not currently active. It must never take the
+    // rest of this handler down with it, or panning is silently never armed.
+    try {
+      media.setPointerCapture?.(e.pointerId);
+    } catch {
+      /* capture is an optimisation, not a requirement */
+    }
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (pointers.size === 2) {
+      const [a, b] = [...pointers.values()];
+      startDist = Math.hypot(a.x - b.x, a.y - b.y);
+      startScale = scale;
+      panFrom = null;
+    } else if (scale > 1.01) {
+      panFrom = { x: e.clientX - x, y: e.clientY - y };
+    }
+  });
+
+  media.addEventListener('pointermove', (e) => {
+    if (!pointers.has(e.pointerId)) return;
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (pointers.size === 2 && startDist) {
+      const [a, b] = [...pointers.values()];
+      setScale(startScale * (Math.hypot(a.x - b.x, a.y - b.y) / startDist));
+      return;
+    }
+    if (panFrom) {
+      x = e.clientX - panFrom.x;
+      y = e.clientY - panFrom.y;
+      apply();
+    }
+  });
+
+  const release = (e) => {
+    try {
+      media.releasePointerCapture?.(e.pointerId);
+    } catch {
+      /* already released */
+    }
+    pointers.delete(e.pointerId);
+    if (pointers.size < 2) startDist = 0;
+    if (pointers.size === 0) panFrom = null;
+  };
+  media.addEventListener('pointerup', release);
+  media.addEventListener('pointercancel', release);
+
+  // A plain tap or click toggles between fitted and zoomed.
+  media.addEventListener('click', (e) => {
+    if (panFrom || pointers.size) return;
+    // Ignore the click that ends a drag.
+    if (Math.abs(x) > 2 || Math.abs(y) > 2) return;
+    if (scale > 1.01) {
+      setScale(1);
+      return;
+    }
+    const box = media.getBoundingClientRect();
+    setScale(2.4);
+    // Zoom towards wherever they tapped.
+    x = (box.width / 2 - (e.clientX - box.left)) * (2.4 - 1);
+    y = (box.height / 2 - (e.clientY - box.top)) * (2.4 - 1);
+    apply();
+  });
+
+  media.addEventListener(
+    'wheel',
+    (e) => {
+      e.preventDefault();
+      setScale(scale * (e.deltaY < 0 ? 1.12 : 0.89));
+    },
+    { passive: false }
+  );
+
+  return {
+    reset() {
+      scale = 1;
+      x = 0;
+      y = 0;
+      pointers.clear();
+      startDist = 0;
+      panFrom = null;
+      apply();
+    },
+  };
+}
+
+/**
  * The enlarged view. Clicking a piece opens it here rather than jumping straight
  * to WhatsApp — the customer gets a proper look and the full description first,
  * with asking and booking one tap away inside.
@@ -236,6 +366,8 @@ function initViewer({ grid, lookup }) {
   if (!dialog) return;
 
   const img = $('#viewerImage');
+  const media = $('#viewerMedia');
+  const zoom = createZoom(media, img);
   let lastFocus = null;
 
   const open = (piece) => {
@@ -243,13 +375,21 @@ function initViewer({ grid, lookup }) {
     $('#viewerName').textContent = piece.name;
     $('#viewerBlurb').textContent = piece.blurb ?? '';
 
+    zoom.reset();
     if (piece.image) {
       img.src = piece.image;
       img.alt = piece.name;
-      img.closest('figure').hidden = false;
+      media.hidden = false;
     } else {
       img.removeAttribute('src');
-      img.closest('figure').hidden = true;
+      media.hidden = true;
+    }
+
+    const hint = $('#viewerZoomText');
+    if (hint) {
+      hint.textContent = window.matchMedia('(hover: hover) and (pointer: fine)').matches
+        ? 'Click or scroll to zoom'
+        : 'Tap or pinch to zoom';
     }
 
     // Only the facts the showroom actually recorded.
@@ -275,11 +415,11 @@ function initViewer({ grid, lookup }) {
   };
 
   grid.addEventListener('click', (e) => {
-    const card = e.target.closest('[data-piece]');
+    const card = e.target.closest('[data-product]');
     if (!card) return;
     // Let a deliberate new-tab click go straight through to WhatsApp.
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
-    const piece = lookup.get(card.dataset.piece);
+    const piece = lookup.get(card.dataset.product);
     if (!piece) return;
     e.preventDefault();
     open(piece);
@@ -290,7 +430,10 @@ function initViewer({ grid, lookup }) {
   dialog.addEventListener('click', (e) => {
     if (e.target === dialog) close(); // the backdrop
   });
-  dialog.addEventListener('close', () => lastFocus?.focus?.());
+  dialog.addEventListener('close', () => {
+    zoom.reset();
+    lastFocus?.focus?.();
+  });
 
   $('#viewerVisit')?.addEventListener('click', () => {
     close();
