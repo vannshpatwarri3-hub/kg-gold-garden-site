@@ -43,6 +43,13 @@ export const BUSINESS = {
     displayName: 'KG Gold Garden',
   },
 
+  social: {
+    instagram: {
+      handle: 'kggold_ahemdabad',
+      url: 'https://www.instagram.com/kggold_ahemdabad/',
+    },
+  },
+
   hours: {
     // Confirmed by owner: Monday–Saturday, 11:00–20:00. Closed Sunday.
     openDays: [1, 2, 3, 4, 5, 6], // 0 = Sunday
@@ -83,11 +90,36 @@ export const PURITY = {
  * single exact figure. The owner can edit these freely.
  */
 export const CATEGORIES = [
-  { id: 'ring', name: 'Rings', makingPct: [8, 14], purity: '22K', typicalGrams: [2, 8] },
-  { id: 'bangle', name: 'Bangles & Kada', makingPct: [10, 18], purity: '22K', typicalGrams: [10, 40] },
-  { id: 'chain', name: 'Chains & Necklaces', makingPct: [9, 16], purity: '22K', typicalGrams: [8, 45] },
-  { id: 'earring', name: 'Earrings & Tops', makingPct: [10, 16], purity: '22K', typicalGrams: [3, 12] },
-  { id: 'coin', name: 'Coins & Biscuits', makingPct: [1, 3], purity: '24K', typicalGrams: [1, 100] },
+  { id: 'ring', name: 'Rings', makingPct: [8, 14], purity: '22K', karats: ['18K', '22K'], typicalGrams: [2, 8] },
+  { id: 'bangle', name: 'Bangles & Kada', makingPct: [10, 18], purity: '22K', karats: ['18K', '22K'], typicalGrams: [10, 40] },
+  { id: 'chain', name: 'Chains & Necklaces', makingPct: [9, 16], purity: '22K', karats: ['18K', '22K'], typicalGrams: [8, 45] },
+  { id: 'earring', name: 'Earrings & Tops', makingPct: [10, 16], purity: '22K', karats: ['18K', '22K'], typicalGrams: [3, 12] },
+  { id: 'coin', name: 'Coins & Biscuits', makingPct: [1, 3], purity: '24K', karats: ['24K'], typicalGrams: [1, 100] },
+];
+
+/**
+ * Finish is a colour, not a purity. Rose gold is gold alloyed with copper, so a
+ * rose piece and a yellow piece of the same karat contain the same gold and are
+ * billed on the same per-gram rate.
+ *
+ * 24K is pure gold by definition — there is no alloy in it — so 24K rose gold
+ * does not exist and the calculator will not offer it.
+ */
+export const FINISHES = [
+  {
+    id: 'yellow',
+    name: 'Yellow gold',
+    hex: '#FFC85C',
+    karats: ['18K', '22K', '24K'],
+    note: 'The traditional finish. Most of our 916 jewellery is yellow.',
+  },
+  {
+    id: 'rose',
+    name: 'Rose gold',
+    hex: '#E8A07C',
+    karats: ['18K', '22K'],
+    note: 'Gold alloyed with copper for the pink tone. Same karat means the same gold content — and the same per-gram rate.',
+  },
 ];
 
 /** Bullion the showroom retails. Weights only — no invented stock counts. */

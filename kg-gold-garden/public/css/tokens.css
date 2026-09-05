@@ -1,0 +1,140 @@
+/* ===========================================================================
+   KG Gold Garden — design tokens
+   Palette "Ivory & Emerald": a warm paper ground, deep emerald for weight, and
+   a multi-stop gold that behaves like metal rather than like yellow paint.
+   Light, warm and open — a shop with the lights on, not a vault.
+   =========================================================================== */
+
+:root {
+  /* --- paper ground ------------------------------------------------------ */
+  --paper-0: #FFFFFF;
+  --paper-1: #FDFBF6;   /* page base — warm white, never clinical */
+  --paper-2: #F7F1E5;   /* alternate sections */
+  --paper-3: #EFE6D5;   /* deepest sand */
+
+  --bg: var(--paper-1);
+  --bg-alt: var(--paper-2);
+  --surface: var(--paper-0);
+  --surface-2: #FBF6EA;
+
+  /* --- emerald ----------------------------------------------------------- */
+  --emerald-900: #0E3527;   /* dark sections + footer */
+  --emerald-800: #14513A;
+  --emerald-600: #1C7A55;
+  --emerald-400: #2E9B6E;
+
+  /* --- gold -------------------------------------------------------------- */
+  --gold-100: #FAF0D8;
+  --gold-200: #F2DDA8;
+  --gold-300: #E8C46E;
+  --gold-400: #DDB35C;
+  --gold-500: #C29433;
+  --gold-600: #A9791F;   /* 3.65:1 — large text, icons, rules only */
+  --gold-700: #8A6114;   /* 5.2:1 on paper — safe for small text */
+
+  --accent: var(--gold-600);
+  --accent-text: var(--gold-700);
+
+  /* Metal, not a flat colour: the stops mimic a specular roll-off. */
+  --grad-gold: linear-gradient(135deg,
+    #8A6114 0%, #C29433 18%, #FAF0D8 38%, #DDB35C 52%,
+    #A9791F 68%, #E8C46E 86%, #C29433 100%);
+  --grad-gold-soft: linear-gradient(120deg, #E8C46E, #C29433 58%, #A9791F);
+  --grad-rule: linear-gradient(90deg, transparent, var(--gold-500), var(--gold-300), var(--gold-500), transparent);
+
+  /* --- text --------------------------------------------------------------
+     Contrast on --paper-1: text 14.9:1 · muted 4.96:1 · dim 3.4:1 (large only) */
+  --text: #16211C;
+  --text-muted: #5F6F65;
+  --text-dim: #7E8D83;
+  --on-gold: #16211C;   /* 8.8:1 on --gold-300 */
+
+  /* --- lines & feedback --------------------------------------------------- */
+  --line: rgba(22, 33, 28, 0.11);
+  --line-strong: rgba(169, 121, 31, 0.40);
+
+  --danger: #A4302B;
+  --success: #16704E;
+  --warn: #8A6114;
+  --warn-bg: rgba(232, 196, 110, 0.20);
+  --warn-line: rgba(169, 121, 31, 0.42);
+
+  /* --- type -------------------------------------------------------------- */
+  --font-display: 'Fraunces', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+  --font-body: 'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --step--1: clamp(0.80rem, 0.77rem + 0.14vw, 0.875rem);
+  --step-0:  clamp(1rem, 0.96rem + 0.20vw, 1.0625rem);
+  --step-1:  clamp(1.15rem, 1.08rem + 0.35vw, 1.35rem);
+  --step-2:  clamp(1.45rem, 1.30rem + 0.72vw, 1.95rem);
+  --step-3:  clamp(1.85rem, 1.55rem + 1.45vw, 2.85rem);
+  --step-4:  clamp(2.35rem, 1.75rem + 2.90vw, 4.40rem);
+  --step-5:  clamp(2.90rem, 1.90rem + 4.90vw, 6.50rem);
+
+  /* --- spacing (4px base) ------------------------------------------------ */
+  --sp-1: 4px;   --sp-2: 8px;   --sp-3: 12px;  --sp-4: 16px;
+  --sp-5: 24px;  --sp-6: 32px;  --sp-7: 48px;  --sp-8: 64px;
+  --sp-9: 96px;  --sp-10: 128px;
+
+  --section-y: clamp(72px, 9vw, 136px);
+  --wrap: 1200px;
+  --gutter: clamp(20px, 5vw, 48px);
+
+  /* --- shape ------------------------------------------------------------- */
+  --r-sm: 4px;
+  --r-md: 8px;
+  --r-lg: 14px;
+  --r-pill: 999px;
+
+  /* --- elevation — warm and soft, never grey ------------------------------ */
+  --shadow-1: 0 1px 2px rgba(22, 33, 28, .07);
+  --shadow-2: 0 10px 30px -16px rgba(22, 33, 28, .20);
+  --shadow-3: 0 26px 64px -30px rgba(22, 33, 28, .28);
+  --glow-gold: 0 0 0 1px rgba(169, 121, 31, .22), 0 12px 34px -14px rgba(194, 147, 51, .45);
+
+  /* --- motion ------------------------------------------------------------ */
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
+  --ease-in-out: cubic-bezier(.65, 0, .35, 1);
+  --dur-1: 160ms;
+  --dur-2: 280ms;
+  --dur-3: 520ms;
+  --dur-4: 900ms;
+
+  /* --- layers ------------------------------------------------------------ */
+  --z-base: 1;
+  --z-sticky: 10;
+  --z-nav: 20;
+  --z-chat: 30;
+  --z-modal: 40;
+  --z-toast: 50;
+}
+
+/* ---------------------------------------------------------------------------
+   Dark passages (the assurance band and the footer) re-declare the semantic
+   tokens so every component inside them inverts without a single override.
+   --------------------------------------------------------------------------- */
+.on-dark {
+  --bg: var(--emerald-900);
+  --surface: rgba(255, 255, 255, 0.055);
+  --surface-2: rgba(255, 255, 255, 0.09);
+
+  --text: #F6F2E7;
+  --text-muted: #B4C6BA;   /* 7.9:1 on --emerald-900 */
+  --text-dim: #8FA497;
+
+  --line: rgba(242, 221, 168, 0.16);
+  --line-strong: rgba(242, 221, 168, 0.34);
+
+  --accent: var(--gold-300);
+  --accent-text: var(--gold-200);
+
+  --success: #7ADCAC;
+  --danger: #F2A6A2;
+
+  color: var(--text);
+  background: var(--bg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-1: 1ms; --dur-2: 1ms; --dur-3: 1ms; --dur-4: 1ms; }
+}

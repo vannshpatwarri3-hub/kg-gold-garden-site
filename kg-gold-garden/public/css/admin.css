@@ -1,0 +1,52 @@
+/* Rate-entry page. Deliberately plain — it is a tool, not a shopfront. */
+
+.admin { background: var(--paper-2); min-height: 100svh; }
+
+.admin__wrap {
+  max-width: 620px;
+  margin-inline: auto;
+  padding: clamp(28px, 6vw, 64px) var(--gutter) var(--sp-9);
+  display: grid;
+  gap: var(--sp-5);
+}
+
+.admin__back {
+  display: inline-block;
+  font-size: var(--step--1); color: var(--text-muted);
+  text-decoration: none; margin-bottom: var(--sp-5);
+}
+.admin__back:hover { color: var(--accent-text); }
+
+.admin__head h1 { font-size: var(--step-3); color: var(--emerald-900); margin-bottom: var(--sp-3); }
+.admin__lede { color: var(--text-muted); font-size: var(--step--1); max-width: 52ch; }
+
+.admin__card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: clamp(20px, 3vw, 30px);
+  box-shadow: var(--shadow-1);
+}
+.admin__card h2 {
+  font-size: var(--step-1);
+  color: var(--emerald-900);
+  margin-bottom: var(--sp-4);
+}
+
+.admin__current { border-top: 1px solid var(--line); }
+.admin__current > div {
+  display: flex; justify-content: space-between; gap: 14px;
+  padding: 10px 0; border-bottom: 1px solid var(--line);
+}
+.admin__current dt { color: var(--text-muted); font-size: var(--step--1); }
+.admin__current dd { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--emerald-800); }
+.admin__stamp { margin-top: var(--sp-4); font-size: var(--step--1); color: var(--text-dim); }
+.admin__stamp.is-placeholder { color: var(--warn); font-weight: 600; }
+
+.admin__grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); }
+.admin__hint { font-size: var(--step--1); color: var(--text-dim); margin-bottom: var(--sp-5); }
+.admin__status { margin-top: var(--sp-4); font-size: var(--step--1); font-weight: 500; }
+
+@media (max-width: 560px) {
+  .admin__grid { grid-template-columns: 1fr; gap: 0; }
+}

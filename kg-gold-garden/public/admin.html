@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Today's rate — KG Gold Garden</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#FDFBF6">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..700&family=Manrope:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/css/main.css">
+<link rel="stylesheet" href="/css/admin.css">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+</head>
+
+<body class="admin">
+<main class="admin__wrap">
+
+  <header class="admin__head">
+    <a class="admin__back" href="/">&lsaquo; Back to the website</a>
+    <h1>Today's gold rate</h1>
+    <p class="admin__lede">
+      Enter the figures the owners give you. Until this is done the website shows
+      a visible warning instead of pretending the placeholder numbers are real.
+    </p>
+  </header>
+
+  <section class="admin__card" id="currentCard">
+    <h2>Showing on the website now</h2>
+    <dl class="admin__current" id="current"><div><dt>Loading…</dt><dd></dd></div></dl>
+    <p class="admin__stamp" id="stamp"></p>
+  </section>
+
+  <form class="admin__card" id="rateForm" novalidate>
+    <h2>Enter today's rate</h2>
+
+    <div class="field">
+      <label for="token">Admin token
+        <span class="dim">printed in the server console at startup</span></label>
+      <input type="password" id="token" name="token" autocomplete="current-password" required>
+      <p class="field__error" data-error-for="token"></p>
+    </div>
+
+    <div class="admin__grid">
+      <div class="field">
+        <label for="gold24">24K &middot; 999 <span class="req">*</span></label>
+        <input type="number" id="gold24" name="gold24" inputmode="decimal" step="0.01" min="1" required placeholder="per gram">
+      </div>
+      <div class="field">
+        <label for="gold22">22K &middot; 916 <span class="req">*</span></label>
+        <input type="number" id="gold22" name="gold22" inputmode="decimal" step="0.01" min="1" required placeholder="per gram">
+      </div>
+      <div class="field">
+        <label for="gold18">18K &middot; 750 <span class="dim">optional</span></label>
+        <input type="number" id="gold18" name="gold18" inputmode="decimal" step="0.01" min="1" placeholder="auto from 24K">
+      </div>
+      <div class="field">
+        <label for="silver">Silver <span class="dim">optional</span></label>
+        <input type="number" id="silver" name="silver" inputmode="decimal" step="0.01" min="1" placeholder="per gram">
+      </div>
+    </div>
+
+    <p class="admin__hint">
+      All figures are rupees per gram. 18K covers our rose gold too — the karat sets
+      the price, the colour does not. Leave 18K blank and it is worked out from the 24K rate.
+    </p>
+
+    <button class="btn btn--gold btn--block btn--lg" type="submit" id="save">
+      <span class="btn__label">Publish today's rate</span>
+      <span class="btn__spinner" aria-hidden="true"></span>
+    </button>
+
+    <p class="admin__status" id="status" role="status" aria-live="polite"></p>
+  </form>
+
+  <section class="admin__card">
+    <h2>Daily reminder</h2>
+    <p class="admin__hint" id="reminderInfo">
+      The server asks both owners for the rate at 12:00 PM India time, every day.
+    </p>
+    <button class="btn btn--outline" id="runReminder" type="button">
+      <span class="btn__label">Send the reminder now</span>
+      <span class="btn__spinner" aria-hidden="true"></span>
+    </button>
+    <p class="admin__status" id="reminderStatus" role="status" aria-live="polite"></p>
+  </section>
+
+</main>
+
+<script type="module" src="/js/admin.js"></script>
+</body>
+</html>
