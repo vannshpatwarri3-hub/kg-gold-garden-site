@@ -110,7 +110,7 @@ export const PURITY = {
  * single exact figure. The owner can edit these freely.
  */
 export const CATEGORIES = [
-  { id: 'ring', name: 'Rings', makingPct: [8, 14], purity: '22K', karats: ['18K', '22K'], typicalGrams: [2, 8] },
+  { id: 'ring', name: 'Rings', makingPct: [8, 14], purity: '22K', karats: ['18K', '22K'], typicalGrams: [2, 15] },
   { id: 'bangle', name: 'Bangles & Kada', makingPct: [10, 18], purity: '22K', karats: ['18K', '22K'], typicalGrams: [10, 40] },
   { id: 'chain', name: 'Chains & Necklaces', makingPct: [9, 16], purity: '22K', karats: ['18K', '22K'], typicalGrams: [8, 45] },
   { id: 'earring', name: 'Earrings & Tops', makingPct: [10, 16], purity: '22K', karats: ['18K', '22K'], typicalGrams: [3, 12] },

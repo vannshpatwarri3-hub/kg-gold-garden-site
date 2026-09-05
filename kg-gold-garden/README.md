@@ -64,34 +64,47 @@ the owners will receive.
 > figure on the site is the figure an owner gave you. That is the entire point
 > of the reminder.
 
-### 1c. Set the admin password
+### 1c. First-time setup — login and email
 
-The rate page is password protected. Set the password yourself — nobody else,
-including whoever set this project up, ever sees it:
+One command does both:
 
 ```bash
-npm run set-password
+npm run setup
 ```
 
-Type the password at the prompt (it is not echoed), and paste the single
-`ADMIN_PASSWORD_HASH=…` line it prints into your `.env`. Restart, and `/admin`
-asks for that password. Only a scrypt hash is stored, so the password cannot be
-read back out of the file.
+It asks for:
 
-Until a password is set, `/admin` refuses to show the rate form and tells you to
-run that command. Five wrong attempts per quarter-hour, per visitor, then it
-locks out.
+- **the admin ID and password** for `/admin` — neither is echoed to the screen,
+  and only a scrypt hash of the password is stored, so it cannot be read back
+  out of the file by anyone;
+- **the Gmail App Password** that lets the site send email (see below). It
+  checks the credentials against Gmail before saving, and can send you a test
+  message to prove delivery works.
+
+Everything is written straight into `.env`, which is git-ignored. Restart with
+`npm start` afterwards.
+
+Five wrong login attempts per quarter-hour, per visitor, then it locks out.
 
 ### 2. Turn on email
 
 The site sends from **primeplay345@gmail.com** and copies every enquiry to the
-same address. Gmail will not accept your normal password — you need an App
-Password:
+same address. Gmail will not accept your normal account password — it needs a
+16-character **App Password**, which is free:
 
-1. Turn on 2-Step Verification — <https://myaccount.google.com/signinoptions/two-step-verification>
-2. Create an App Password — <https://myaccount.google.com/apppasswords> (Mail → Other → "KG Gold Garden website")
-3. `cp .env.example .env` and paste the 16 characters into `SMTP_PASS`, spaces removed.
-4. Restart.
+1. Turn on 2-Step Verification (App Passwords do not exist without it) —
+   <https://myaccount.google.com/signinoptions/two-step-verification>
+2. Create the App Password — <https://myaccount.google.com/apppasswords>
+   (choose Mail → Other, name it "KG Gold Garden website")
+3. Run `npm run setup` and paste the 16 characters when asked. Spaces don't
+   matter. It verifies them with Gmail on the spot and tells you if they are
+   wrong, rather than failing silently later.
+4. Restart with `npm start`.
+
+**This is the single thing that makes the "email is not switched on" messages go
+away.** Appointment bookings and rate-alert signups are already being saved
+correctly without it — the site just cannot deliver the confirmation email yet,
+and says so honestly rather than claiming a message was sent.
 
 **Until you do this nothing is lost and nothing is faked.** Signups and bookings
 are saved to `data/`, the emails are queued as JSON in `data/outbox/`, and the

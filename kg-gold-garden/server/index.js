@@ -15,6 +15,7 @@ import {
   sessionCookie,
   verifyPassword,
   verifySession,
+  verifyUsername,
 } from './auth.js';
 import { ensureDirs, readJson, append } from './store.js';
 import { getRates, setRates, computePrice } from './rates.js';
@@ -136,10 +137,13 @@ app.post('/api/admin/login', limit('login', 5, 15 * 60e3), (req, res) => {
     });
   }
 
-  const password = String(req.body?.password ?? '');
-  if (!verifyPassword(password, process.env.ADMIN_PASSWORD_HASH)) {
-    // One message for every failure — never hint at which part was wrong.
-    return res.status(401).json({ ok: false, error: 'That password is not correct.' });
+  const okUser = verifyUsername(req.body?.username);
+  const okPass = verifyPassword(String(req.body?.password ?? ''), process.env.ADMIN_PASSWORD_HASH);
+
+  // Both are checked before replying, and one message covers either failure —
+  // never reveal which half was wrong.
+  if (!okUser || !okPass) {
+    return res.status(401).json({ ok: false, error: 'That ID or password is not correct.' });
   }
 
   res.setHeader('Set-Cookie', sessionCookie(createSession(), { secure: req.secure }));

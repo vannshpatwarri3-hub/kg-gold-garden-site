@@ -52,6 +52,18 @@ export function isPasswordConfigured() {
   return Boolean(process.env.ADMIN_PASSWORD_HASH);
 }
 
+/** The ID shown on the login form. Defaults to "admin" if none was chosen. */
+export function adminUsername() {
+  return (process.env.ADMIN_USERNAME || 'admin').trim();
+}
+
+/** Case-insensitive, and compared in constant time like the password. */
+export function verifyUsername(given) {
+  const expected = Buffer.from(adminUsername().toLowerCase());
+  const actual = Buffer.from(String(given ?? '').trim().toLowerCase());
+  return expected.length === actual.length && crypto.timingSafeEqual(expected, actual);
+}
+
 // --- sessions ---------------------------------------------------------------
 
 const sign = (payload) =>

@@ -28,7 +28,7 @@ export const PIECES = {
     copy: 'A 916 band with a single set stone. The shank is finished by hand, which is where most of the making charge on a ring actually goes.',
     spec: [
       ['Purity', '22K · 916 hallmarked'],
-      ['Typical weight', '2 g to 8 g'],
+      ['Typical weight', '2 g to 15 g'],
       ['Making charge', 'Rises with the setting work'],
     ],
   },

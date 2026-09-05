@@ -51,6 +51,15 @@ export async function setRates(input, actor = 'showroom') {
   const current = await readJson(FILE, SEED);
   const next = { ...current };
 
+  /**
+   * If this update does not name an 18K rate, drop any stored one so it is
+   * derived from the new 24K figure below. Keeping yesterday's explicit 18K
+   * against today's 24K would silently misprice every 18K and rose gold piece.
+   */
+  if (input.gold18 === undefined || input.gold18 === null || input.gold18 === '') {
+    delete next.gold18;
+  }
+
   for (const key of ['gold24', 'gold22', 'gold18', 'silver']) {
     if (input[key] === undefined || input[key] === null || input[key] === '') continue;
     const value = Number(input[key]);

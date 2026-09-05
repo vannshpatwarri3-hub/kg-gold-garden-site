@@ -35,6 +35,12 @@
     </p>
 
     <div class="field">
+      <label for="username">ID</label>
+      <input type="text" id="username" name="username" autocomplete="username" required
+             autocapitalize="none" spellcheck="false" value="admin">
+    </div>
+
+    <div class="field">
       <label for="password">Password</label>
       <input type="password" id="password" name="password" autocomplete="current-password" required>
       <p class="field__error" data-error-for="password"></p>
@@ -54,11 +60,11 @@
       Anyone who can reach this page could change the gold rate. Set a password
       before you use it — run this in the project folder:
     </p>
-    <pre class="admin__code">npm run set-password</pre>
+    <pre class="admin__code">npm run setup</pre>
     <p class="admin__hint">
-      Type the password you want at the prompt. It is not echoed and not stored —
-      the command prints one <code>ADMIN_PASSWORD_HASH=…</code> line to paste into
-      your <code>.env</code> file. Restart the server and reload this page.
+      It asks for the ID and password you want — neither is shown on screen — and
+      writes them to your <code>.env</code> file itself. The same command also
+      switches on email. Restart the server afterwards and reload this page.
     </p>
   </section>
 

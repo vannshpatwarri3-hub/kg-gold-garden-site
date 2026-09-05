@@ -75,13 +75,15 @@ $('#loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const btn = $('#loginBtn');
   const statusEl = $('#loginStatus');
+  const username = $('#username').value.trim();
   const password = $('#password').value;
 
+  if (!username) return status(statusEl, 'Please enter the ID.', 'err');
   if (!password) return status(statusEl, 'Please enter the password.', 'err');
 
   busy(btn, true);
   try {
-    await api('/api/admin/login', { method: 'POST', body: { password } });
+    await api('/api/admin/login', { method: 'POST', body: { username, password } });
     $('#password').value = '';
     status(statusEl, '');
     await refreshState();

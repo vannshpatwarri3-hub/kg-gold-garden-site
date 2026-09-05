@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
-    "set-password": "node scripts/set-password.mjs"
+    "setup": "node scripts/setup.mjs",
+    "set-password": "node scripts/setup.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.70.0",
