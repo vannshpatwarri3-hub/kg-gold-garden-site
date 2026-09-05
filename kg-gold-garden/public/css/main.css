@@ -588,6 +588,16 @@ output { color: var(--accent-text); font-weight: 700; font-variant-numeric: tabu
   transition: transform var(--dur-3) var(--ease-out);
 }
 .bullion-card:hover .bullion-card__ingot { transform: perspective(420px) rotateX(16deg) translateY(-3px); }
+
+.bullion-card__photo {
+  width: calc(100% + var(--sp-5) * 2);
+  margin: calc(var(--sp-5) * -1) calc(var(--sp-5) * -1) var(--sp-4);
+  aspect-ratio: 4 / 3; object-fit: cover;
+  border-bottom: 1px solid var(--line);
+  transition: scale var(--dur-3) var(--ease-out);
+}
+.bullion-card { overflow: hidden; }
+.bullion-card:hover .bullion-card__photo { scale: 1.04; }
 .bullion-card__weight { font-family: var(--font-display); font-size: var(--step-2); color: var(--emerald-900); }
 .bullion-card__form { font-size: var(--step--1); color: var(--text-dim); letter-spacing: .1em; text-transform: uppercase; margin-bottom: var(--sp-4); }
 .bullion-card__price { font-size: var(--step-1); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--gold-700); }
@@ -784,7 +794,21 @@ output { color: var(--accent-text); font-weight: 700; font-variant-numeric: tabu
 /* --- products ------------------------------------------------------------- */
 .section--products { background: var(--paper-1); }
 
-.products {
+.products { display: grid; gap: var(--sp-9); }
+
+.collection__head {
+  display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px var(--sp-4);
+  padding-bottom: var(--sp-4); margin-bottom: var(--sp-5);
+  border-bottom: 1px solid var(--line-strong);
+}
+.collection__name { font-size: var(--step-2); color: var(--emerald-900); }
+.collection__blurb { color: var(--text-muted); font-size: var(--step--1); flex: 1 1 240px; }
+.collection__count {
+  font-size: .72rem; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--text-dim); white-space: nowrap;
+}
+
+.collection__grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
   gap: var(--sp-4);
@@ -830,6 +854,11 @@ output { color: var(--accent-text); font-weight: 700; font-variant-numeric: tabu
 .product__price {
   font-size: var(--step-1); font-weight: 700; color: var(--gold-700);
   font-variant-numeric: tabular-nums;
+}
+/* No weight on file yet, so no price is claimed — the customer asks instead. */
+.product__price--ask {
+  font-size: var(--step--1); font-weight: 600; color: var(--text-muted);
+  letter-spacing: .02em;
 }
 .product__cta {
   display: inline-flex; align-items: center; gap: 6px;
@@ -1015,7 +1044,9 @@ output { color: var(--accent-text); font-weight: 700; font-variant-numeric: tabu
   .standing__note { font-size: .68rem; }
   .standing__stat { padding-inline: 6px; }
 
-  .products { grid-template-columns: 1fr; }
+  .products { gap: var(--sp-8); }
+  .collection__grid { grid-template-columns: 1fr; }
+  .collection__count { display: none; }
   .voice { width: 78vw; }
   .voices__row { animation-duration: 44s; }
   .callsheet { max-width: calc(100vw - 20px); }

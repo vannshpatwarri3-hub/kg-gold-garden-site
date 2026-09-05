@@ -8,7 +8,7 @@
  */
 import { readJson, writeJson } from './store.js';
 import { getRates, computePrice } from './rates.js';
-import { CATEGORIES } from './config.js';
+import { CATEGORIES, COLLECTIONS } from './config.js';
 
 const PRODUCTS_FILE = 'products.json';
 const TESTIMONIALS_FILE = 'testimonials.json';
@@ -57,31 +57,52 @@ export async function getProducts() {
   }
 
   const rates = await getRates();
+
   const items = (file.items ?? []).map((p) => {
     const category = CATEGORIES.find((c) => c.id === p.category);
+
+    /**
+     * A price is only shown when the showroom has actually given us a weight and
+     * a karat for that piece. Anything else stays "price on request" and sends
+     * the customer to WhatsApp — guessing a weight would invent the price.
+     */
+    const priceable = Number.isFinite(Number(p.grams)) && Number(p.grams) > 0 && Boolean(p.karat);
     let price = null;
-    try {
-      price = computePrice({
-        rates,
-        grams: p.grams,
-        purity: p.karat,
-        makingPct: p.makingPct ?? KARAT_MAKING_FALLBACK,
-      });
-    } catch {
-      price = null; // a bad row should not take the whole page down
+    if (priceable) {
+      try {
+        price = computePrice({
+          rates,
+          grams: p.grams,
+          purity: p.karat,
+          makingPct: p.makingPct ?? KARAT_MAKING_FALLBACK,
+        });
+      } catch {
+        price = null; // a bad row should not take the whole page down
+      }
     }
-    return {
-      ...p,
-      categoryName: category?.name ?? null,
-      price,
-    };
+
+    return { ...p, categoryName: category?.name ?? null, price };
   });
+
+  // Group into the subheads, keeping COLLECTIONS order and dropping empty ones.
+  const groups = COLLECTIONS.map((c) => ({
+    ...c,
+    items: items.filter((p) => p.category === c.id),
+  })).filter((g) => g.items.length);
+
+  // Anything with an unrecognised category still gets shown rather than lost.
+  const grouped = new Set(groups.flatMap((g) => g.items.map((i) => i.id)));
+  const leftovers = items.filter((p) => !grouped.has(p.id));
+  if (leftovers.length) {
+    groups.push({ id: 'other', name: 'More pieces', blurb: '', items: leftovers });
+  }
 
   return {
     status: file.status ?? 'live',
     isSample: (file.status ?? 'live') === 'sample',
     ratesArePlaceholder: rates.isPlaceholder,
     items,
+    groups,
   };
 }
 

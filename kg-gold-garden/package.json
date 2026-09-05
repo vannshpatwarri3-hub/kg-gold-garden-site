@@ -8,6 +8,7 @@
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
     "setup": "node scripts/setup.mjs",
+    "add-photos": "node scripts/add-photos.mjs",
     "send-outbox": "node scripts/send-outbox.mjs",
     "set-password": "node scripts/setup.mjs"
   },
@@ -16,6 +17,7 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "nodemailer": "^6.9.16",
+    "sharp": "^0.35.4",
     "three": "^0.171.0"
   },
   "engines": {

@@ -135,44 +135,84 @@ export async function initProducts({ config }) {
   }
 
   const owner = config.business.owners[0];
+  const WA_ICON =
+    '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 2A9.9 9.9 0 0 0 3.6 17.1L2.05 22l5.05-1.5A9.9 9.9 0 1 0 12.04 2Zm5.8 14.06c-.25.7-1.44 1.33-2 1.37-.51.05-1.16.07-1.87-.12a15.6 15.6 0 0 1-2.5-1.05 12.2 12.2 0 0 1-4.2-4.36c-.3-.5-.75-1.4-.75-2.32s.48-1.4.66-1.6c.18-.2.4-.24.53-.24h.38c.13 0 .3-.03.47.36l.72 1.74c.06.13.1.28.02.44-.09.17-.13.27-.25.42l-.37.43c-.12.12-.25.26-.1.5.13.25.6 1 1.3 1.62.9.8 1.65 1.05 1.9 1.17.24.13.38.11.52-.06l.75-.87c.17-.2.31-.15.52-.08l1.67.79c.24.12.4.18.46.28.06.1.06.6-.19 1.3Z"/></svg>';
 
-  grid.innerHTML = data.items
-    .map((p) => {
-      const price = p.price ? inr(p.price.total) : null;
-      const finishLabel = p.finish === 'rose' ? 'Rose gold' : 'Yellow gold';
-      const message =
-        `Hello ${config.business.name}, I am interested in this piece from your website:\n\n` +
-        `${p.name}\n${p.karat} · ${finishLabel} · ${p.grams} g\n` +
-        (price ? `Indicative price: ${price}\n` : '') +
-        `\nIs it available, and could you confirm the exact price?`;
-      const href = `https://wa.me/91${owner.phone}?text=${encodeURIComponent(message)}`;
+  const card = (p, groupName) => {
+    const price = p.price ? inr(p.price.total) : null;
+    const finishLabel = p.finish === 'rose' ? 'Rose gold' : p.finish === 'yellow' ? 'Yellow gold' : null;
 
-      const art = p.image
-        ? `<img class="product__photo" src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy">`
-        : placeholderSvg(p.category);
+    // Every card asks the same two things the owner wants asked.
+    const lines = [
+      `Hello ${config.business.name}, I saw this piece on your website:`,
+      '',
+      p.name,
+      [groupName, p.karat, finishLabel, p.grams ? `${p.grams} g` : null].filter(Boolean).join(' · '),
+    ];
+    if (price) lines.push(`Shown on the website at ${price}`);
+    lines.push(
+      '',
+      price
+        ? 'Could you confirm the price, and can I book a time to come and see it?'
+        : 'Could you tell me the price, and can I book a time to come and see it?'
+    );
+    const href = `https://wa.me/91${owner.phone}?text=${encodeURIComponent(lines.join('\n'))}`;
 
-      return `
-        <a class="product" role="listitem" href="${esc(href)}" target="_blank" rel="noopener"
-           aria-label="Enquire about ${esc(p.name)} on WhatsApp">
-          <span class="product__media${p.image ? ' has-photo' : ''}">
-            ${art}
-            ${p.image ? '' : '<span class="product__soon">Photograph coming soon</span>'}
+    // Only state facts the showroom actually supplied.
+    const meta = [p.karat, finishLabel, p.grams ? `${p.grams} g` : null].filter(Boolean).join(' · ');
+
+    return `
+      <a class="product" role="listitem" href="${esc(href)}" target="_blank" rel="noopener"
+         aria-label="Ask about ${esc(p.name)} on WhatsApp">
+        <span class="product__media${p.image ? ' has-photo' : ''}">
+          ${
+            p.image
+              ? `<img class="product__photo" src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy">`
+              : placeholderSvg(p.category)
+          }
+          ${p.image ? '' : '<span class="product__soon">Photograph coming soon</span>'}
+        </span>
+        <span class="product__body">
+          <span class="product__name">${esc(p.name)}</span>
+          ${meta ? `<span class="product__meta">${esc(meta)}</span>` : ''}
+          ${p.blurb ? `<span class="product__blurb">${esc(p.blurb)}</span>` : '<span class="product__blurb"></span>'}
+          <span class="product__foot">
+            <span class="product__price${price ? '' : ' product__price--ask'}">${
+              price ? esc(price) : 'Price on request'
+            }</span>
+            <span class="product__cta">${WA_ICON}${price ? 'Enquire' : 'Ask &amp; book'}</span>
           </span>
-          <span class="product__body">
-            <span class="product__name">${esc(p.name)}</span>
-            <span class="product__meta">${esc(p.karat)} &middot; ${esc(finishLabel)} &middot; ${esc(String(p.grams))} g</span>
-            <span class="product__blurb">${esc(p.blurb ?? '')}</span>
-            <span class="product__foot">
-              <span class="product__price">${price ? esc(price) : 'Ask us'}</span>
-              <span class="product__cta">
-                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 2A9.9 9.9 0 0 0 3.6 17.1L2.05 22l5.05-1.5A9.9 9.9 0 1 0 12.04 2Zm5.8 14.06c-.25.7-1.44 1.33-2 1.37-.51.05-1.16.07-1.87-.12a15.6 15.6 0 0 1-2.5-1.05 12.2 12.2 0 0 1-4.2-4.36c-.3-.5-.75-1.4-.75-2.32s.48-1.4.66-1.6c.18-.2.4-.24.53-.24h.38c.13 0 .3-.03.47.36l.72 1.74c.06.13.1.28.02.44-.09.17-.13.27-.25.42l-.37.43c-.12.12-.25.26-.1.5.13.25.6 1 1.3 1.62.9.8 1.65 1.05 1.9 1.17.24.13.38.11.52-.06l.75-.87c.17-.2.31-.15.52-.08l1.67.79c.24.12.4.18.46.28.06.1.06.6-.19 1.3Z"/></svg>
-                Enquire
-              </span>
-            </span>
-            ${p.price ? `<span class="product__breakup">${esc(inr(p.price.metal))} metal + ${esc(inr(p.price.making))} making + 3% GST</span>` : ''}
-          </span>
-        </a>`;
-    })
+          ${
+            p.price
+              ? `<span class="product__breakup">${esc(inr(p.price.metal))} metal + ${esc(inr(p.price.making))} making + 3% GST</span>`
+              : ''
+          }
+        </span>
+      </a>`;
+  };
+
+  const groups = data.groups?.length
+    ? data.groups
+    : [{ id: 'all', name: '', blurb: '', items: data.items }];
+
+  grid.innerHTML = groups
+    .map(
+      (g) => `
+      <section class="collection" aria-labelledby="col-${esc(g.id)}">
+        ${
+          g.name
+            ? `<header class="collection__head">
+                 <h3 class="collection__name" id="col-${esc(g.id)}">${esc(g.name)}</h3>
+                 ${g.blurb ? `<p class="collection__blurb">${esc(g.blurb)}</p>` : ''}
+                 <span class="collection__count">${g.items.length} piece${g.items.length === 1 ? '' : 's'}</span>
+               </header>`
+            : ''
+        }
+        <div class="collection__grid" role="list">
+          ${g.items.map((p) => card(p, g.name)).join('')}
+        </div>
+      </section>`
+    )
     .join('');
 }
 

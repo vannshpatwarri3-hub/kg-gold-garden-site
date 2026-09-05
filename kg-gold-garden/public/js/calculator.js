@@ -260,15 +260,21 @@ export function initBullion({ config, rates }) {
         `Hello ${config.business.name}, I would like to enquire about a ` +
         `${b.grams} g 24K gold ${b.form.toLowerCase()}. Is it available today?`;
 
-      // Size each ingot against the heaviest, on a log scale — a 100 g bar is
-      // not a hundred times the size of a 1 g one, and shouldn't look it.
+      // Size each drawn ingot against the heaviest, on a log scale — a 100 g bar
+      // is not a hundred times the size of a 1 g one, and shouldn't look it.
       const t = Math.log(b.grams) / Math.log(heaviest);
       const w = Math.round(56 + 44 * t);
       const h = Math.round(52 + 30 * t);
 
+      // A real photograph wins; the drawn ingot is the fallback for weights we
+      // have no picture of yet.
+      const art = b.image
+        ? `<img class="bullion-card__photo" src="${esc(b.image)}" alt="${esc(String(b.grams))} gram 24K gold ${esc(b.form.toLowerCase())}" loading="lazy">`
+        : `<div class="bullion-card__ingot" aria-hidden="true" style="width:${w}%;height:${h}px"></div>`;
+
       return `
         <article class="bullion-card">
-          <div class="bullion-card__ingot" aria-hidden="true" style="width:${w}%;height:${h}px"></div>
+          ${art}
           <p class="bullion-card__weight">${b.grams} g</p>
           <p class="bullion-card__form">${esc(b.purity)} · ${esc(b.form)}</p>
           <p class="bullion-card__price">${inr(p.total)}</p>

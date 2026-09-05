@@ -115,6 +115,24 @@ export const CATEGORIES = [
   { id: 'chain', name: 'Chains & Necklaces', makingPct: [9, 16], purity: '22K', karats: ['18K', '22K'], typicalGrams: [8, 45] },
   { id: 'earring', name: 'Earrings & Tops', makingPct: [10, 16], purity: '22K', karats: ['18K', '22K'], typicalGrams: [3, 12] },
   { id: 'coin', name: 'Coins & Biscuits', makingPct: [1, 3], purity: '24K', karats: ['24K'], typicalGrams: [1, 100] },
+  { id: 'necklace-set', name: 'Necklace Sets', makingPct: [12, 20], purity: '22K', karats: ['18K', '22K'], typicalGrams: [25, 90] },
+  { id: 'necklace', name: 'Necklaces & Pendants', makingPct: [10, 18], purity: '22K', karats: ['18K', '22K'], typicalGrams: [5, 30] },
+  { id: 'band', name: 'Half-kada Bands', makingPct: [12, 20], purity: '18K', karats: ['18K', '22K'], typicalGrams: [3, 12] },
+];
+
+/**
+ * The subheads the pieces are grouped under in "Our pieces". Order here is the
+ * order on the page. A group with nothing in it is not rendered at all.
+ */
+export const COLLECTIONS = [
+  { id: 'necklace-set', name: 'Necklace sets', blurb: 'Necklace and earrings, made as a pair.' },
+  { id: 'necklace', name: 'Necklaces & pendants', blurb: 'Worn on their own, every day.' },
+  { id: 'chain', name: 'Chains', blurb: 'Plain and patterned, in every length we keep.' },
+  { id: 'ring', name: 'Rings', blurb: 'From a single stone to full antique work.' },
+  { id: 'earring', name: 'Earrings', blurb: 'Studs, drops and jhumkas.' },
+  { id: 'bangle', name: 'Kada & bangles', blurb: 'Plain, carved, and stone-set.' },
+  { id: 'band', name: 'Half-kada bands', blurb: 'A gold fitting on a soft band, for everyday wear.' },
+  { id: 'coin', name: 'Gold biscuits & coins', blurb: '999 fine, bought as savings rather than to wear.' },
 ];
 
 /**
@@ -144,13 +162,14 @@ export const FINISHES = [
 
 /** Bullion the showroom retails. Weights only — no invented stock counts. */
 export const BULLION = [
-  { grams: 1, purity: '24K', form: 'Biscuit' },
-  { grams: 2, purity: '24K', form: 'Biscuit' },
-  { grams: 5, purity: '24K', form: 'Biscuit' },
-  { grams: 10, purity: '24K', form: 'Biscuit' },
-  { grams: 20, purity: '24K', form: 'Bar' },
-  { grams: 50, purity: '24K', form: 'Bar' },
-  { grams: 100, purity: '24K', form: 'Bar' },
+  { grams: 1, purity: '24K', form: 'Biscuit', image: '/assets/products/bar-1g.webp' },
+  { grams: 2, purity: '24K', form: 'Biscuit', image: '/assets/products/bar-2g.webp' },
+  { grams: 5, purity: '24K', form: 'Biscuit', image: '/assets/products/bar-5g.webp' },
+  { grams: 10, purity: '24K', form: 'Biscuit', image: '/assets/products/biscuit-10g-a.webp' },
+  // No photograph for these two yet — they fall back to the drawn ingot.
+  { grams: 20, purity: '24K', form: 'Bar', image: null },
+  { grams: 50, purity: '24K', form: 'Bar', image: '/assets/products/bar-50g.webp' },
+  { grams: 100, purity: '24K', form: 'Bar', image: null },
 ];
 
 export const money = (n) =>
