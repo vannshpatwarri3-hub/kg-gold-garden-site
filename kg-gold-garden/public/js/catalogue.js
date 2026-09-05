@@ -135,6 +135,7 @@ export async function initProducts({ config }) {
   }
 
   const owner = config.business.owners[0];
+  const lookup = new Map();
   const WA_ICON =
     '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 2A9.9 9.9 0 0 0 3.6 17.1L2.05 22l5.05-1.5A9.9 9.9 0 1 0 12.04 2Zm5.8 14.06c-.25.7-1.44 1.33-2 1.37-.51.05-1.16.07-1.87-.12a15.6 15.6 0 0 1-2.5-1.05 12.2 12.2 0 0 1-4.2-4.36c-.3-.5-.75-1.4-.75-2.32s.48-1.4.66-1.6c.18-.2.4-.24.53-.24h.38c.13 0 .3-.03.47.36l.72 1.74c.06.13.1.28.02.44-.09.17-.13.27-.25.42l-.37.43c-.12.12-.25.26-.1.5.13.25.6 1 1.3 1.62.9.8 1.65 1.05 1.9 1.17.24.13.38.11.52-.06l.75-.87c.17-.2.31-.15.52-.08l1.67.79c.24.12.4.18.46.28.06.1.06.6-.19 1.3Z"/></svg>';
 
@@ -161,9 +162,13 @@ export async function initProducts({ config }) {
     // Only state facts the showroom actually supplied.
     const meta = [p.karat, finishLabel, p.grams ? `${p.grams} g` : null].filter(Boolean).join(' · ');
 
+    // Remembered so the enlarged view can be opened without another request.
+    lookup.set(p.id, { ...p, groupName, href, priceLabel: price });
+
     return `
       <a class="product" role="listitem" href="${esc(href)}" target="_blank" rel="noopener"
-         aria-label="Ask about ${esc(p.name)} on WhatsApp">
+         data-piece="${esc(p.id)}"
+         aria-label="View ${esc(p.name)}">
         <span class="product__media${p.image ? ' has-photo' : ''}">
           ${
             p.image
@@ -214,6 +219,86 @@ export async function initProducts({ config }) {
       </section>`
     )
     .join('');
+
+  initViewer({ grid, lookup });
+}
+
+/**
+ * The enlarged view. Clicking a piece opens it here rather than jumping straight
+ * to WhatsApp — the customer gets a proper look and the full description first,
+ * with asking and booking one tap away inside.
+ *
+ * The card stays a real WhatsApp link underneath, so it still works with
+ * JavaScript off and can be opened in a new tab deliberately.
+ */
+function initViewer({ grid, lookup }) {
+  const dialog = $('#pieceViewer');
+  if (!dialog) return;
+
+  const img = $('#viewerImage');
+  let lastFocus = null;
+
+  const open = (piece) => {
+    $('#viewerCollection').textContent = piece.groupName ?? '';
+    $('#viewerName').textContent = piece.name;
+    $('#viewerBlurb').textContent = piece.blurb ?? '';
+
+    if (piece.image) {
+      img.src = piece.image;
+      img.alt = piece.name;
+      img.closest('figure').hidden = false;
+    } else {
+      img.removeAttribute('src');
+      img.closest('figure').hidden = true;
+    }
+
+    // Only the facts the showroom actually recorded.
+    const spec = [
+      ['Collection', piece.groupName],
+      ['Purity', piece.karat],
+      ['Finish', piece.finish === 'rose' ? 'Rose gold' : piece.finish === 'yellow' ? 'Yellow gold' : null],
+      ['Weight', piece.grams ? `${piece.grams} g` : null],
+    ].filter(([, v]) => v);
+    $('#viewerSpec').innerHTML = spec
+      .map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`)
+      .join('');
+
+    $('#viewerPriceLabel').textContent = piece.priceLabel ?? 'Price on request';
+    $('#viewerPriceNote').textContent = piece.priceLabel
+      ? 'Includes making and 3% GST, at today’s rate.'
+      : 'Weights vary by piece, so we quote each one for you.';
+
+    $('#viewerAsk').href = piece.href;
+
+    lastFocus = document.activeElement;
+    dialog.showModal();
+  };
+
+  grid.addEventListener('click', (e) => {
+    const card = e.target.closest('[data-piece]');
+    if (!card) return;
+    // Let a deliberate new-tab click go straight through to WhatsApp.
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+    const piece = lookup.get(card.dataset.piece);
+    if (!piece) return;
+    e.preventDefault();
+    open(piece);
+  });
+
+  const close = () => dialog.close();
+  $('#viewerClose')?.addEventListener('click', close);
+  dialog.addEventListener('click', (e) => {
+    if (e.target === dialog) close(); // the backdrop
+  });
+  dialog.addEventListener('close', () => lastFocus?.focus?.());
+
+  $('#viewerVisit')?.addEventListener('click', () => {
+    close();
+    document.querySelector('#visit')?.scrollIntoView({
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      block: 'start',
+    });
+  });
 }
 
 // ---------------------------------------------------------------------------

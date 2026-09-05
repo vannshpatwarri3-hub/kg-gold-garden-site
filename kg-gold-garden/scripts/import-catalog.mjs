@@ -24,8 +24,43 @@ if (!SRC) {
   process.exit(1);
 }
 
-const WIDTH = 1200;
-const HEIGHT = 900;
+/**
+ * A 4:5 portrait frame suits jewellery far better than landscape, and the piece
+ * is fitted INSIDE it rather than cropped to fill it — cropping was cutting the
+ * tops off necklaces and the drops off earrings.
+ *
+ * The gap either side is filled with a blurred, enlarged copy of the same
+ * photograph, so nothing is lost and the card still looks deliberate instead of
+ * letterboxed.
+ */
+const WIDTH = 1000;
+const HEIGHT = 1250;
+
+async function fitWithBackdrop(src) {
+  const base = sharp(src, { failOn: 'none' }).rotate();
+  const meta = await base.metadata();
+
+  const backdrop = await base
+    .clone()
+    .resize(WIDTH, HEIGHT, { fit: 'cover', position: 'centre' })
+    .blur(28)
+    .modulate({ brightness: 0.92, saturation: 0.9 })
+    .toBuffer();
+
+  // 94% so the piece never touches the edge of the card.
+  const piece = await base
+    .clone()
+    .resize(Math.round(WIDTH * 0.94), Math.round(HEIGHT * 0.94), {
+      fit: 'inside',
+      withoutEnlargement: false,
+    })
+    .toBuffer();
+
+  return {
+    meta,
+    composed: sharp(backdrop).composite([{ input: piece, gravity: 'centre' }]),
+  };
+}
 
 /** key = the HH_MM_SS in the filename. */
 const CATALOG = {
@@ -88,7 +123,8 @@ const CATALOG = {
     blurb: 'A pavé top with an open teardrop below, split by a line of white stones.' },
 
   // --- kada & bangles ------------------------------------------------------
-  '11_50_12': { id: 'bracelet-charm', name: 'Enamel Charm Bracelet', category: 'bangle', finish: 'yellow',
+  // A chain, not a bangle — filed where the showroom says it belongs.
+  '11_50_12': { id: 'chain-enamel-charm', name: 'Enamel Charm Chain', category: 'chain', finish: 'yellow',
     blurb: 'A fine chain hung with small enamelled charms in blue and white.' },
   '11_50_20': { id: 'bangle-crown', name: 'Crown Stone Bangle', category: 'bangle', finish: 'rose',
     blurb: 'A slim bangle with a raised row of claw-set stones above a pavé band.' },
@@ -122,12 +158,10 @@ for (const file of files.sort()) {
   const spec = CATALOG[key];
   process.stdout.write(`  ${spec.name.padEnd(28)} `);
 
-  const image = sharp(path.join(SRC, file), { failOn: 'none' }).rotate();
-  const meta = await image.metadata();
-  const pipeline = image.resize(WIDTH, HEIGHT, { fit: 'cover', position: 'attention' });
+  const { meta, composed } = await fitWithBackdrop(path.join(SRC, file));
 
-  await pipeline.clone().webp({ quality: 84 }).toFile(path.join(OUT_DIR, `${spec.id}.webp`));
-  await pipeline.clone().jpeg({ quality: 85, mozjpeg: true }).toFile(path.join(OUT_DIR, `${spec.id}.jpg`));
+  await composed.clone().webp({ quality: 86 }).toFile(path.join(OUT_DIR, `${spec.id}.webp`));
+  await composed.clone().jpeg({ quality: 87, mozjpeg: true }).toFile(path.join(OUT_DIR, `${spec.id}.jpg`));
 
   const { id, ...rest } = spec;
   items.push({ id, ...rest, image: `/assets/products/${id}.webp` });
@@ -149,7 +183,7 @@ await writeFile(
   DATA_FILE,
   JSON.stringify(
     {
-      status: file.status ?? 'sample',
+      status: 'live',
       note: 'Weight and karat are recorded only where they are stamped on the piece itself. Everything else shows "Price on request" and sends the customer to WhatsApp — add "grams" and "karat" to a piece and it starts pricing itself from the daily rate.',
       items,
     },

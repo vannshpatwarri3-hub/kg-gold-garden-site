@@ -126,32 +126,29 @@ function stampTexture({ round = false, w = 512, h = 320 } = {}) {
   g.fillStyle = ink;
   g.textAlign = 'center';
 
+  // Nothing is stamped on these but the fineness — no brand, no maker's mark.
   if (round) {
     g.lineWidth = 3;
     g.beginPath();
     g.arc(w / 2, h / 2, Math.min(w, h) / 2 - 16, 0, Math.PI * 2);
     g.stroke();
-    g.font = '600 30px Georgia, serif';
-    g.fillText('KG GOLD', w / 2, h / 2 - 26);
-    g.fillText('GARDEN', w / 2, h / 2 + 8);
-    g.font = '500 20px Georgia, serif';
-    g.fillText('999.0', w / 2, h / 2 + 48);
+    g.font = '600 54px Georgia, serif';
+    g.fillText('999.0', w / 2, h / 2 + 19);
   } else {
     g.lineWidth = 3;
     g.strokeRect(20, 20, w - 40, h - 40);
-    g.font = '600 42px Georgia, serif';
-    g.fillText('KG GOLD GARDEN', w / 2, 118);
+
+    g.font = '600 64px Georgia, serif';
+    g.fillText('999.0', w / 2, h / 2 - 4);
 
     g.lineWidth = 2;
     g.beginPath();
-    g.moveTo(w / 2 - 120, 146);
-    g.lineTo(w / 2 + 120, 146);
+    g.moveTo(w / 2 - 96, h / 2 + 24);
+    g.lineTo(w / 2 + 96, h / 2 + 24);
     g.stroke();
 
-    g.font = '600 56px Georgia, serif';
-    g.fillText('999.0', w / 2, 212);
-    g.font = '500 26px Georgia, serif';
-    g.fillText('FINE GOLD', w / 2, 252);
+    g.font = '500 30px Georgia, serif';
+    g.fillText('FINE GOLD', w / 2, h / 2 + 64);
   }
 
   const tex = new THREE.CanvasTexture(c);
