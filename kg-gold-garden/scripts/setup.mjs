@@ -9,13 +9,12 @@
  * sent anywhere. The password is stored only as a scrypt hash; the App Password
  * is written straight into .env, which is git-ignored.
  */
-import readline from 'node:readline';
-import { Writable } from 'node:stream';
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import nodemailer from 'nodemailer';
 import { hashPassword } from '../server/auth.js';
+import { question, stop } from './prompt.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const ENV_PATH = path.join(ROOT, '.env');
@@ -24,40 +23,11 @@ const rule = (c = '─') => c.repeat(70);
 
 // --- prompts ----------------------------------------------------------------
 
-const muted = new Writable({
-  write(chunk, enc, cb) {
-    if (!muted.hidden) process.stdout.write(chunk, enc);
-    cb();
-  },
-});
-muted.hidden = false;
+const ask = async (text, fallback = '') => (await question(text)) || fallback;
+const askHidden = (text) => question(text, { hidden: true });
 
-function ask(question, fallback = '') {
-  return new Promise((resolve) => {
-    const rl = readline.createInterface({ input: process.stdin, output: process.stdout, terminal: true });
-    rl.question(question, (answer) => {
-      rl.close();
-      resolve(answer.trim() || fallback);
-    });
-  });
-}
-
-function askHidden(question) {
-  return new Promise((resolve) => {
-    process.stdout.write(question);
-    const rl = readline.createInterface({ input: process.stdin, output: muted, terminal: true });
-    rl.question('', (answer) => {
-      muted.hidden = false;
-      process.stdout.write('\n');
-      rl.close();
-      resolve(answer);
-    });
-    muted.hidden = true;
-  });
-}
-
-const yes = async (question, def = true) => {
-  const a = (await ask(`${question} ${def ? '[Y/n]' : '[y/N]'} `)).toLowerCase();
+const yes = async (text, def = true) => {
+  const a = (await ask(`${text} ${def ? '[Y/n]' : '[y/N]'} `)).toLowerCase();
   if (!a) return def;
   return a.startsWith('y');
 };
@@ -187,6 +157,8 @@ if (await yes('Do you have the App Password ready?', false)) {
 }
 
 // 3 --------------------------------------------------------------- finish ---
+stop();
+
 if (!changes.length) {
   console.log(`${rule()}\n  Nothing changed.\n${rule()}\n`);
   process.exit(0);
