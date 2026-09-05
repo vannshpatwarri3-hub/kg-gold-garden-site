@@ -8,6 +8,7 @@
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
     "setup": "node scripts/setup.mjs",
+    "send-outbox": "node scripts/send-outbox.mjs",
     "set-password": "node scripts/setup.mjs"
   },
   "dependencies": {
