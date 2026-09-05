@@ -36,8 +36,10 @@
 
     <div class="field">
       <label for="username">ID</label>
+      <!-- No default value: the configured ID is not published to the page, and a
+           hardcoded "admin" would just get a real ID rejected. -->
       <input type="text" id="username" name="username" autocomplete="username" required
-             autocapitalize="none" spellcheck="false" value="admin">
+             autocapitalize="none" spellcheck="false" placeholder="The ID you chose during setup">
     </div>
 
     <div class="field">

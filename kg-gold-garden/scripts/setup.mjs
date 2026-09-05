@@ -68,7 +68,10 @@ const changes = [];
 console.log(`${rule()}\n  1. The rate page  (/admin)\n${rule()}`);
 
 if (await yes('Set the admin ID and password now?')) {
-  const id = await ask('  Admin ID [admin]: ', 'admin');
+  // Offer whatever ID is already configured, so changing only the password is
+  // one press of Enter.
+  const currentId = (env.match(/^\s*ADMIN_USERNAME\s*=\s*(.*)$/m)?.[1] ?? '').trim() || 'admin';
+  const id = await ask(`  Admin ID [${currentId}]: `, currentId);
 
   let password = '';
   for (;;) {
