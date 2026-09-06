@@ -530,6 +530,68 @@ app.post('/api/chat', limit('chat', 30, 5 * 60e3), async (req, res, next) => {
 });
 
 // ---------------------------------------------------------------------------
+// Search engines
+// ---------------------------------------------------------------------------
+
+/**
+ * Where this site actually lives, with no trailing slash. Both files below have
+ * to name the site absolutely, so PUBLIC_URL is the answer whenever it is set.
+ * Failing that we read the host off the request — behind Render's proxy the
+ * original scheme survives only in x-forwarded-proto.
+ */
+function siteOrigin(req) {
+  const configured = process.env.PUBLIC_URL?.trim();
+  if (configured) return configured.replace(/\/+$/, '');
+  const proto = req.get('x-forwarded-proto')?.split(',')[0]?.trim() || req.protocol;
+  return `${proto}://${req.get('host')}`;
+}
+
+app.get('/robots.txt', (req, res) => {
+  res
+    .type('text/plain')
+    .send(
+      [
+        'User-agent: *',
+        'Allow: /',
+        // The rate page needs a password, and the JSON endpoints are no use to
+        // anyone reading search results. Keep both out of the index.
+        'Disallow: /admin',
+        'Disallow: /api/',
+        '',
+        `Sitemap: ${siteOrigin(req)}/sitemap.xml`,
+        '',
+      ].join('\n')
+    );
+});
+
+/**
+ * One page, one entry.
+ *
+ * The catalogue deep links (?piece=…) are drawn by the browser out of the same
+ * HTML, so listing all thirty would hand Google thirty copies of one page
+ * rather than thirty pages — which counts against a site, not for it.
+ */
+app.get('/sitemap.xml', async (req, res, next) => {
+  try {
+    const { updatedAt } = await getRates();
+    const lastmod = (updatedAt ?? new Date().toISOString()).slice(0, 10);
+    res.type('application/xml').send(
+      `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${siteOrigin(req)}/</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+</urlset>
+`
+    );
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ---------------------------------------------------------------------------
 // Static assets
 // ---------------------------------------------------------------------------
 
