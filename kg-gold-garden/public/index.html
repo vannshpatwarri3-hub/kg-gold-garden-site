@@ -775,6 +775,9 @@
   </div>
 </noscript>
 
+<!-- Motion's UMD bundle sets window.Motion. Loaded before the app so the tab
+     animation can use its spring; everything still works without it. -->
+<script src="/vendor/motion/motion.js"></script>
 <script type="module" src="/js/app.js"></script>
 </body>
 </html>

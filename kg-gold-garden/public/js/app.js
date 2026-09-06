@@ -5,6 +5,7 @@ import { initRates, initCalculator, initBullion } from './calculator.js';
 import { initAppointment, initSubscribe } from './forms.js';
 import { initChat } from './chat.js';
 import { initCallSheet } from './call.js';
+import { animatedTabs } from './animated-tabs.js';
 import { initProducts, initVoices, initFooterQr, initStanding, initMuhurat } from './catalogue.js';
 
 const ASSURANCE_ICON = {
@@ -136,6 +137,7 @@ async function initShowcaseSection(configPromise) {
   }
 
   paint('bar');
+  animatedTabs($('.showcase__tabs'), { variant: 'gold' });
 
   tabs.forEach((tab) => {
     tab.addEventListener('click', () => {
@@ -160,6 +162,7 @@ async function boot() {
 
   initHeroBackground($('#heroCanvas'));
   attachVideoUpgrade($('#heroVideo'));
+  animatedTabs($('.nav__links'), { selector: 'a', variant: 'quiet' });
 
   // Kick the fetch off once and share it — the 3D section needs the finishes.
   const configPromise = api('/api/config');

@@ -517,19 +517,41 @@ output { color: var(--accent-text); font-weight: 700; font-variant-numeric: tabu
 .showcase__loading.is-done { display: none; }
 @keyframes bounce { 0%,100% { opacity:.25; translate: 0 0; } 50% { opacity:1; translate: 0 -7px; } }
 
+/* --- tab row with a springing background ---------------------------------- */
+.tabpill {
+  position: absolute; left: 0; top: 0; z-index: 0;
+  border-radius: var(--r-pill); opacity: 0;
+  pointer-events: none;
+  transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-1) linear;
+}
+.tabpill--gold { background: var(--grad-gold-soft); box-shadow: var(--glow-gold); }
+.tabpill--quiet { background: rgba(22,33,28,.06); }
+
+.has-pill { position: relative; }
+.has-pill > *:not(.tabpill) { position: relative; z-index: 1; }
+
 .showcase__tabs { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: var(--sp-5); }
 .showcase__tabs button {
   padding: 9px 17px; border-radius: var(--r-pill);
   border: 1px solid var(--line-strong); color: var(--text-muted);
   background: var(--surface);
   font-size: var(--step--1); min-height: 42px; font-weight: 500;
-  transition: all var(--dur-2) var(--ease-out);
+  transition: color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out),
+              background-color var(--dur-2) var(--ease-out);
 }
 .showcase__tabs button:hover { color: var(--accent-text); border-color: var(--gold-600); }
 .showcase__tabs button[aria-selected="true"] {
   color: var(--on-gold); background: var(--grad-gold-soft);
   border-color: transparent; font-weight: 700;
 }
+/* With the pill doing the painting, the buttons go transparent and let it show
+   through — but only once it exists, so the row is never unstyled. */
+.showcase__tabs.has-pill button { background: transparent; }
+.showcase__tabs.has-pill button[aria-selected="true"] { background: transparent; }
+.showcase__tabs.has-pill button:hover { color: var(--on-gold); border-color: transparent; }
+
+.nav__links.has-pill a { position: relative; }
+.nav__links.has-pill a:hover { background: transparent; }
 
 .showcase__info h3 { font-size: var(--step-3); margin-bottom: var(--sp-3); }
 .showcase__info p { color: var(--text-muted); margin-bottom: var(--sp-5); }

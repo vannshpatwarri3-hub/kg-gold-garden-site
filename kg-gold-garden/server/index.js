@@ -533,10 +533,18 @@ app.post('/api/chat', limit('chat', 30, 5 * 60e3), async (req, res, next) => {
 // Static assets
 // ---------------------------------------------------------------------------
 
-// three.js is served from node_modules so the site works with no CDN and no build step.
+// three.js and motion are served from node_modules so the site works with no CDN
+// and no build step. motion ships a UMD bundle, which needs no import map.
 app.use(
   '/vendor/three',
   express.static(path.join(ROOT, 'node_modules/three/build'), {
+    maxAge: '30d',
+    immutable: true,
+  })
+);
+app.use(
+  '/vendor/motion',
+  express.static(path.join(ROOT, 'node_modules/motion/dist'), {
     maxAge: '30d',
     immutable: true,
   })
