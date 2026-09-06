@@ -122,6 +122,9 @@ const CATALOG = {
     blurb: 'Rose-cut white stones and rubies clustered over a raised dome.' },
 
   // --- earrings ------------------------------------------------------------
+  // Keyed by exact filename: this one arrived with no extension at all.
+  '1': { id: 'ear-marquise-crescent', name: 'Marquise Crescent Studs', category: 'earring', finish: 'yellow',
+    blurb: 'Marquise stones spraying out from a pavé crescent, sitting close against the ear.' },
   '11_48_41': { id: 'ear-horseshoe', name: 'Horseshoe Stud Earrings', category: 'earring', finish: 'yellow',
     blurb: 'An open horseshoe outlined in small stones, edged with larger rose cuts.' },
   '11_49_39': { id: 'ear-teardrop', name: 'Teardrop Drop Earrings', category: 'earring', finish: 'yellow',
@@ -151,10 +154,40 @@ await mkdir(OUT_DIR, { recursive: true });
 const items = [];
 const unmatched = [];
 
-for (const file of files.sort()) {
-  if (!/\.(png|jpe?g|webp|heic|tiff?)$/i.test(file)) continue;
+/** Files sometimes arrive with no extension, so fall back to the magic bytes. */
+async function looksLikeImage(full) {
+  if (/\.(png|jpe?g|webp|heic|heif|avif|tiff?|gif)$/i.test(full)) return true;
+  try {
+    const { open } = await import('node:fs/promises');
+    const fh = await open(full, 'r');
+    const { buffer } = await fh.read(Buffer.alloc(12), 0, 12, 0);
+    await fh.close();
+    const hex = buffer.toString('hex');
+    return (
+      hex.startsWith('89504e47') || // PNG
+      hex.startsWith('ffd8ff') || // JPEG
+      hex.startsWith('47494638') || // GIF
+      hex.startsWith('49492a00') || // TIFF LE
+      hex.startsWith('4d4d002a') || // TIFF BE
+      buffer.subarray(8, 12).toString('latin1') === 'WEBP' ||
+      /ftyp(heic|heix|mif1|avif)/.test(buffer.toString('latin1'))
+    );
+  } catch {
+    return false;
+  }
+}
 
-  const key = Object.keys(CATALOG).find((k) => file.includes(k));
+for (const file of files.sort()) {
+  if (!(await looksLikeImage(path.join(SRC, file)))) continue;
+
+  /**
+   * An exact filename wins over a fragment. Without that, a key like "1" would
+   * match "11_43_09" and silently relabel a completely different piece.
+   */
+  const key = CATALOG[file]
+    ? file
+    : Object.keys(CATALOG).find((k) => k.includes('_') && file.includes(k));
+
   if (!key) {
     unmatched.push(file);
     continue;
