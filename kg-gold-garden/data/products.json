@@ -1,0 +1,264 @@
+{
+  "status": "live",
+  "note": "Weight and karat are recorded only where they are stamped on the piece itself. Everything else shows \"Price on request\" and sends the customer to WhatsApp — add \"grams\" and \"karat\" to a piece and it starts pricing itself from the daily rate.",
+  "items": [
+    {
+      "id": "set-emerald-drop",
+      "name": "Emerald Drop Bridal Set",
+      "category": "necklace-set",
+      "finish": "yellow",
+      "blurb": "Layered pearl and green bead strings gathered into a kundan pendant, with matching tops.",
+      "image": "/assets/products/set-emerald-drop.webp"
+    },
+    {
+      "id": "set-rose-kundan",
+      "name": "Rose Kundan Choker Set",
+      "category": "necklace-set",
+      "finish": "yellow",
+      "blurb": "A close-fitting kundan choker with pink stones and a pearl fringe, with jhumka drops.",
+      "image": "/assets/products/set-rose-kundan.webp"
+    },
+    {
+      "id": "set-mesh-solitaire",
+      "name": "Mesh Collar Set",
+      "category": "necklace-set",
+      "finish": "yellow",
+      "blurb": "A woven mesh collar holding rose-cut stones, finished with a teardrop and matching earrings.",
+      "image": "/assets/products/set-mesh-solitaire.webp"
+    },
+    {
+      "id": "pendant-octagon",
+      "name": "Octagon Pendant Chain",
+      "category": "necklace",
+      "finish": "yellow",
+      "blurb": "A single faceted octagonal stone held in claws on a fine cable chain.",
+      "image": "/assets/products/pendant-octagon.webp"
+    },
+    {
+      "id": "pendant-mop",
+      "name": "Mother-of-Pearl Pendant",
+      "category": "necklace",
+      "finish": "yellow",
+      "blurb": "A round mother-of-pearl disc in a plain bezel, on a box chain. Quiet enough for every day.",
+      "image": "/assets/products/pendant-mop.webp"
+    },
+    {
+      "id": "chain-two-tone",
+      "name": "Two-Tone Tassel Chain",
+      "category": "chain",
+      "finish": "yellow",
+      "blurb": "A long chain of linked circles and beads in two tones, dropping into fine tassels.",
+      "image": "/assets/products/chain-two-tone.webp"
+    },
+    {
+      "id": "chain-bead-mala",
+      "name": "Beaded Stone Mala",
+      "category": "chain",
+      "finish": "yellow",
+      "blurb": "Gold beads alternating with cut green stones, thickening towards the front.",
+      "image": "/assets/products/chain-bead-mala.webp"
+    },
+    {
+      "id": "chain-enamel-charm",
+      "name": "Enamel Charm Chain",
+      "category": "chain",
+      "finish": "yellow",
+      "blurb": "A fine chain hung with small enamelled charms in blue and white.",
+      "image": "/assets/products/chain-enamel-charm.webp"
+    },
+    {
+      "id": "chain-stone-line",
+      "name": "Stone Line Chain",
+      "category": "chain",
+      "finish": "yellow",
+      "blurb": "A continuous double line of small white stones, worn on its own.",
+      "image": "/assets/products/chain-stone-line.webp"
+    },
+    {
+      "id": "ring-sapphire-bloom",
+      "name": "Sapphire Bloom Ring",
+      "category": "ring",
+      "finish": "rose",
+      "blurb": "A flower of white stones set beside a single blue stone, on a split shank.",
+      "image": "/assets/products/ring-sapphire-bloom.webp"
+    },
+    {
+      "id": "ring-jade-antique",
+      "name": "Jade Antique Ring",
+      "category": "ring",
+      "finish": "yellow",
+      "blurb": "A green cabochon centre framed in beadwork, rubies and white stones.",
+      "image": "/assets/products/ring-jade-antique.webp"
+    },
+    {
+      "id": "ring-emerald-knot",
+      "name": "Emerald Knot Ring",
+      "category": "ring",
+      "finish": "yellow",
+      "blurb": "A rectangular green stone held inside crossing bands of small white stones.",
+      "image": "/assets/products/ring-emerald-knot.webp"
+    },
+    {
+      "id": "ring-marquise-spiral",
+      "name": "Marquise Spiral Ring",
+      "category": "ring",
+      "finish": "rose",
+      "blurb": "Marquise-cut stones turning in a spiral inside three fine outer rows.",
+      "image": "/assets/products/ring-marquise-spiral.webp"
+    },
+    {
+      "id": "ring-pearl-sun",
+      "name": "Pearl Sun Ring",
+      "category": "ring",
+      "finish": "yellow",
+      "blurb": "A ring of pearls around a ruby centre, inside a fluted gold border.",
+      "image": "/assets/products/ring-pearl-sun.webp"
+    },
+    {
+      "id": "ring-antique-rasrawa",
+      "name": "Antique Pearl Ring",
+      "category": "ring",
+      "finish": "yellow",
+      "blurb": "Traditional antique work — rubies, pearls and a green stone across a domed face.",
+      "image": "/assets/products/ring-antique-rasrawa.webp"
+    },
+    {
+      "id": "ring-ruby-cluster",
+      "name": "Ruby Cluster Ring",
+      "category": "ring",
+      "finish": "yellow",
+      "blurb": "Rose-cut white stones and rubies clustered over a raised dome.",
+      "image": "/assets/products/ring-ruby-cluster.webp"
+    },
+    {
+      "id": "ear-marquise-crescent",
+      "name": "Marquise Crescent Studs",
+      "category": "earring",
+      "finish": "yellow",
+      "blurb": "Marquise stones spraying out from a pavé crescent, sitting close against the ear.",
+      "image": "/assets/products/ear-marquise-crescent.webp"
+    },
+    {
+      "id": "ear-horseshoe",
+      "name": "Horseshoe Stud Earrings",
+      "category": "earring",
+      "finish": "yellow",
+      "blurb": "An open horseshoe outlined in small stones, edged with larger rose cuts.",
+      "image": "/assets/products/ear-horseshoe.webp"
+    },
+    {
+      "id": "ear-teardrop",
+      "name": "Teardrop Drop Earrings",
+      "category": "earring",
+      "finish": "yellow",
+      "blurb": "A pavé top with an open teardrop below, split by a line of white stones.",
+      "image": "/assets/products/ear-teardrop.webp"
+    },
+    {
+      "id": "bangle-crown",
+      "name": "Crown Stone Bangle",
+      "category": "bangle",
+      "finish": "rose",
+      "blurb": "A slim bangle with a raised row of claw-set stones above a pavé band.",
+      "image": "/assets/products/bangle-crown.webp"
+    },
+    {
+      "id": "bangle-jade-lotus",
+      "name": "Jade Lotus Kada",
+      "category": "bangle",
+      "finish": "yellow",
+      "blurb": "Two green cabochons capped with lotus work, joined by a pierced gold band.",
+      "image": "/assets/products/bangle-jade-lotus.webp"
+    },
+    {
+      "id": "bangle-baguette",
+      "name": "Baguette Line Bangle",
+      "category": "bangle",
+      "finish": "rose",
+      "blurb": "A full circle of baguette-cut stones in a clean claw setting, with a box clasp.",
+      "image": "/assets/products/bangle-baguette.webp"
+    },
+    {
+      "id": "band-olive",
+      "name": "Olive Band Bracelet",
+      "category": "band",
+      "finish": "rose",
+      "blurb": "A soft olive band with a stone-set link at the centre and an adjustable fitting.",
+      "image": "/assets/products/band-olive.webp"
+    },
+    {
+      "id": "band-tan-disc",
+      "name": "Tan Band Bracelet",
+      "category": "band",
+      "finish": "yellow",
+      "blurb": "A tan band with a round stone-set disc and two small stone bars either side.",
+      "image": "/assets/products/band-tan-disc.webp"
+    },
+    {
+      "id": "biscuit-10g",
+      "name": "10 g Gold Biscuit",
+      "category": "coin",
+      "karat": "24K",
+      "finish": "yellow",
+      "grams": 10,
+      "makingPct": 2,
+      "blurb": "Ten grams, 999 fine. The size most people buy as savings.",
+      "image": "/assets/products/biscuit-10g.webp"
+    },
+    {
+      "id": "bar-50g",
+      "name": "50 g Gold Bar",
+      "category": "coin",
+      "karat": "24K",
+      "finish": "yellow",
+      "grams": 50,
+      "makingPct": 2,
+      "blurb": "Fifty grams, 999 fine. Bought outright rather than built up.",
+      "image": "/assets/products/bar-50g.webp"
+    },
+    {
+      "id": "bar-1g",
+      "name": "1 g Gold Bar",
+      "category": "coin",
+      "karat": "24K",
+      "finish": "yellow",
+      "grams": 1,
+      "makingPct": 2,
+      "blurb": "One gram, 999 fine. The smallest way to start, and a common gift at Dhanteras.",
+      "image": "/assets/products/bar-1g.webp"
+    },
+    {
+      "id": "bar-2g",
+      "name": "2 g Gold Bar",
+      "category": "coin",
+      "karat": "24K",
+      "finish": "yellow",
+      "grams": 2,
+      "makingPct": 2,
+      "blurb": "Two grams, 999 fine, sealed in its assay card.",
+      "image": "/assets/products/bar-2g.webp"
+    },
+    {
+      "id": "bar-5g",
+      "name": "5 g Gold Bar",
+      "category": "coin",
+      "karat": "24K",
+      "finish": "yellow",
+      "grams": 5,
+      "makingPct": 2,
+      "blurb": "Five grams, 999 fine. A practical size to buy a little at a time.",
+      "image": "/assets/products/bar-5g.webp"
+    },
+    {
+      "id": "biscuit-100g",
+      "name": "100 g Gold Biscuit",
+      "category": "coin",
+      "karat": "24K",
+      "finish": "yellow",
+      "grams": 100,
+      "makingPct": 2,
+      "blurb": "One hundred grams, 999 fine. The largest bar we keep on the counter.",
+      "image": "/assets/products/biscuit-100g.webp"
+    }
+  ]
+}

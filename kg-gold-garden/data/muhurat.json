@@ -1,0 +1,4 @@
+{
+  "note": "Add the dates you want shown. Format: {\"date\": \"2026-11-08\", \"name\": \"Dhanteras\", \"note\": \"one short line\"}. Dates in the past are dropped automatically, so last year's entries are harmless. The section on the website stays hidden while this list is empty.",
+  "items": []
+}

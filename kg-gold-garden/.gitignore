@@ -1,5 +1,22 @@
 node_modules/
 .env
-data/
 *.log
 .DS_Store
+
+# data/ holds two different kinds of thing, and they must be treated
+# differently: the catalogue is content the website needs in order to deploy,
+# while the rest is either private customer information or runtime state that
+# the server recreates on its own.
+
+# Private — real customers' names, emails and phone numbers. Never published.
+data/subscribers.json
+data/appointments.json
+data/outbox/
+
+# Runtime state — recreated on first boot, and personal to each installation.
+data/reminders.json
+data/rates.json
+
+# Everything else in data/ (products.json, muhurat.json, testimonials.json) is
+# the shop's own content and MUST travel with the site, or the live version
+# falls back to the sample catalogue.

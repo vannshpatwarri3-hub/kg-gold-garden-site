@@ -1,0 +1,30 @@
+{
+  "status": "hidden",
+  "note": "Set \"status\": \"live\" once you have replaced these with words real customers actually gave you. Do not publish invented reviews.",
+  "items": [
+    {
+      "id": "t1",
+      "name": "Sample entry",
+      "city": "Ahmedabad",
+      "text": "Replace this with something a real customer told you. Keep it in their words — it reads better than anything written for them."
+    },
+    {
+      "id": "t2",
+      "name": "Sample entry",
+      "city": "Ahmedabad",
+      "text": "A second placeholder. Three or four short quotes work better on this row than one long one."
+    },
+    {
+      "id": "t3",
+      "name": "Sample entry",
+      "city": "Ahmedabad",
+      "text": "Ask a customer you know well if you may print what they said. Most people are happy to be asked."
+    },
+    {
+      "id": "t4",
+      "name": "Sample entry",
+      "city": "Ahmedabad",
+      "text": "If you have none yet, set \"status\" to \"hidden\" in data/testimonials.json and this whole section disappears."
+    }
+  ]
+}
