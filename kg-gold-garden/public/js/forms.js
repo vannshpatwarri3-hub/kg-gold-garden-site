@@ -67,7 +67,7 @@ export function initAppointment({ config }) {
       if (!data.open) {
         const why =
           data.reason === 'closed'
-            ? `We are closed that day — ${config.business.hours.closedLabel.toLowerCase()}.`
+            ? `${config.business.hours.closedLabel} — please pick another day.`
             : 'Please choose a date within the next 60 days.';
         timeSel.innerHTML = '<option value="">Not available</option>';
         showErrors(form, { date: why });
