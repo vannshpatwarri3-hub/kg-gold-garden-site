@@ -60,6 +60,27 @@ const inlineScriptHashes = await (async () => {
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+
+  // frame-ancestors below is what modern browsers obey; this is the older
+  // header, kept for the phones and tablets that predate CSP level 2.
+  res.setHeader('X-Frame-Options', 'DENY');
+
+  // The site asks for none of these, so refuse them outright: a script that
+  // somehow got in still could not reach a camera, a microphone or a location.
+  res.setHeader(
+    'Permissions-Policy',
+    'camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()'
+  );
+
+  // Render terminates TLS at its edge, so the app only learns the visitor's
+  // real scheme from this header. Only promise HSTS when the request genuinely
+  // arrived over HTTPS — sending it on plain http (or on localhost) would pin a
+  // browser to a scheme the server is not actually serving.
+  const proto = req.get('x-forwarded-proto')?.split(',')[0]?.trim() || req.protocol;
+  if (proto === 'https') {
+    res.setHeader('Strict-Transport-Security', 'max-age=15552000; includeSubDomains');
+  }
+
   res.setHeader(
     'Content-Security-Policy',
     [
@@ -71,6 +92,10 @@ app.use((req, res, next) => {
       "connect-src 'self'",
       "frame-ancestors 'none'",
       "base-uri 'self'",
+      // Nothing here embeds Flash, Java or a PDF viewer, and every form on the
+      // site posts to this origin. Saying so closes two more injection routes.
+      "object-src 'none'",
+      "form-action 'self'",
     ].join('; ')
   );
   next();
@@ -188,7 +213,31 @@ app.post('/api/admin/logout', (req, res) => {
 
 // --- validation helpers -----------------------------------------------------
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
-const clean = (v, max = 200) => String(v ?? '').trim().slice(0, max);
+
+/**
+ * Trim, cap the length, and strip control characters.
+ *
+ * The stripping is the part that earns its place. Values from these forms reach
+ * mail headers — the owner's booking notice puts the customer's name straight
+ * into the Subject line, and their address into Reply-To — and a carriage
+ * return inside a header is exactly how header injection is done. nodemailer
+ * guards against it as well, but a value that cannot contain a newline cannot
+ * be smuggled through anything, now or after some future upgrade.
+ *
+ * `multiline` keeps real line breaks for fields that only ever reach a message
+ * body and never a header.
+ */
+// Every C0 control character plus DEL. Built from codepoints rather than
+// typed literally, so the source stays readable and diffable.
+const CONTROL_CHARS = new RegExp('[\u0000-\u001F\u007F]', 'g');
+// The same, but sparing U+000A so genuine line breaks survive in body text.
+const CONTROL_BUT_NEWLINE = new RegExp('[\u0000-\u0009\u000B-\u001F\u007F]', 'g');
+
+const clean = (v, max = 200, { multiline = false } = {}) =>
+  String(v ?? '')
+    .replace(multiline ? CONTROL_BUT_NEWLINE : CONTROL_CHARS, '')
+    .trim()
+    .slice(0, max);
 
 function validEmail(v) {
   return EMAIL_RE.test(v) && v.length <= 254;
@@ -380,7 +429,8 @@ app.post('/api/appointments', limit('appt', 6, 10 * 60e3), async (req, res, next
     const date = clean(req.body?.date, 10);
     const time = clean(req.body?.time, 5);
     const purpose = clean(req.body?.purpose, 80) || 'General enquiry';
-    const notes = clean(req.body?.notes, 500);
+    // Only ever reaches the message body, so real line breaks are kept.
+    const notes = clean(req.body?.notes, 500, { multiline: true });
 
     const errors = {};
     if (name.length < 2) errors.name = 'Please enter your name.';

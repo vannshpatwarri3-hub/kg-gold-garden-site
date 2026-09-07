@@ -17,7 +17,7 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "motion": "^13.2.0",
-    "nodemailer": "^6.9.16",
+    "nodemailer": "^10.0.0",
     "sharp": "^0.35.4",
     "three": "^0.171.0"
   },
@@ -27,5 +27,8 @@
   "devDependencies": {
     "jsqr": "^1.4.0",
     "qrcode": "^1.5.4"
+  },
+  "overrides": {
+    "qs": "^6.16.0"
   }
 }
