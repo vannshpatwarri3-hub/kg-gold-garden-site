@@ -1,0 +1,92 @@
+/* Shared styling for the policy pages.
+   Deliberately plain: these are documents, not a landing page. They inherit
+   the site's colours and faces from tokens.css so they read as part of the
+   same shop, and nothing else. */
+
+.doc {
+  max-width: 76ch;
+  margin-inline: auto;
+  padding: var(--sp-6) clamp(18px, 5vw, 32px) var(--sp-8);
+}
+
+.doc__back {
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-bottom: var(--sp-6);
+  font-size: var(--step--1); color: var(--gold-700); text-decoration: none;
+}
+.doc__back:hover { color: var(--emerald-800); text-decoration: underline; }
+
+.doc__kicker {
+  font-size: var(--step--1); letter-spacing: .14em; text-transform: uppercase;
+  color: var(--gold-700); margin: 0 0 10px;
+}
+.doc h1 {
+  font-family: var(--font-display); font-weight: 600;
+  font-size: var(--step-3); line-height: 1.12; color: var(--emerald-900);
+  margin: 0 0 14px; text-wrap: balance;
+}
+.doc__updated {
+  font-size: var(--step--1); color: var(--text-dim);
+  padding-bottom: var(--sp-5); margin: 0 0 var(--sp-6);
+  border-bottom: 1px solid color-mix(in srgb, var(--gold-600) 30%, transparent);
+}
+
+.doc h2 {
+  font-family: var(--font-display); font-weight: 600;
+  font-size: var(--step-1); color: var(--emerald-800);
+  margin: var(--sp-7) 0 var(--sp-3);
+}
+.doc h3 {
+  font-size: var(--step-0); font-weight: 700; color: var(--text);
+  margin: var(--sp-5) 0 8px;
+}
+.doc p, .doc li { color: var(--text-muted); line-height: 1.68; text-wrap: pretty; }
+.doc p { margin: 0 0 var(--sp-3); }
+.doc ul, .doc ol { margin: 0 0 var(--sp-3); padding-left: 1.35em; }
+.doc li { margin-bottom: 8px; }
+.doc strong { color: var(--text); font-weight: 600; }
+.doc a { color: var(--gold-700); }
+.doc a:hover { color: var(--emerald-800); }
+
+.doc table {
+  width: 100%; border-collapse: collapse; margin: 0 0 var(--sp-4);
+  font-size: var(--step--1);
+}
+.doc th, .doc td {
+  text-align: left; padding: 10px 12px; vertical-align: top;
+  border-bottom: 1px solid color-mix(in srgb, var(--emerald-900) 12%, transparent);
+  color: var(--text-muted);
+}
+.doc th { color: var(--emerald-800); font-weight: 600; white-space: nowrap; }
+.doc__scroll { overflow-x: auto; }
+
+/* Anything the shop still has to fill in is marked, not guessed at. */
+.doc__todo {
+  display: block; padding: var(--sp-4) var(--sp-5); margin: 0 0 var(--sp-4);
+  border-radius: var(--r-md);
+  border: 1px dashed var(--gold-600);
+  background: color-mix(in srgb, var(--gold-100) 55%, transparent);
+  color: var(--text);
+}
+.doc__todo strong { display: block; margin-bottom: 6px; color: var(--gold-700); }
+
+.doc__contact {
+  padding: var(--sp-5); border-radius: var(--r-lg);
+  background: var(--surface-2);
+  border: 1px solid color-mix(in srgb, var(--gold-600) 26%, transparent);
+}
+.doc__contact p:last-child { margin-bottom: 0; }
+
+@media print {
+  .doc__back, .nav, .footer { display: none !important; }
+  .doc { max-width: none; padding: 0; }
+  .doc p, .doc li { color: #000; }
+  .doc a::after { content: " (" attr(href) ")"; font-size: .85em; color: #555; }
+}
+
+.doc__foot {
+  margin-top: var(--sp-8); padding-top: var(--sp-5);
+  border-top: 1px solid color-mix(in srgb, var(--gold-600) 30%, transparent);
+  font-size: var(--step--1); color: var(--text-dim);
+}
+.doc__foot p { margin: 0; color: inherit; }

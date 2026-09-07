@@ -74,3 +74,12 @@
 @media (max-width: 560px) {
   .admin__grid { grid-template-columns: 1fr; gap: 0; }
 }
+
+/* Sits under the panels, so the privacy link is reachable from every page. */
+.admin__footer {
+  max-width: 620px; margin: var(--sp-7) auto 0;
+  padding: var(--sp-5) var(--sp-5) var(--sp-7);
+  border-top: 1px solid color-mix(in srgb, var(--gold-600) 26%, transparent);
+  font-size: var(--step--1); color: var(--text-dim); text-align: center;
+}
+.admin__footer p { margin: 0; }

@@ -21,6 +21,7 @@ import {
 import { ensureDirs, readJson, writeJson, append } from './store.js';
 import { getRates, setRates, computePrice } from './rates.js';
 import { reply as chatReply, chatMeta, whatsappLink } from './chat.js';
+import { llmsTxt } from './llms.js';
 import {
   send,
   isMailConfigured,
@@ -616,6 +617,11 @@ function siteOrigin(req) {
   return `${proto}://${req.get('host')}`;
 }
 
+// A plain-language summary of the shop for language models (llmstxt.org).
+app.get('/llms.txt', (req, res) => {
+  res.type('text/plain').send(llmsTxt(siteOrigin(req)));
+});
+
 app.get('/robots.txt', (req, res) => {
   res
     .type('text/plain')
@@ -652,6 +658,12 @@ app.get('/sitemap.xml', async (req, res, next) => {
     <loc>${siteOrigin(req)}/</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>daily</changefreq>
+  </url>
+  <url>
+    <loc>${siteOrigin(req)}/privacy</loc>
+    <lastmod>2026-09-07</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
   </url>
 </urlset>
 `
