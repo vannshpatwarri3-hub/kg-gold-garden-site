@@ -152,3 +152,16 @@ body {
 .doc__more { margin-top: var(--sp-7); }
 .doc__more ul { list-style: none; padding: 0; }
 .doc__more li { margin-bottom: 10px; }
+
+/* Shown when the rate on display is a placeholder or a day old. Deliberately
+   the loudest thing on the page — somebody who searched for the gold rate and
+   landed here has not seen the rest of the site. */
+.doc__warn {
+  padding: var(--sp-4) var(--sp-5); margin: 0 0 var(--sp-5);
+  border-radius: var(--r-md);
+  border: 1px solid var(--gold-600);
+  border-left: 4px solid var(--gold-700);
+  background: color-mix(in srgb, var(--gold-100) 70%, transparent);
+  color: var(--text);
+}
+.doc__warn strong { display: block; margin-bottom: 4px; }

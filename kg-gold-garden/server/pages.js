@@ -363,7 +363,23 @@ function ratesTable(rates) {
 
   if (!rows.length) return '';
 
+  // The front page warns when the figures are placeholders or a day old. A page
+  // headed "Today's gold rate" must do the same, and more plainly — somebody
+  // arriving here from a search has not seen the rest of the site, and these
+  // numbers are the only thing they came for.
+  let warning = '';
+  if (rates.isPlaceholder) {
+    warning = `<p class="doc__warn"><strong>These are placeholder figures.</strong>
+      They have not been set by KG Gold Garden yet and are not the shop’s rate.
+      Please confirm the day’s rate by phone or WhatsApp before relying on
+      anything here.</p>`;
+  } else if (rates.isStale) {
+    warning = `<p class="doc__warn"><strong>This rate has not been refreshed today.</strong>
+      Please confirm with us before you finalise anything.</p>`;
+  }
+
   return `
+    ${warning}
     <div class="doc__scroll">
       <table>
         <caption class="doc__caption">Counter rate at KG Gold Garden${
