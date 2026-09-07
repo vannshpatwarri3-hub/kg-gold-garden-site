@@ -22,6 +22,7 @@ import { ensureDirs, readJson, writeJson, append } from './store.js';
 import { getRates, setRates, computePrice } from './rates.js';
 import { reply as chatReply, chatMeta, whatsappLink } from './chat.js';
 import { llmsTxt } from './llms.js';
+import { PAGES, isServicePage, renderPage } from './pages.js';
 import {
   send,
   isMailConfigured,
@@ -617,6 +618,39 @@ function siteOrigin(req) {
   return `${proto}://${req.get('host')}`;
 }
 
+/**
+ * Dedicated pages for the things the shop does — the rate, the jewellery, the
+ * bullion, how a price is built, and where to find us.
+ *
+ * Registered before the single-page catch-all, so /gold-rate-ahmedabad is a
+ * page in its own right rather than the front page wearing a different address.
+ */
+app.get('/:slug', async (req, res, next) => {
+  if (!isServicePage(req.params.slug)) return next();
+  try {
+    const html = await renderPage(req.params.slug, siteOrigin(req));
+    if (!html) return next();
+
+    // The page carries its own JSON-LD block, which the startup scan of
+    // index.html never saw and whose hash is therefore missing from the policy.
+    // Restate the policy for this one response with that block's hash added,
+    // rather than loosening script-src for the whole site.
+    const ld = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+    const csp = res.getHeader('Content-Security-Policy');
+    if (ld && typeof csp === 'string') {
+      const digest = crypto.createHash('sha256').update(ld[1], 'utf8').digest('base64');
+      res.setHeader(
+        'Content-Security-Policy',
+        csp.replace("script-src 'self'", `script-src 'self' 'sha256-${digest}'`)
+      );
+    }
+
+    res.type('html').send(html);
+  } catch (err) {
+    next(err);
+  }
+});
+
 // A plain-language summary of the shop for language models (llmstxt.org).
 app.get('/llms.txt', (req, res) => {
   res.type('text/plain').send(llmsTxt(siteOrigin(req)));
@@ -659,6 +693,12 @@ app.get('/sitemap.xml', async (req, res, next) => {
     <lastmod>${lastmod}</lastmod>
     <changefreq>daily</changefreq>
   </url>
+${PAGES.map((page) => `  <url>
+    <loc>${siteOrigin(req)}/${page.slug}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`).join("\n")}
   <url>
     <loc>${siteOrigin(req)}/privacy</loc>
     <lastmod>2026-09-07</lastmod>

@@ -1,7 +1,26 @@
-/* Shared styling for the policy pages.
-   Deliberately plain: these are documents, not a landing page. They inherit
-   the site's colours and faces from tokens.css so they read as part of the
-   same shop, and nothing else. */
+/* Shared styling for the policy and service pages.
+
+   These pages deliberately do not load main.css — they carry no client script
+   and need none of the landing page's machinery. That means they must state
+   the page's own ground themselves: without this rule the body is transparent,
+   and on a phone set to dark the browser paints its own dark canvas behind
+   light-mode text. The result is unreadable, which is how the gold rate ended
+   up invisible on the very page written to show it.
+
+   The site has no dark theme — tokens.css defines one palette, and .on-dark is
+   a section treatment rather than a mode — so this commits to it explicitly. */
+
+:root { color-scheme: light; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  line-height: 1.65;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
 
 .doc {
   max-width: 76ch;
@@ -26,7 +45,7 @@
   margin: 0 0 14px; text-wrap: balance;
 }
 .doc__updated {
-  font-size: var(--step--1); color: var(--text-dim);
+  font-size: var(--step--1); color: var(--text-muted);
   padding-bottom: var(--sp-5); margin: 0 0 var(--sp-6);
   border-bottom: 1px solid color-mix(in srgb, var(--gold-600) 30%, transparent);
 }
@@ -87,6 +106,49 @@
 .doc__foot {
   margin-top: var(--sp-8); padding-top: var(--sp-5);
   border-top: 1px solid color-mix(in srgb, var(--gold-600) 30%, transparent);
-  font-size: var(--step--1); color: var(--text-dim);
+  font-size: var(--step--1); color: var(--text-muted);
 }
 .doc__foot p { margin: 0; color: inherit; }
+
+/* --- service pages ------------------------------------------------------- */
+
+.doc__lead {
+  font-size: var(--step-1); line-height: 1.5; color: var(--text);
+  margin: 0 0 var(--sp-6); text-wrap: pretty;
+}
+
+.doc__caption {
+  caption-side: top; text-align: left; padding: 0 0 10px;
+  /* --text-dim measures 3.37:1 here, short of the 4.5:1 small text needs. */
+  font-size: var(--step--1); color: var(--text-muted);
+}
+
+.doc__pieces { list-style: none; padding: 0; margin: 0 0 var(--sp-5); }
+.doc__pieces li {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--emerald-900) 10%, transparent);
+}
+.doc__pieces li span { font-size: var(--step--1); color: var(--text-muted); }
+.doc__price { margin-left: auto; color: var(--gold-700) !important; font-weight: 600; }
+
+.doc__faq {
+  border-bottom: 1px solid color-mix(in srgb, var(--emerald-900) 12%, transparent);
+  padding: 2px 0;
+}
+.doc__faq summary {
+  cursor: pointer; padding: 14px 0; font-weight: 600; color: var(--text);
+  list-style: none; display: flex; justify-content: space-between; gap: 16px;
+}
+.doc__faq summary::-webkit-details-marker { display: none; }
+.doc__faq summary::after {
+  content: '+'; color: var(--gold-700); font-weight: 400; font-size: 1.3em; line-height: 1;
+}
+.doc__faq[open] summary::after { content: '\2013'; }
+.doc__faq summary:hover { color: var(--gold-700); }
+.doc__faq summary:focus-visible { outline: 2px solid var(--gold-600); outline-offset: 3px; }
+.doc__faq p { padding: 0 0 14px; margin: 0; }
+
+.doc__more { margin-top: var(--sp-7); }
+.doc__more ul { list-style: none; padding: 0; }
+.doc__more li { margin-bottom: 10px; }

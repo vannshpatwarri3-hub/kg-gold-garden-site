@@ -38,6 +38,11 @@ Monday to Saturday, 11 AM to 8 PM, and closed on Sunday.
 - [Price calculator](${origin}/#calculator): metal, making and GST for a given weight
 - [Book a viewing](${origin}/#visit): choose a date and time to come in
 - [Gold rate alerts](${origin}/#alerts): an email when 22K reaches a figure you name
+- [Gold rate in Ahmedabad](${origin}/gold-rate-ahmedabad): the counter rate, and what it does and does not mean
+- [Gold jewellery](${origin}/gold-jewellery-ahmedabad): hallmarking, how a price is built, what is in stock
+- [Gold coins and biscuits](${origin}/gold-coins-biscuits-ahmedabad): 24K bullion, no making charge
+- [How a gold price works](${origin}/gold-price-calculator): metal, making charge and GST, separately
+- [Visiting the showroom](${origin}/visit-our-showroom): address, hours and how to book
 - [Privacy policy](${origin}/privacy): what the two forms collect, and how to have it deleted
 
 ## Contact
