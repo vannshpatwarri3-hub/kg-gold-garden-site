@@ -76,6 +76,26 @@ app.use((req, res, next) => {
   next();
 });
 
+/**
+ * Nothing under /api/ may be cached.
+ *
+ * Without an explicit instruction a browser is free to guess how long a
+ * response stays good, and Safari in particular guesses generously. That is how
+ * a phone ends up showing yesterday's gold rate — or the "not set yet" notice —
+ * hours after the counter has entered today's, while a laptop that happened to
+ * fetch later shows the right one. For a shop whose whole page turns on a
+ * number that changes daily, a stale answer is worse than a slow one.
+ *
+ * The images and stylesheets below are still cached normally; this covers only
+ * the endpoints that report changing state.
+ */
+app.use('/api', (_req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache'); // for HTTP/1.0 caches on older devices
+  res.setHeader('Expires', '0');
+  next();
+});
+
 // --- simple in-memory rate limiting ----------------------------------------
 const buckets = new Map();
 function limit(name, max, windowMs) {

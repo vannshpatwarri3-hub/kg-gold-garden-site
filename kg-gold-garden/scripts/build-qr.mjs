@@ -59,8 +59,10 @@ function qrSvg({ margin = 3, dark = EMERALD, light = PAPER, logo = null } = {}) 
   const isFinder = (x, y) =>
     (x < 7 && y < 7) || (x >= N - 7 && y < 7) || (x < 7 && y >= N - 7);
 
+  // light: null leaves the ground transparent, so a code dropped onto a card
+  // that has its own gradient does not sit in a visible flat square.
   const parts = [];
-  parts.push(`<rect width="${S}" height="${S}" fill="${light}"/>`);
+  if (light) parts.push(`<rect width="${S}" height="${S}" fill="${light}"/>`);
 
   // Data modules, as dots with a little rounding — softer than hard squares,
   // and the gaps between them are what a scanner reads anyway.
@@ -94,7 +96,7 @@ function qrSvg({ margin = 3, dark = EMERALD, light = PAPER, logo = null } = {}) 
     const c = S / 2;
     const r = S * 0.118;
     parts.push(
-      `<circle cx="${c}" cy="${c}" r="${r + 0.55}" fill="${light}"/>`,
+      `<circle cx="${c}" cy="${c}" r="${r + 0.55}" fill="${light ?? 'none'}"/>`,
       `<circle cx="${c}" cy="${c}" r="${r + 0.55}" fill="none" stroke="${GOLD_600}" stroke-width=".22" stroke-opacity=".7"/>`,
       `<image href="${logo}" x="${c - r}" y="${c - r}" width="${r * 2}" height="${r * 2}"/>`
     );
@@ -259,12 +261,123 @@ async function plain() {
 }
 
 // ---------------------------------------------------------------------------
+// Dark, for Instagram
+// ---------------------------------------------------------------------------
+
+const INK = '#0B0806';
+const GOLD_200 = '#F2DDA8';
+const SAND = '#C9B999';
+
+/**
+ * Shared frame for the two dark treatments: the shop's own black-and-gold
+ * ground, with a hole in the middle where the code goes.
+ */
+function darkFrameSvg(S, { codeTop, codeSize, panel }) {
+  const panelPad = 34;
+  const panelRect = panel
+    ? `<rect x="${(S - codeSize) / 2 - panelPad}" y="${codeTop - panelPad}"
+             width="${codeSize + panelPad * 2}" height="${codeSize + panelPad * 2}"
+             rx="26" fill="${PAPER}"/>
+       <rect x="${(S - codeSize) / 2 - panelPad}" y="${codeTop - panelPad}"
+             width="${codeSize + panelPad * 2}" height="${codeSize + panelPad * 2}"
+             rx="26" fill="none" stroke="${GOLD_600}" stroke-opacity=".45" stroke-width="2"/>`
+    : '';
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}">
+  <defs>
+    <radialGradient id="ground" cx="50%" cy="42%" r="78%">
+      <stop offset="0%" stop-color="#33240F"/>
+      <stop offset="58%" stop-color="#150E07"/>
+      <stop offset="100%" stop-color="${INK}"/>
+    </radialGradient>
+    <linearGradient id="r3" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="${GOLD_300}" stop-opacity="0"/>
+      <stop offset="50%" stop-color="${GOLD_300}"/>
+      <stop offset="100%" stop-color="${GOLD_300}" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="${S}" height="${S}" fill="url(#ground)"/>
+  <rect x="26" y="26" width="${S - 52}" height="${S - 52}" rx="16"
+        fill="none" stroke="${GOLD_600}" stroke-opacity=".55" stroke-width="2"/>
+
+  <text x="${S / 2}" y="126" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif"
+        font-size="52" font-weight="700" fill="${GOLD_200}"
+        textLength="510" lengthAdjust="spacingAndGlyphs">${esc(SHOP.name)}</text>
+  <rect x="285" y="154" width="510" height="1.6" fill="url(#r3)"/>
+  <text x="${S / 2}" y="198" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif"
+        font-size="21" fill="${GOLD_300}" fill-opacity=".9"
+        textLength="440" lengthAdjust="spacingAndGlyphs">${esc(SHOP.tagline)}</text>
+
+  ${panelRect}
+
+  <text x="${S / 2}" y="930" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif"
+        font-size="34" font-weight="600" fill="${GOLD_200}"
+        textLength="420" lengthAdjust="spacingAndGlyphs">${esc(SHOP.call)}</text>
+  <text x="${S / 2}" y="974" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif"
+        font-size="23" fill="${SAND}" fill-opacity=".9"
+        textLength="330" lengthAdjust="spacingAndGlyphs">Shahibaug, Ahmedabad</text>
+  <text x="${S / 2}" y="1016" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif"
+        font-size="23" fill="${SAND}" fill-opacity=".9"
+        textLength="360" lengthAdjust="spacingAndGlyphs">${esc(SHOP.hours)}</text>
+</svg>`;
+}
+
+/**
+ * The safe one: dark card, but the code sits on an ivory panel, so it is still
+ * dark-on-light and every scanner ever made can read it.
+ */
+async function darkSquare() {
+  const S = 1080;
+  const qrPx = 560;
+  const top = 290;
+  const logoDataUri = `data:image/png;base64,${(await fs.readFile(MARK)).toString('base64')}`;
+  const { buf: code } = await renderCode(qrPx, { logo: logoDataUri, margin: 4 });
+
+  return sharp(Buffer.from(darkFrameSvg(S, { codeTop: top, codeSize: qrPx, panel: true }), 'utf8'), {
+    density: 72,
+  })
+    .composite([{ input: code, top, left: Math.round((S - qrPx) / 2) }])
+    .png()
+    .toFile(path.join(OUT, 'kg-gold-garden-square-dark.png'));
+}
+
+/**
+ * The fully inverted one: gold modules straight onto the black ground. This is
+ * the look most people picture, but it reverses what the QR standard expects.
+ * Modern phone cameras cope; older scanner apps often do not. Built so it can
+ * be compared honestly against the safe version above, not because it is the
+ * better choice.
+ */
+async function darkSquareInverted() {
+  const S = 1080;
+  const qrPx = 560;
+  const top = 290;
+  const logoDataUri = `data:image/png;base64,${(await fs.readFile(MARK)).toString('base64')}`;
+  const { buf: code } = await renderCode(qrPx, {
+    logo: logoDataUri,
+    margin: 4,
+    dark: GOLD_200,
+    light: null, // transparent — let the card's own glow show through
+  });
+
+  return sharp(Buffer.from(darkFrameSvg(S, { codeTop: top, codeSize: qrPx, panel: false }), 'utf8'), {
+    density: 72,
+  })
+    .composite([{ input: code, top, left: Math.round((S - qrPx) / 2) }])
+    .png()
+    .toFile(path.join(OUT, 'kg-gold-garden-square-dark-inverted.png'));
+}
+
+// ---------------------------------------------------------------------------
 
 await fs.mkdir(OUT, { recursive: true });
 const { modules } = qrSvg({});
 await counterCard();
 await square();
 await plain();
+await darkSquare();
+await darkSquareInverted();
 
 console.log(`Encoded: ${URL}`);
 console.log(`Grid:    ${modules} × ${modules} modules, error correction H`);
