@@ -32,8 +32,17 @@ export const BUSINESS = {
     )}`;
   },
 
+  // `phone`/`intl` is the number that rings. `whatsapp`/`waIntl` is optional and
+  // only needed when an owner takes WhatsApp on a different handset — every
+  // WhatsApp link prefers it, and falls back to the calling number without it.
   owners: [
-    { name: 'Sunil Patwari', phone: '8200329042', intl: '918200329042' },
+    {
+      name: 'Sunil Patwari',
+      phone: '8200329042',
+      intl: '918200329042',
+      whatsapp: '9824688441',
+      waIntl: '919824688441',
+    },
     { name: 'Anil Patwari', phone: '9898703136', intl: '919898703136' },
   ],
 

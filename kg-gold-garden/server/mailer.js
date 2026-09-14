@@ -25,6 +25,25 @@ function getTransporter() {
     transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+
+      /**
+       * Without pooling, every single email opens a brand new TLS connection to
+       * Gmail and logs in again — several seconds of handshake per message. The
+       * pool keeps a couple of authenticated connections warm and reuses them,
+       * which is the difference between "sent instantly" and "sent eventually".
+       */
+      pool: true,
+      maxConnections: 3,
+      maxMessages: 50,
+
+      /**
+       * Nodemailer has no timeouts by default, so an unreachable Gmail could
+       * hang a send until the OS gives up — minutes. These caps mean a failed
+       * send fails fast and lands in data/outbox/ instead of hanging.
+       */
+      connectionTimeout: 10_000,
+      greetingTimeout: 10_000,
+      socketTimeout: 20_000,
     });
   }
   return transporter;

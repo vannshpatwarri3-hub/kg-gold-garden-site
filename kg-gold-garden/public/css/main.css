@@ -174,7 +174,7 @@ h1, h2, h3 {
   letter-spacing: .005em; color: var(--emerald-800);
 }
 .on-dark .brand__name { color: var(--gold-200); }
-.brand__place { font-size: .68rem; color: var(--text-dim); letter-spacing: .13em; text-transform: uppercase; }
+.brand__place { font-size: .75rem; color: var(--text-dim); letter-spacing: .13em; text-transform: uppercase; }
 
 .nav__links { display: flex; gap: 4px; margin-inline: auto; }
 .nav__links a {
@@ -226,7 +226,12 @@ h1, h2, h3 {
   /* When the content is taller than the viewport it must fall back to the start
      edge, otherwise centring pushes the eyebrow up under the fixed nav. */
   align-items: safe center;
-  padding: clamp(118px, 17vh, 190px) var(--gutter) clamp(84px, 13vh, 140px);
+  /* Measured at 1440x900: content is 656px, and the old 153px/117px padding took
+     the hero to 926px — 26px past the fold, so the rate strip was clipped by a
+     sliver on a standard laptop. These clamps give 126px/90px there, landing the
+     whole hero at 872px with room to spare, while still clearing the 67px nav by
+     a comfortable margin. */
+  padding: clamp(104px, 14vh, 160px) var(--gutter) clamp(72px, 10vh, 120px);
   isolation: isolate; overflow: hidden;
   background: var(--paper-1);
 }
@@ -286,12 +291,22 @@ h1, h2, h3 {
   padding-top: var(--sp-5); border-top: 1px solid var(--line-strong); max-width: 640px;
 }
 .hero__facts dt { font-size: var(--step--1); color: var(--text-dim); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 5px; }
-.hero__facts dd { font-family: var(--font-display); font-size: var(--step-2); color: var(--emerald-800); }
+/* The live rate is the most-read number on the site. It was inheriting the body
+   line-height (1.65) and proportional figures, so it sat in a pool of dead space
+   with digits of uneven width — while every other figure on the site already got
+   tabular-nums. Display line-height and tabular figures, like the rest. */
+.hero__facts dd {
+  font-family: var(--font-display);
+  font-size: var(--step-2);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  color: var(--emerald-800);
+}
 
 .hero__scroll {
   position: absolute; left: 50%; bottom: 26px; translate: -50% 0;
   display: grid; justify-items: center; gap: 9px;
-  font-size: .68rem; letter-spacing: .22em; text-transform: uppercase;
+  font-size: .75rem; letter-spacing: .22em; text-transform: uppercase;
   color: var(--text-dim); text-decoration: none;
 }
 .hero__scroll-line { width: 1px; height: 46px; background: linear-gradient(var(--gold-600), transparent); }
@@ -324,7 +339,7 @@ h1, h2, h3 {
   width: 1px; background: var(--line-strong); opacity: .55;
 }
 .standing__value {
-  font-family: var(--font-display); font-weight: 500;
+  font-family: var(--font-display); font-weight: 600;
   font-size: clamp(2.3rem, 1.2rem + 4.2vw, 3.7rem); line-height: 1;
   font-variant-numeric: tabular-nums;
   background: var(--grad-gold); -webkit-background-clip: text; background-clip: text;
@@ -355,7 +370,7 @@ h1, h2, h3 {
 .field { margin-bottom: var(--sp-5); }
 .field label {
   display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
-  font-size: var(--step--1); color: var(--text-muted); font-weight: 500;
+  font-size: var(--step--1); color: var(--text-muted); font-weight: 600;
   letter-spacing: .04em; margin-bottom: 9px;
 }
 .field input[type="text"], .field input[type="tel"], .field input[type="email"],
@@ -373,7 +388,7 @@ h1, h2, h3 {
 }
 .field input::placeholder, .field textarea::placeholder { color: var(--text-dim); }
 .field.has-error input, .field.has-error select { border-color: var(--danger); }
-.field__error { color: var(--danger); font-size: var(--step--1); margin-top: 7px; display: none; font-weight: 500; }
+.field__error { color: var(--danger); font-size: var(--step--1); margin-top: 7px; display: none; font-weight: 600; }
 .field.has-error .field__error { display: block; }
 .field__hint { color: var(--text-dim); font-size: var(--step--1); margin-top: 7px; }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); }
@@ -431,7 +446,7 @@ output { color: var(--accent-text); font-weight: 700; font-variant-numeric: tabu
   padding: 14px 18px; margin-bottom: var(--sp-6);
   border: 1px solid var(--warn-line); background: var(--warn-bg);
   border-radius: var(--r-md); color: var(--warn); font-size: var(--step--1);
-  max-width: 760px; font-weight: 500;
+  max-width: 760px; font-weight: 600;
 }
 .rate-banner .icon { width: 19px; height: 19px; margin-top: 2px; }
 
@@ -506,7 +521,7 @@ output { color: var(--accent-text); font-weight: 700; font-variant-numeric: tabu
 .showcase__hint {
   position: absolute; left: 50%; bottom: 16px; translate: -50% 0;
   display: flex; align-items: center; gap: 7px;
-  font-size: .72rem; letter-spacing: .12em; text-transform: uppercase;
+  font-size: .75rem; letter-spacing: .12em; text-transform: uppercase;
   color: var(--text-dim); pointer-events: none;
   transition: opacity var(--dur-2) var(--ease-out);
 }
@@ -540,7 +555,7 @@ output { color: var(--accent-text); font-weight: 700; font-variant-numeric: tabu
   padding: 9px 17px; border-radius: var(--r-pill);
   border: 1px solid var(--line-strong); color: var(--text-muted);
   background: var(--surface);
-  font-size: var(--step--1); min-height: 42px; font-weight: 500;
+  font-size: var(--step--1); min-height: 42px; font-weight: 600;
   transition: color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out),
               background-color var(--dur-2) var(--ease-out);
 }
@@ -573,7 +588,7 @@ output { color: var(--accent-text); font-weight: 700; font-variant-numeric: tabu
   padding: 8px 15px; min-height: 42px;
   border-radius: var(--r-pill); border: 1px solid var(--line);
   background: var(--surface); color: var(--text-muted);
-  font-size: var(--step--1); font-weight: 500;
+  font-size: var(--step--1); font-weight: 600;
   transition: all var(--dur-2) var(--ease-out);
 }
 .showcase__finish button:hover:not(:disabled) { border-color: var(--gold-600); color: var(--accent-text); }
@@ -674,7 +689,7 @@ output { color: var(--accent-text); font-weight: 700; font-variant-numeric: tabu
 .visit__meta > div { padding: 14px 0; border-top: 1px solid var(--line); }
 .visit__meta dt { font-size: var(--step--1); color: var(--text-dim); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 5px; }
 .visit__meta dd { color: var(--text); }
-.visit__meta a { color: var(--emerald-800); text-decoration: none; font-weight: 500; }
+.visit__meta a { color: var(--emerald-800); text-decoration: none; font-weight: 600; }
 .visit__meta a:hover { text-decoration: underline; }
 .owner-line { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 7px; }
 .owner-line__wa {
@@ -694,7 +709,7 @@ output { color: var(--accent-text); font-weight: 700; font-variant-numeric: tabu
 }
 .appt__title { font-size: var(--step-2); margin-bottom: var(--sp-3); }
 .appt__lede { color: var(--text-muted); font-size: var(--step--1); margin-bottom: var(--sp-6); }
-.appt__status, .alerts__status { margin-top: var(--sp-4); font-size: var(--step--1); font-weight: 500; }
+.appt__status, .alerts__status { margin-top: var(--sp-4); font-size: var(--step--1); font-weight: 600; }
 .status--ok { color: var(--success); }
 .status--warn { color: var(--warn); }
 .status--err { color: var(--danger); }
@@ -777,7 +792,7 @@ output { color: var(--accent-text); font-weight: 700; font-variant-numeric: tabu
 }
 .chat__avatar { width: 34px; height: 34px; }
 .chat__name { font-family: var(--font-display); font-size: 1rem; color: var(--gold-200); }
-.chat__status { font-size: .74rem; color: #B4C6BA; }
+.chat__status { font-size: .75rem; color: #B4C6BA; }
 .chat__min { margin-left: auto; width: 34px; height: 34px; display: grid; place-items: center; color: #B4C6BA; border-radius: 50%; }
 .chat__min:hover { color: var(--gold-200); background: rgba(255,255,255,.1); }
 
@@ -843,7 +858,7 @@ output { color: var(--accent-text); font-weight: 700; font-variant-numeric: tabu
 .collection__name { font-size: var(--step-2); color: var(--emerald-900); }
 .collection__blurb { color: var(--text-muted); font-size: var(--step--1); flex: 1 1 240px; }
 .collection__count {
-  font-size: .72rem; letter-spacing: .12em; text-transform: uppercase;
+  font-size: .75rem; letter-spacing: .12em; text-transform: uppercase;
   color: var(--text-dim); white-space: nowrap;
 }
 
@@ -878,7 +893,7 @@ output { color: var(--accent-text); font-weight: 700; font-variant-numeric: tabu
 .product:hover .product__photo { scale: 1.04; }
 .product__soon {
   position: absolute; bottom: 10px; left: 50%; translate: -50% 0;
-  font-size: .66rem; letter-spacing: .12em; text-transform: uppercase;
+  font-size: .75rem; letter-spacing: .12em; text-transform: uppercase;
   color: var(--text-dim);
 }
 
@@ -907,7 +922,7 @@ output { color: var(--accent-text); font-weight: 700; font-variant-numeric: tabu
   transition: background-color var(--dur-2) var(--ease-out);
 }
 .product:hover .product__cta { background: rgba(22,112,78,.18); }
-.product__breakup { font-size: .72rem; color: var(--text-dim); padding-top: 8px; }
+.product__breakup { font-size: .75rem; color: var(--text-dim); padding-top: 8px; }
 
 /* --- piece viewer --------------------------------------------------------- */
 .viewer {
@@ -966,7 +981,7 @@ output { color: var(--accent-text); font-weight: 700; font-variant-numeric: tabu
   display: inline-flex; align-items: center; gap: 7px;
   padding: 7px 14px; border-radius: var(--r-pill);
   background: rgba(253,251,246,.92); border: 1px solid var(--line);
-  color: var(--text-muted); font-size: .72rem; letter-spacing: .06em;
+  color: var(--text-muted); font-size: .75rem; letter-spacing: .06em;
   pointer-events: none; backdrop-filter: blur(6px);
   transition: opacity var(--dur-2) var(--ease-out);
 }
@@ -1081,7 +1096,7 @@ output { color: var(--accent-text); font-weight: 700; font-variant-numeric: tabu
 }
 .shortlist__meta { min-width: 0; }
 .shortlist__name { display: block; font-weight: 600; font-size: var(--step--1); color: var(--emerald-900); }
-.shortlist__sub { display: block; font-size: .74rem; color: var(--text-dim); }
+.shortlist__sub { display: block; font-size: .75rem; color: var(--text-dim); }
 .shortlist__remove {
   width: 34px; height: 34px; display: grid; place-items: center;
   border-radius: 50%; color: var(--text-dim);
@@ -1103,7 +1118,7 @@ output { color: var(--accent-text); font-weight: 700; font-variant-numeric: tabu
   border-radius: 0 0 var(--r-lg) var(--r-lg);
 }
 .muhurat__when {
-  display: block; font-size: .72rem; letter-spacing: .13em; text-transform: uppercase;
+  display: block; font-size: .75rem; letter-spacing: .13em; text-transform: uppercase;
   color: var(--accent-text); font-weight: 700; margin-bottom: 8px;
 }
 .muhurat__name { display: block; font-family: var(--font-display); font-size: var(--step-1); color: var(--emerald-900); }
@@ -1162,7 +1177,7 @@ output { color: var(--accent-text); font-weight: 700; font-variant-numeric: tabu
   font-weight: 700; font-size: .9rem;
 }
 .voice__name { display: block; font-weight: 600; font-size: var(--step--1); color: var(--emerald-900); }
-.voice__city { display: block; font-size: .74rem; color: var(--text-dim); }
+.voice__city { display: block; font-size: .75rem; color: var(--text-dim); }
 
 /* --- call sheet ----------------------------------------------------------- */
 .callsheet {
@@ -1290,8 +1305,8 @@ output { color: var(--accent-text); font-weight: 700; font-variant-numeric: tabu
 
   /* Keep the three stats on one line — stacking them loses the comparison. */
   .standing__value { font-size: clamp(1.55rem, 6.2vw, 2.1rem); }
-  .standing__label { font-size: .66rem; letter-spacing: .08em; }
-  .standing__note { font-size: .68rem; }
+  .standing__label { font-size: .75rem; letter-spacing: .08em; }
+  .standing__note { font-size: .75rem; }
   .standing__stat { padding-inline: 6px; }
 
   .products { gap: var(--sp-8); }

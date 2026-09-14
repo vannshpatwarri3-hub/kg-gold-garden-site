@@ -230,7 +230,7 @@ export function initCalculator({ config, rates }) {
       `${c.name} · ${karat}${finish ? ` · ${finish.name}` : ''}\n` +
       `Weight: ${grams} g\nMaking: ${pct}%\n` +
       `Estimated total: ${inr(p.total)}\n\nCould you give me an exact quote?`;
-    waLink.href = `https://wa.me/91${owner.phone}?text=${encodeURIComponent(msg)}`;
+    waLink.href = `https://wa.me/91${owner.waPhone ?? owner.phone}?text=${encodeURIComponent(msg)}`;
   }
 
   categorySel.addEventListener('change', applyCategoryDefaults);
@@ -285,7 +285,7 @@ export function initBullion({ config, rates }) {
           <p class="bullion-card__form">${esc(b.purity)} · ${esc(b.form)}</p>
           <p class="bullion-card__price">${inr(p.total)}</p>
           <p class="bullion-card__tax">incl. 3% GST · indicative</p>
-          <a class="bullion-card__cta" href="https://wa.me/91${esc(owner.phone)}?text=${encodeURIComponent(msg)}"
+          <a class="bullion-card__cta" href="https://wa.me/91${esc(owner.waPhone ?? owner.phone)}?text=${encodeURIComponent(msg)}"
              target="_blank" rel="noopener">
             Check availability
             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>

@@ -93,7 +93,7 @@ export function initShortlist({ lookup, config }) {
     itemsEl.innerHTML = rows;
     emptyEl.hidden = ids.length > 0;
     actionsEl.hidden = ids.length === 0;
-    sendEl.href = `https://wa.me/91${owner.phone}?text=${encodeURIComponent(message())}`;
+    sendEl.href = `https://wa.me/91${owner.waPhone ?? owner.phone}?text=${encodeURIComponent(message())}`;
 
     listeners.forEach((fn) => fn(ids));
   };

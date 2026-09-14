@@ -213,6 +213,47 @@ app.post('/api/admin/logout', (req, res) => {
   res.json({ ok: true });
 });
 
+/**
+ * Everything the showroom has collected: who booked a viewing, and who signed
+ * up for rate alerts.
+ *
+ * This is real customers' names, phone numbers and email addresses, so it sits
+ * behind requireAdmin and is never rendered into a public page. There is no
+ * public route anywhere that returns these files.
+ */
+app.get('/api/admin/data', requireAdmin, async (_req, res, next) => {
+  try {
+    const [appointments, subscribers] = await Promise.all([
+      readJson('appointments.json', []),
+      readJson('subscribers.json', []),
+    ]);
+
+    const todayKey = new Date().toISOString().slice(0, 10);
+
+    // Newest first — the showroom wants to see what has just come in.
+    const bookings = [...appointments].reverse().map((b) => ({
+      ...b,
+      isPast: b.date < todayKey,
+      isToday: b.date === todayKey,
+    }));
+
+    res.json({
+      ok: true,
+      appointments: bookings,
+      subscribers: [...subscribers].reverse(),
+      counts: {
+        appointments: appointments.length,
+        upcoming: bookings.filter((b) => !b.isPast && b.status !== 'cancelled').length,
+        today: bookings.filter((b) => b.isToday && b.status !== 'cancelled').length,
+        subscribers: subscribers.filter((s) => s.status === 'active').length,
+        alerts: subscribers.filter((s) => s.alertBelow).length,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // --- validation helpers -----------------------------------------------------
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
 
@@ -304,6 +345,10 @@ app.get('/api/config', async (_req, res) => {
         phone: o.phone,
         display: `+91 ${o.phone.slice(0, 5)} ${o.phone.slice(5)}`,
         tel: `tel:+91${o.phone}`,
+        // The WhatsApp handset, for links the browser builds itself. Falls back
+        // to the calling number for owners who use one phone for both.
+        waPhone: o.whatsapp ?? o.phone,
+        waDisplay: `+91 ${(o.whatsapp ?? o.phone).slice(0, 5)} ${(o.whatsapp ?? o.phone).slice(5)}`,
         whatsapp: whatsappLink(o, `Hello ${BUSINESS.name}, I found you through your website.`),
       })),
       email: BUSINESS.email.primary,
@@ -490,33 +535,34 @@ app.post('/api/appointments', limit('appt', 6, 10 * 60e3), async (req, res, next
     };
     await append('appointments.json', booking);
 
-    // Notify the showroom, and the customer if they gave us an address.
-    const ownerMail = await send({
-      to: BUSINESS.email.primary,
-      ...ownerAppointmentNotice({ ...booking, date: prettyDate, time: label }),
-    });
-
-    let customerMail = { delivered: false, reason: 'no_email' };
-    if (email) {
-      customerMail = await send({
-        to: email,
-        ...appointmentEmail({ ...booking, date: prettyDate, time: label }),
-      });
-    }
-
+    /**
+     * Reply the moment the booking is safely stored.
+     *
+     * Email used to be sent *before* this line — two sequential Gmail handshakes
+     * that left the customer staring at a spinner for several seconds, watching
+     * nothing happen, with no idea whether their slot was taken. The booking is
+     * already saved by now, so nothing is lost by sending the mail afterwards.
+     */
     res.json({
       ok: true,
       reference,
       date: prettyDate,
       time: label,
-      emailSent: customerMail.delivered,
-      ownerNotified: ownerMail.delivered,
+      emailQueued: Boolean(email),
       mailConfigured: isMailConfigured(),
       whatsapp: whatsappLink(
         BUSINESS.owners[0],
         `Hello ${BUSINESS.name}, I have booked an appointment. Reference ${reference}, ${prettyDate} at ${label}.`
       ),
     });
+
+    // Both notices go out together, after the reply. A failure here is already
+    // handled inside send(), which files the message in data/outbox/ instead.
+    const detail = { ...booking, date: prettyDate, time: label };
+    Promise.all([
+      send({ to: BUSINESS.email.primary, ...ownerAppointmentNotice(detail) }),
+      email ? send({ to: email, ...appointmentEmail(detail) }) : Promise.resolve(null),
+    ]).catch((err) => console.error('[appointment mail]', err));
   } catch (err) {
     next(err);
   }
@@ -571,21 +617,26 @@ app.post('/api/subscribe', limit('sub', 6, 10 * 60e3), async (req, res, next) =>
     };
     await append('subscribers.json', record);
 
-    const welcome = await send({ to: email, ...welcomeEmail(name) });
-    await send({ to: BUSINESS.email.primary, ...ownerSubscriberNotice(record) });
-
+    // Reply first — the sign-up is stored, so the visitor should not be made to
+    // wait on two Gmail handshakes before the form tells them it worked.
+    const mailReady = isMailConfigured();
     res.json({
       ok: true,
-      emailSent: welcome.delivered,
-      mailConfigured: isMailConfigured(),
+      emailQueued: true,
+      mailConfigured: mailReady,
       message:
-        (welcome.delivered
+        (mailReady
           ? 'You are on the list. A welcome note is on its way to your inbox.'
           : 'You are on the list. Our email delivery is not switched on yet, so your welcome note is saved and will be sent as soon as it is.') +
         (alert.value
           ? ` We will write to you separately the day 22K reaches ₹${alert.value.toLocaleString('en-IN')}.`
           : ''),
     });
+
+    Promise.all([
+      send({ to: email, ...welcomeEmail(name) }),
+      send({ to: BUSINESS.email.primary, ...ownerSubscriberNotice(record) }),
+    ]).catch((err) => console.error('[subscribe mail]', err));
   } catch (err) {
     next(err);
   }

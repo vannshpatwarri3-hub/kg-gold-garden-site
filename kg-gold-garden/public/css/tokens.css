@@ -43,10 +43,16 @@
   --grad-rule: linear-gradient(90deg, transparent, var(--gold-500), var(--gold-300), var(--gold-500), transparent);
 
   /* --- text --------------------------------------------------------------
-     Contrast on --paper-1: text 14.9:1 · muted 4.96:1 · dim 3.4:1 (large only) */
+     Measured against --paper-1 (#FDFBF6):
+       text 16.0:1 · muted 5.1:1 · dim 4.5:1
+
+     --text-dim was #7E8D83 (3.37:1) and carried a "large text only" caveat, but
+     it is applied to the SMALLEST type on the site — rate-card labels, the "/g"
+     unit, field hints — in 30-odd rules. A caveat no rule honoured is not a
+     caveat, so the colour now clears 4.5:1 outright and the caveat is gone. */
   --text: #16211C;
   --text-muted: #5F6F65;
-  --text-dim: #7E8D83;
+  --text-dim: #68786E;
   --on-gold: #16211C;   /* 8.8:1 on --gold-300 */
 
   /* --- lines & feedback --------------------------------------------------- */

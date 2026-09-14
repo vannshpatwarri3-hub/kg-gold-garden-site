@@ -62,7 +62,7 @@ function buildAsk(owner, dateLabel, adminUrl) {
     `• 18K / 750 — this covers our rose gold as well\n\n` +
     `You can enter them directly here: ${adminUrl}\n` +
     `Or just reply with the three figures and we will put them up.`;
-  return `https://wa.me/${owner.intl}?text=${encodeURIComponent(message)}`;
+  return `https://wa.me/${owner.waIntl ?? owner.intl}?text=${encodeURIComponent(message)}`;
 }
 
 /**
@@ -83,13 +83,13 @@ async function sendWhatsApp(owner, body) {
   const payload = template
     ? {
         messaging_product: 'whatsapp',
-        to: owner.intl,
+        to: owner.waIntl ?? owner.intl,
         type: 'template',
         template: { name: template, language: { code: 'en' } },
       }
     : {
         messaging_product: 'whatsapp',
-        to: owner.intl,
+        to: owner.waIntl ?? owner.intl,
         type: 'text',
         text: { body },
       };
@@ -130,20 +130,31 @@ export async function runReminder({ force = false } = {}) {
     waLink: buildAsk(o, dateLabel, adminUrl),
   }));
 
-  // 1. Always: the email with tap-to-send links.
-  const mail = await send({
-    to: BUSINESS.email.primary,
-    ...rateReminderEmail({ dateLabel, adminUrl, owners, currentRates: rates }),
-  });
-
-  // 2. Optionally: straight to WhatsApp, if credentials exist.
-  const whatsapp = [];
-  for (const owner of owners) {
-    const body =
-      `Namaste ${owner.name.split(' ')[0]}bhai — please share today's KG Gold Garden rate ` +
-      `(${dateLabel}) per gram: 24K/999, 22K/916 and 18K/750. Enter it here: ${adminUrl}`;
-    whatsapp.push({ owner: owner.name, ...(await sendWhatsApp(owner, body)) });
-  }
+  /**
+   * Everything leaves at once.
+   *
+   * This used to run strictly one after another — an SMTP handshake, and then a
+   * separate Meta API call per owner — so pressing "send the reminder now" in
+   * the admin page sat spinning for the sum of all of them. They are unrelated
+   * messages to different places; there was never a reason to queue them up.
+   *
+   * 1. Always: the email with tap-to-send links.
+   * 2. Optionally: straight to WhatsApp, if credentials exist.
+   */
+  const [mail, whatsapp] = await Promise.all([
+    send({
+      to: BUSINESS.email.primary,
+      ...rateReminderEmail({ dateLabel, adminUrl, owners, currentRates: rates }),
+    }),
+    Promise.all(
+      owners.map(async (owner) => {
+        const body =
+          `Namaste ${owner.name.split(' ')[0]}bhai — please share today's KG Gold Garden rate ` +
+          `(${dateLabel}) per gram: 24K/999, 22K/916 and 18K/750. Enter it here: ${adminUrl}`;
+        return { owner: owner.name, ...(await sendWhatsApp(owner, body)) };
+      })
+    ),
+  ]);
 
   const record = {
     date: key,

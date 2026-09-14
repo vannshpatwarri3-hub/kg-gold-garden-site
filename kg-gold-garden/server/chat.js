@@ -18,16 +18,20 @@ const money = (n) =>
 
 const phoneLabel = (p) => `+91 ${p.slice(0, 5)} ${p.slice(5)}`;
 
-/** Build a WhatsApp deep link with a prefilled message. */
+/**
+ * Build a WhatsApp deep link with a prefilled message.
+ * Uses the owner's WhatsApp handset if they have a separate one.
+ */
 export function whatsappLink(owner, text) {
-  return `https://wa.me/${owner.intl}?text=${encodeURIComponent(text)}`;
+  return `https://wa.me/${owner.waIntl ?? owner.intl}?text=${encodeURIComponent(text)}`;
 }
 
 function waActions(prefill) {
   return BUSINESS.owners.map((o) => ({
     type: 'whatsapp',
     label: `WhatsApp ${o.name.split(' ')[0]}`,
-    sublabel: phoneLabel(o.phone),
+    // Show the number the message will actually go to, not the calling line.
+    sublabel: phoneLabel(o.whatsapp ?? o.phone),
     href: whatsappLink(o, prefill),
   }));
 }

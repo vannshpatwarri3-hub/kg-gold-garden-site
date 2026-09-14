@@ -158,7 +158,7 @@ export async function initProducts({ config }) {
         ? 'Could you confirm the price, and can I book a time to come and see it?'
         : 'Could you tell me the price, and can I book a time to come and see it?'
     );
-    const href = `https://wa.me/91${owner.phone}?text=${encodeURIComponent(lines.join('\n'))}`;
+    const href = `https://wa.me/91${owner.waPhone ?? owner.phone}?text=${encodeURIComponent(lines.join('\n'))}`;
 
     // Only state facts the showroom actually supplied.
     const meta = [p.karat, finishLabel, p.grams ? `${p.grams} g` : null].filter(Boolean).join(' · ');
