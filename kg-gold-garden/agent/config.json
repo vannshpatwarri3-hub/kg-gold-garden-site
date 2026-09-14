@@ -1,0 +1,20 @@
+{
+  "_comment": "KG Gold Garden caretaker settings. Safe to edit by hand.",
+
+  "siteUrl": "https://kg-gold-garden-site.onrender.com",
+
+  "_autoRestoreRates": "When true, if the site falls back to demo rates the agent re-posts the LAST RATE YOU SET yourself. It never invents a number. Leave false until you say go.",
+  "autoRestoreRates": false,
+
+  "_maxRestoreAgeDays": "Refuse to auto-restore a saved rate older than this many days; alert instead. Gold moves daily.",
+  "maxRestoreAgeDays": 7,
+
+  "_timeoutSeconds": "Render free tier cold-starts can take 60s+. Be patient.",
+  "timeoutSeconds": 120,
+
+  "_retries": "Extra attempts if the ping fails outright.",
+  "retries": 2,
+
+  "_keepLogDays": "Delete heartbeat logs older than this.",
+  "keepLogDays": 30
+}

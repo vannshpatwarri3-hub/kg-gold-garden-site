@@ -20,3 +20,9 @@ data/rates.json
 # Everything else in data/ (products.json, muhurat.json, testimonials.json) is
 # the shop's own content and MUST travel with the site, or the live version
 # falls back to the sample catalogue.
+
+# Caretaker agent - your admin login, plus local logs and state.
+# secrets.env must never be committed or deployed.
+agent/secrets.env
+agent/logs/
+agent/state/
