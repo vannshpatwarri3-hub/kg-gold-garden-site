@@ -43,16 +43,23 @@
   --grad-rule: linear-gradient(90deg, transparent, var(--gold-500), var(--gold-300), var(--gold-500), transparent);
 
   /* --- text --------------------------------------------------------------
-     Measured against --paper-1 (#FDFBF6):
-       text 16.0:1 · muted 5.1:1 · dim 4.5:1
+     Contrast, measured on every light ground text actually sits on:
 
-     --text-dim was #7E8D83 (3.37:1) and carried a "large text only" caveat, but
-     it is applied to the SMALLEST type on the site — rate-card labels, the "/g"
-     unit, field hints — in 30-odd rules. A caveat no rule honoured is not a
-     caveat, so the colour now clears 4.5:1 outright and the caveat is gone. */
+                     paper-1   surface-2   paper-2
+       --text         16.0       15.4       14.7
+       --text-muted    5.14       4.93       4.73
+       --text-dim      4.92       4.72       4.52    (AA small text: 4.5)
+
+     --text-dim is the faintest grey on the site and it carries the SMALLEST
+     type — rate-card labels, the "/g" unit, field hints. It was #7E8D83 (3.37:1)
+     with a "large text only" caveat that no rule honoured; then #68786E, which
+     passed on paper-1 but not on the paper-2 sand behind the visit, testimonial
+     and muhurat sections (4.15:1). #627268 is the lightest shade that clears
+     4.5:1 on all three grounds while staying lighter than --text-muted.
+     (paper-3 only ever sits behind images, never behind text.) */
   --text: #16211C;
   --text-muted: #5F6F65;
-  --text-dim: #68786E;
+  --text-dim: #627268;
   --on-gold: #16211C;   /* 8.8:1 on --gold-300 */
 
   /* --- lines & feedback --------------------------------------------------- */

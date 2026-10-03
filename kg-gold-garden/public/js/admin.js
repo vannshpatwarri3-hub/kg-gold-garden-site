@@ -154,16 +154,24 @@ $('#runReminder').addEventListener('click', async () => {
   busy(btn, true);
   try {
     const res = await api('/api/reminder/run', { method: 'POST', body: { force: true } });
-    const wa = (res.whatsapp ?? [])
-      .map((w) => `${w.owner}: ${w.sent ? 'sent' : w.reason.replace(/_/g, ' ')}`)
-      .join(' · ');
-    status(
-      statusEl,
-      res.emailDelivered
-        ? `Reminder emailed to the shop with tap-to-send links. WhatsApp — ${wa}`
-        : `Email delivery is not switched on, so the reminder was saved to data/outbox/. WhatsApp — ${wa}`,
-      res.emailDelivered ? 'ok' : 'warn'
-    );
+
+    // Direct WhatsApp sending is optional and needs Meta credentials; when it
+    // was never set up, listing "not configured" per owner only reads as a fault.
+    const tried = (res.whatsapp ?? []).filter((w) => w.reason !== 'not_configured');
+    const wa = tried.length
+      ? ` WhatsApp — ${tried.map((w) => `${w.owner}: ${w.sent ? 'sent' : w.reason.replace(/_/g, ' ')}`).join(' · ')}`
+      : '';
+
+    // "Not set up" and "set up but failed" are different problems with
+    // different fixes, so they must never share a message again.
+    let message = `Reminder emailed to the shop with tap-to-send links.${wa}`;
+    if (!res.emailDelivered) {
+      message =
+        res.emailReason === 'not_configured'
+          ? `Email is not set up on the server yet, so the reminder was not sent.${wa}`
+          : `The reminder email could not be sent: ${res.emailError || 'no reason was given'}.${wa}`;
+    }
+    status(statusEl, message, res.emailDelivered ? 'ok' : 'warn');
   } catch (err) {
     status(statusEl, err.message, 'err');
     if (err.data?.needsLogin) await refreshState();
@@ -220,7 +228,7 @@ function bookingRow(b) {
 function subscriberRow(s) {
   const tag = s.alertBelow
     ? `<span class="tag tag--ok">alert below ${inr(s.alertBelow)}</span>`
-    : '<span class="tag tag--past">daily rates only</span>';
+    : '<span class="tag tag--past">no price alert</span>';
 
   return `
     <article class="record">

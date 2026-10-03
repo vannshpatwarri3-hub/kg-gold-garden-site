@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stop rate alerts — KG Gold Garden</title>
+<!-- Reached only from a link in someone's own email; never worth indexing. -->
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#FDFBF6">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..700&family=Manrope:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/css/main.css">
+<link rel="stylesheet" href="/css/legal.css">
+<link rel="icon" href="/favicon-32.png" type="image/png" sizes="64x64">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+</head>
+<body>
+<main class="doc" id="main">
+  <a class="doc__back" href="/">
+    <svg class="icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H6M12 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Back to KG Gold Garden
+  </a>
+
+  <p class="doc__kicker">KG Gold Garden</p>
+  <h1>Stop rate alerts</h1>
+
+  <!-- Shown when the link carries a token. -->
+  <section id="confirm" hidden>
+    <p>
+      Press the button below and we will stop emailing you when 22K reaches your price.
+      Nothing else about you changes, and you can set a new alert on our website at any time.
+    </p>
+    <button class="btn btn--gold" id="stopBtn" type="button">
+      <span class="btn__label">Stop my alerts</span>
+      <span class="btn__spinner" aria-hidden="true"></span>
+    </button>
+  </section>
+
+  <!-- Shown when the page is opened without a token, e.g. typed by hand. -->
+  <section id="nolink" hidden>
+    <p>
+      This page needs the link from one of our alert emails. Open the most recent rate alert
+      we sent you and use the &ldquo;stop these alerts&rdquo; link at the bottom of it.
+    </p>
+  </section>
+
+  <p class="doc__updated" id="result" role="status" aria-live="polite"></p>
+</main>
+
+<script type="module" src="/js/stop-alerts.js"></script>
+</body>
+</html>

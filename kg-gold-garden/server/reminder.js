@@ -7,7 +7,7 @@
  *
  * Two delivery paths:
  *
- *   1. ALWAYS — an email to primeplay345@gmail.com containing a tap-to-send
+ *   1. ALWAYS — an email to the shop (BUSINESS.email.primary) with a tap-to-send
  *      WhatsApp link for each owner, with the request already written. Two taps
  *      from the inbox and the message is on its way from the shop's own number.
  *
@@ -160,6 +160,9 @@ export async function runReminder({ force = false } = {}) {
     date: key,
     at: new Date().toISOString(),
     emailDelivered: mail.delivered,
+    // Why it did not go, in words the admin page can show as they are.
+    emailReason: mail.delivered ? null : mail.reason,
+    emailError: mail.delivered ? null : mail.error ?? null,
     whatsapp,
     rateWasPlaceholder: rates.isPlaceholder,
   };
@@ -170,7 +173,7 @@ export async function runReminder({ force = false } = {}) {
   });
 
   console.log(
-    `[reminder] ${dateLabel} — email ${mail.delivered ? 'sent' : 'queued to outbox'}; ` +
+    `[reminder] ${dateLabel} — email ${mail.delivered ? 'sent' : `not sent (${mail.error || mail.reason})`}; ` +
       `whatsapp ${whatsapp.map((w) => `${w.owner}:${w.sent ? 'sent' : w.reason}`).join(', ')}`
   );
 

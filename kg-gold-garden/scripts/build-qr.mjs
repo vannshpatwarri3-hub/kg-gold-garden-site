@@ -132,7 +132,7 @@ const SHOP = {
   line3: 'Shahibaug, Ahmedabad 380004',
   phone: '+91 82003 29042  ·  +91 98987 03136',
   social: 'instagram.com/kggold_ahemdabad',
-  hours: 'Monday – Saturday  ·  11 AM – 8 PM',
+  hours: 'Monday – Saturday  ·  10:30 AM – 8 PM',
 };
 
 /** A6 at 300 dpi — the counter card and window sticker. */
@@ -240,7 +240,7 @@ async function square() {
         textLength="330" lengthAdjust="spacingAndGlyphs">Shahibaug, Ahmedabad</text>
   <text x="${S / 2}" y="1014" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif"
         font-size="23" fill="${MUTED}"
-        textLength="360" lengthAdjust="spacingAndGlyphs">${esc(SHOP.hours)}</text>
+        textLength="392" lengthAdjust="spacingAndGlyphs">${esc(SHOP.hours)}</text>
 </svg>`;
 
   // density 72 means one SVG unit renders as one pixel, so the canvas comes out
@@ -319,7 +319,7 @@ function darkFrameSvg(S, { codeTop, codeSize, panel }) {
         textLength="330" lengthAdjust="spacingAndGlyphs">Shahibaug, Ahmedabad</text>
   <text x="${S / 2}" y="1016" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif"
         font-size="23" fill="${SAND}" fill-opacity=".9"
-        textLength="360" lengthAdjust="spacingAndGlyphs">${esc(SHOP.hours)}</text>
+        textLength="392" lengthAdjust="spacingAndGlyphs">${esc(SHOP.hours)}</text>
 </svg>`;
 }
 

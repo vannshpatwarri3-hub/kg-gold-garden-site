@@ -111,7 +111,7 @@ const card = Buffer.from(`<svg width="${W}" height="${H}" xmlns="http://www.w3.o
 
   <text x="547" y="508" font-family="Segoe UI, Arial, sans-serif"
         font-size="24" fill="#C9B999" fill-opacity=".88"
-        textLength="252" lengthAdjust="spacingAndGlyphs">Mon–Sat, 11 AM – 8 PM</text>
+        textLength="288" lengthAdjust="spacingAndGlyphs">Mon–Sat, 10:30 AM – 8 PM</text>
 </svg>`);
 
 await sharp(card)

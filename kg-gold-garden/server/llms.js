@@ -27,7 +27,7 @@ bullion over the counter. This website publishes the shop's own gold rate for
 24K, 22K and 18K gold and for silver, lists pieces held in the showroom,
 calculates what a piece costs at that rate, and books appointments to come and
 see them. Nothing is sold or paid for through the website. The showroom is open
-Monday to Saturday, 11 AM to 8 PM, and closed on Sunday.
+Monday to Saturday, 10:30 AM to 8 PM, and closed on Sunday.
 
 ## Pages
 

@@ -3,22 +3,23 @@
  * Guided setup:  npm run setup
  *
  *   1. the admin ID and password for the rate page
- *   2. the Gmail App Password that lets the site actually send email
+ *   2. the four EmailJS values that let the site actually send email
  *
- * Nothing you type is echoed to the screen, written to your shell history, or
- * sent anywhere. The password is stored only as a scrypt hash; the App Password
- * is written straight into .env, which is git-ignored.
+ * Nothing secret is echoed to the screen or written to your shell history. The
+ * password is stored only as a scrypt hash; the EmailJS values are written
+ * straight into .env, which is git-ignored, and go nowhere except to EmailJS
+ * itself if you ask for a test email.
  */
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import nodemailer from 'nodemailer';
 import { hashPassword } from '../server/auth.js';
+import { BUSINESS } from '../server/config.js';
 import { question, stop } from './prompt.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const ENV_PATH = path.join(ROOT, '.env');
-const PRIMARY = 'primeplay345@gmail.com';
+const PRIMARY = BUSINESS.email.primary;
 const rule = (c = '─') => c.repeat(70);
 
 // --- prompts ----------------------------------------------------------------
@@ -97,66 +98,63 @@ if (await yes('Set the admin ID and password now?')) {
 }
 
 // 2 ---------------------------------------------------------------- email ---
-console.log(`${rule()}\n  2. Email  (sending from ${PRIMARY})\n${rule()}`);
+console.log(`${rule()}\n  2. Email  (sending from ${PRIMARY}, through EmailJS)\n${rule()}`);
 console.log(`
-  Gmail will not accept your normal password here. You need a 16-character
-  "App Password", which is free and takes about a minute:
+  The server cannot reach a mail server itself — Render's free plan blocks
+  it — so email goes through EmailJS. Once the Yahoo service and the template
+  exist (the steps are in DEPLOY.md), copy four values from
+  https://dashboard.emailjs.com :
 
-    1. Turn on 2-Step Verification (required before app passwords exist):
-       https://myaccount.google.com/signinoptions/two-step-verification
+    Service ID    Email Services → your Yahoo service
+    Template ID   Email Templates → the KG template
+    Public Key    Account → General
+    Private Key   Account → General   (secret — not shown as you type)
 
-    2. Create the App Password:
-       https://myaccount.google.com/apppasswords
-       Choose "Mail" → "Other", name it "KG Gold Garden website".
-
-    3. Google shows 16 letters like  abcd efgh ijkl mnop
-       Paste them below. Spaces do not matter.
+  And on Account → Security, switch on BOTH "allow API requests from
+  non-browser applications" and "use Private Key", or every send is refused.
 `);
 
-if (await yes('Do you have the App Password ready?', false)) {
-  const appPassword = (await askHidden('  App Password: ')).replace(/\s+/g, '');
+if (await yes('Do you have all four ready?', false)) {
+  const values = {
+    EMAILJS_SERVICE_ID: (await ask('  Service ID:  ')).trim(),
+    EMAILJS_TEMPLATE_ID: (await ask('  Template ID: ')).trim(),
+    EMAILJS_PUBLIC_KEY: (await ask('  Public Key:  ')).trim(),
+    EMAILJS_PRIVATE_KEY: (await askHidden('  Private Key: ')).trim(),
+  };
+  const missing = Object.keys(values).filter((k) => !values[k]);
 
-  if (appPassword.length < 16) {
-    console.log(`\n  ✗ That is ${appPassword.length} characters — an App Password is 16.`);
-    console.log('    Nothing was saved for email. Run setup again when you have it.\n');
+  if (missing.length) {
+    console.log(`\n  ✗ Missing ${missing.join(', ')}. Nothing was saved for email.\n`);
   } else {
-    process.stdout.write('\n  Checking it with Gmail… ');
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: { user: PRIMARY, pass: appPassword },
-    });
+    for (const [key, value] of Object.entries(values)) env = upsert(env, key, value);
+    changes.push('EmailJS keys saved.');
 
-    try {
-      await transporter.verify();
-      console.log('accepted.');
-
-      env = upsert(env, 'SMTP_USER', PRIMARY);
-      env = upsert(env, 'SMTP_PASS', appPassword);
-      changes.push('Email switched on and verified with Gmail.');
-
-      if (await yes('  Send a test email to confirm it arrives?')) {
-        await transporter.sendMail({
-          from: `"KG Gold Garden" <${PRIMARY}>`,
-          to: PRIMARY,
-          subject: 'KG Gold Garden — email is working',
-          text:
-            'This is a test from your own website.\n\n' +
-            'If you are reading this, email is set up correctly. Rate-alert welcome\n' +
-            'notes and appointment confirmations will now be delivered to customers\n' +
-            'instead of being saved and held.\n\n— KG Gold Garden website',
-        });
-        console.log(`  ✓ Sent. Check the inbox for ${PRIMARY}.`);
+    if (await yes(`\n  Send one test email to ${PRIMARY} to confirm it arrives?`)) {
+      // The site's own sender, so the test proves exactly what customers get.
+      Object.assign(process.env, values);
+      const { send } = await import('../server/mailer.js');
+      process.stdout.write('  Sending… ');
+      const result = await send({
+        to: PRIMARY,
+        subject: 'KG Gold Garden — email is working',
+        text: 'This is a test from your own website. If you are reading this, email is set up correctly.',
+        html:
+          '<p>This is a test from your own website.</p>' +
+          '<p>If you are reading this, email is set up correctly: booking confirmations and ' +
+          'rate-alert emails will now reach customers.</p><p>&mdash; KG Gold Garden website</p>',
+      });
+      if (result.delivered) {
+        console.log(`sent. Check the inbox for ${PRIMARY}.\n`);
+      } else {
+        console.log('not sent.');
+        console.log(`\n  ✗ ${result.error || result.reason}`);
+        console.log('    The keys are saved anyway. Check them and the two Security');
+        console.log('    switches in EmailJS, then run setup again.\n');
       }
-      console.log('');
-    } catch (err) {
-      console.log('rejected.');
-      console.log(`\n  ✗ Gmail would not accept it: ${err.message}`);
-      console.log('    Most often this means 2-Step Verification is not on yet, or a');
-      console.log('    character was mistyped. Nothing was saved for email.\n');
     }
   }
 } else {
-  console.log('  Skipped — the site keeps saving mail to data/outbox/ until you do this.\n');
+  console.log('  Skipped — until this is done, no confirmation emails are sent.\n');
 }
 
 // 3 --------------------------------------------------------------- finish ---

@@ -1,78 +1,129 @@
 /**
  * Outbound email. Every message is sent from — and every owner notification is
- * sent to — primeplay345@gmail.com (BUSINESS.email.primary).
+ * sent to — the shop's address in BUSINESS.email.primary.
  *
- * If SMTP_PASS is not configured the mail is written to data/outbox/ instead of
- * being dropped, and send() reports delivered:false so the website can tell the
- * visitor the truth ("saved, delivery pending") rather than faking success.
+ * WHY EMAILJS AND NOT SMTP
+ *   Render's free tier blocks outbound SMTP (ports 25, 465 and 587; Render
+ *   changelog, September 2025), so this server cannot reach any mail server
+ *   directly — every attempt hung for ten seconds and failed. EmailJS is reached
+ *   over ordinary HTTPS, and relays each message through the shop's connected
+ *   Yahoo account, so it genuinely arrives from the shop's own address.
+ *
+ * ONE TEMPLATE CARRIES EVERY EMAIL
+ *   The free plan allows two templates and the site sends six kinds of email,
+ *   so the EmailJS template is a blank envelope filled in from here:
+ *
+ *     To Email   {{to_email}}        Reply To   {{reply_to}}
+ *     Subject    {{subject}}         From Name  {{from_name}}
+ *     Content    {{{html_body}}}     (three braces: the HTML goes in untouched)
+ *
+ *   An envelope that will carry any message to anyone is exactly what a spammer
+ *   wants, so the EmailJS account MUST have "Use Private Key" switched on under
+ *   Account → Security. Only this server holds the private key, so nobody else
+ *   can send through it — even with the public key, service and template IDs.
+ *
+ * LIMITS (free plan, from EmailJS's own documentation)
+ *   1 request per second — every send waits its turn in one queue, 1.1s apart.
+ *   50 KB of variables   — checked before sending; our emails are 3–6 KB.
+ *   200 emails a month   — beyond that, EmailJS drops requests.
+ *
+ * Nothing is ever claimed that did not happen: if EmailJS is not configured, or
+ * a send fails, the message is written to data/outbox/ and send() reports
+ * delivered:false with the reason, so the page can tell the visitor the truth.
  */
-import nodemailer from 'nodemailer';
 import { BUSINESS } from './config.js';
 import { queueOutbox } from './store.js';
 
 const PRIMARY = BUSINESS.email.primary;
-const FROM = `"${BUSINESS.email.displayName}" <${PRIMARY}>`;
-
-let transporter = null;
+const API_URL = process.env.EMAILJS_API_URL || 'https://api.emailjs.com/api/v1.0/email/send';
+const MAX_PARAMS_BYTES = 50 * 1024;
+const MIN_GAP_MS = 1100;
+const TIMEOUT_MS = 15_000;
 
 export function isMailConfigured() {
-  return Boolean(process.env.SMTP_PASS && process.env.SMTP_USER);
+  return Boolean(
+    process.env.EMAILJS_SERVICE_ID &&
+      process.env.EMAILJS_TEMPLATE_ID &&
+      process.env.EMAILJS_PUBLIC_KEY &&
+      process.env.EMAILJS_PRIVATE_KEY
+  );
 }
 
-function getTransporter() {
-  if (!isMailConfigured()) return null;
-  if (!transporter) {
-    transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+// One queue for every email the server sends, so two fired together — a
+// booking's customer and owner notes — never trip the one-per-second limit.
+let queue = Promise.resolve();
+let lastSentAt = 0;
 
-      /**
-       * Without pooling, every single email opens a brand new TLS connection to
-       * Gmail and logs in again — several seconds of handshake per message. The
-       * pool keeps a couple of authenticated connections warm and reuses them,
-       * which is the difference between "sent instantly" and "sent eventually".
-       */
-      pool: true,
-      maxConnections: 3,
-      maxMessages: 50,
+function inTurn(task) {
+  const run = queue.then(async () => {
+    const wait = lastSentAt + MIN_GAP_MS - Date.now();
+    if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
+    try {
+      return await task();
+    } finally {
+      lastSentAt = Date.now();
+    }
+  });
+  queue = run.catch(() => {}); // one failed email must not jam the next
+  return run;
+}
 
-      /**
-       * Nodemailer has no timeouts by default, so an unreachable Gmail could
-       * hang a send until the OS gives up — minutes. These caps mean a failed
-       * send fails fast and lands in data/outbox/ instead of hanging.
-       */
-      connectionTimeout: 10_000,
-      greetingTimeout: 10_000,
-      socketTimeout: 20_000,
-    });
-  }
-  return transporter;
+async function notSent(message, reason, error = null) {
+  const file = await queueOutbox({ ...message, queuedAt: new Date().toISOString(), reason, error });
+  if (error) console.error(`[mail] not sent to ${message.to} — ${error}`);
+  return { delivered: false, reason, error, queuedAt: file };
 }
 
 /**
- * @returns {Promise<{delivered: boolean, reason?: string, queuedAt?: string}>}
+ * @returns {Promise<{delivered: boolean, reason?: string, error?: string|null, queuedAt?: string}>}
  */
 export async function send({ to, subject, text, html, replyTo }) {
-  const message = { from: FROM, to, subject, text, html, replyTo: replyTo || PRIMARY };
-  const tx = getTransporter();
+  const message = { from: PRIMARY, to, subject, text, html, replyTo: replyTo || PRIMARY };
 
-  if (!tx) {
-    const file = await queueOutbox({ ...message, queuedAt: new Date().toISOString() });
-    return { delivered: false, reason: 'smtp_not_configured', queuedAt: file };
+  if (!isMailConfigured()) return notSent(message, 'not_configured');
+
+  const template_params = {
+    to_email: to,
+    subject,
+    reply_to: replyTo || PRIMARY,
+    from_name: BUSINESS.email.displayName,
+    html_body: html,
+  };
+
+  if (Buffer.byteLength(JSON.stringify(template_params)) > MAX_PARAMS_BYTES) {
+    return notSent(message, 'too_large', "over EmailJS's 50 KB limit per email");
   }
 
-  try {
-    await tx.sendMail(message);
-    return { delivered: true };
-  } catch (err) {
-    const file = await queueOutbox({
-      ...message,
-      queuedAt: new Date().toISOString(),
-      error: err.message,
-    });
-    console.error('[mail] send failed, queued to outbox:', err.message);
-    return { delivered: false, reason: 'send_failed', queuedAt: file };
-  }
+  return inTurn(async () => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          service_id: process.env.EMAILJS_SERVICE_ID,
+          template_id: process.env.EMAILJS_TEMPLATE_ID,
+          user_id: process.env.EMAILJS_PUBLIC_KEY,
+          accessToken: process.env.EMAILJS_PRIVATE_KEY,
+          template_params,
+        }),
+        signal: controller.signal,
+      });
+      if (res.ok) return { delivered: true };
+
+      const detail = (await res.text().catch(() => '')).trim().slice(0, 240);
+      return notSent(message, 'send_failed', `EmailJS refused it (${res.status}) ${detail}`.trim());
+    } catch (err) {
+      const why =
+        err.name === 'AbortError'
+          ? `no answer from EmailJS within ${TIMEOUT_MS / 1000}s`
+          : `could not reach EmailJS — ${err.message}`;
+      return notSent(message, 'send_failed', why);
+    } finally {
+      clearTimeout(timer);
+    }
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -140,26 +191,28 @@ function shell(title, innerHtml) {
 // Rate-alert welcome
 // ---------------------------------------------------------------------------
 
-export function welcomeEmail(name) {
+/**
+ * Promises only what the site actually does: one email each time 22K comes down
+ * to the subscriber's own figure. It used to promise daily rates, "sharp move"
+ * notes and early making-charge offers — none of which existed.
+ */
+export function welcomeEmail(name, { target, stopUrl } = {}) {
   const greeting = name ? `Dear ${name},` : 'Dear Customer,';
+  const figure = target ? `₹${Number(target).toLocaleString('en-IN')}` : 'the price you gave us';
 
   const text = `${greeting}
 
-Thank you for choosing to receive gold rate alerts from ${BUSINESS.name}.
+Thank you for setting a gold rate alert with ${BUSINESS.name}.
 
 We understand that buying gold is rarely an ordinary purchase. It is usually tied to a wedding, a new home, a daughter's future, or a quiet decision to protect what a family has worked many years to build. In each of those, timing matters and price matters. That is precisely why we send these alerts — so that you are never guessing, and never buying blind.
 
-From today, you will receive:
-
-  - Our indicative 22K (916) and 24K rates for Ahmedabad, updated on each trading day
-  - A note whenever the rate moves sharply, so that you can act rather than react
-  - Early intimation of our making-charge offers, before they are advertised publicly
+Here is what happens now. The day our 22K (916) rate comes down to ${figure} or lower, we will email you to say so. If it climbs back above your figure and dips again, we will tell you again. That is all we will send.
 
 Two commitments we would like to make to you in writing.
 
 First, on purity. Every piece of jewellery we sell is BIS hallmarked, and our jewellery is guaranteed 916 / 22K. You are welcome to have anything you buy from us independently tested. We would much rather earn your trust than be asked to assume it.
 
-Second, on your privacy. We will never sell, rent or share your email address, and we will never send you anything you did not ask for. If you wish to stop these alerts, a one-word reply saying "stop" is enough, and they will end the same day.
+Second, on your privacy. We will never sell, rent or share your email address, and we will never send you anything you did not ask for. You can stop these alerts at any time, with one click: ${stopUrl}
 
 Should you wish to see a piece in person, our doors are open ${BUSINESS.hours.label}. ${BUSINESS.hours.closedLabel}.
 
@@ -180,7 +233,7 @@ ${PRIMARY}`;
     `
     <p style="margin:0 0 18px;">${greeting}</p>
 
-    <p style="margin:0 0 18px;">Thank you for choosing to receive gold rate alerts from
+    <p style="margin:0 0 18px;">Thank you for setting a gold rate alert with
       <strong>${BUSINESS.name}</strong>.</p>
 
     <p style="margin:0 0 18px;">We understand that buying gold is rarely an ordinary purchase. It is
@@ -189,20 +242,9 @@ ${PRIMARY}`;
       That is precisely why we send these alerts &mdash; so that you are never guessing, and never
       buying blind.</p>
 
-    <p style="margin:0 0 10px;">From today, you will receive:</p>
-    <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
-      ${[
-        'Our indicative 22K (916) and 24K rates for Ahmedabad, updated on each trading day',
-        'A note whenever the rate moves sharply, so that you can act rather than react',
-        'Early intimation of our making-charge offers, before they are advertised publicly',
-      ]
-        .map(
-          (li) =>
-            `<tr><td valign="top" style="padding:0 10px 8px 0;color:#A97722;font-weight:700;">&bull;</td>
-             <td valign="top" style="padding:0 0 8px;">${li}</td></tr>`
-        )
-        .join('')}
-    </table>
+    <p style="margin:0 0 20px;">Here is what happens now. The day our 22K (916) rate comes down
+      to <strong>${figure}</strong> or lower, we will email you to say so. If it climbs back above
+      your figure and dips again, we will tell you again. That is all we will send.</p>
 
     <p style="margin:0 0 18px;">Two commitments we would like to make to you in writing.</p>
 
@@ -212,9 +254,9 @@ ${PRIMARY}`;
       it.</p>
 
     <p style="margin:0 0 18px;"><strong>Second, on your privacy.</strong> We will never sell, rent or
-      share your email address, and we will never send you anything you did not ask for. If you wish
-      to stop these alerts, a one-word reply saying &ldquo;stop&rdquo; is enough, and they will end the
-      same day.</p>
+      share your email address, and we will never send you anything you did not ask for. You can
+      <a href="${stopUrl}" style="color:#A97722;">stop these alerts</a> at any time, with one
+      click.</p>
 
     <p style="margin:0 0 18px;">Should you wish to see a piece in person, our doors are open
       ${BUSINESS.hours.label}. ${BUSINESS.hours.closedLabel}.</p>
@@ -305,7 +347,7 @@ ${PRIMARY}`;
 }
 
 // ---------------------------------------------------------------------------
-// Internal notifications to the showroom (primeplay345@gmail.com)
+// Internal notifications to the showroom (BUSINESS.email.primary)
 // ---------------------------------------------------------------------------
 
 export function ownerAppointmentNotice(b) {
@@ -401,7 +443,7 @@ ${adminUrl}
 }
 
 /** Sent once, when 22K reaches the figure a subscriber asked to be told about. */
-export function rateDropEmail({ name, target, rates }) {
+export function rateDropEmail({ name, target, rates, stopUrl }) {
   const greeting = name ? `Dear ${name},` : 'Dear Customer,';
   const money = (n) => `₹${Number(n).toLocaleString('en-IN')}`;
 
@@ -430,7 +472,7 @@ ${BUSINESS.name}
 ${PRIMARY}
 
 You will not get another one of these until the rate rises above ${money(target)}
-and comes back down again. Reply "stop" at any time and the alerts end.`;
+and comes back down again. To stop these alerts altogether: ${stopUrl}`;
 
   const html = shell(
     `22K has reached ${money(target)}`,
@@ -464,7 +506,7 @@ and comes back down again. Reply "stop" at any time and the alerts end.`;
 
     <p style="margin:0;padding-top:16px;border-top:1px solid #E2D9C4;font-size:12px;color:#7C8A78;">
       You will not get another one of these until the rate rises above ${money(target)} and comes
-      back down again. Reply &ldquo;stop&rdquo; at any time and the alerts end.</p>
+      back down again. <a href="${stopUrl}" style="color:#7C8A78;">Stop these alerts</a></p>
   `
   );
 
@@ -475,7 +517,7 @@ export function ownerSubscriberNotice(s) {
   const lines = [
     `Name  : ${s.name || '—'}`,
     `Email : ${s.email}`,
-    `Alert : ${s.alertBelow ? `wants to be told when 22K reaches ₹${Number(s.alertBelow).toLocaleString('en-IN')}` : 'daily rates only'}`,
+    `Alert : ${s.alertBelow ? `wants to be told when 22K reaches ₹${Number(s.alertBelow).toLocaleString('en-IN')}` : 'no price alert set'}`,
   ].join('\n');
   return {
     subject: `New rate-alert subscriber — ${s.email}`,

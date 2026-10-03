@@ -155,7 +155,7 @@ function captionSvg(W, H, { withQrColumn }) {
 
   <text x="${centre}" y="${base + 172}" text-anchor="${anchor}" font-family="Segoe UI, Arial, sans-serif"
         font-size="19" fill="${GOLD}" fill-opacity=".82"
-        textLength="${withQrColumn ? 404 : 424}" lengthAdjust="spacingAndGlyphs">Shahibaug, Ahmedabad · Mon–Sat, 11 AM – 8 PM</text>
+        textLength="${withQrColumn ? 432 : 453}" lengthAdjust="spacingAndGlyphs">Shahibaug, Ahmedabad · Mon–Sat, 10:30 AM – 8 PM</text>
 </svg>`;
 }
 

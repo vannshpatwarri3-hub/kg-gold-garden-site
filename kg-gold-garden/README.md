@@ -48,7 +48,7 @@ curl -X POST http://localhost:4400/api/rates \
 The server asks for the rate on its own, every day at **12:00 PM India time**,
 for as long as it is running. It does two things:
 
-- **Always** — emails `primeplay345@gmail.com` a reminder containing a
+- **Always** — emails `kggoldgarden81@yahoo.com` a reminder containing a
   **tap-to-send WhatsApp link for Sunilbhai and for Anilbhai**, with the request
   already written ("please share today's 24K / 22K / 18K rate…"). Two taps and
   it is sent from the shop's own number.
@@ -77,9 +77,8 @@ It asks for:
 - **the admin ID and password** for `/admin` — neither is echoed to the screen,
   and only a scrypt hash of the password is stored, so it cannot be read back
   out of the file by anyone;
-- **the Gmail App Password** that lets the site send email (see below). It
-  checks the credentials against Gmail before saving, and can send you a test
-  message to prove delivery works.
+- **the four EmailJS values** that let the site send email (see below), and
+  can send one test message to prove delivery works.
 
 Everything is written straight into `.env`, which is git-ignored. Restart with
 `npm start` afterwards.
@@ -88,28 +87,17 @@ Five wrong login attempts per quarter-hour, per visitor, then it locks out.
 
 ### 2. Turn on email
 
-The site sends from **primeplay345@gmail.com** and copies every enquiry to the
-same address. Gmail will not accept your normal account password — it needs a
-16-character **App Password**, which is free:
+The site sends from **kggoldgarden81@yahoo.com** and copies every enquiry to the
+same address. It sends through **EmailJS** rather than plain email settings,
+because Render's free plan blocks the ports email servers use. The full steps —
+Yahoo App Password, the EmailJS service, the one template, the two security
+switches, and the four values for Render — are in **DEPLOY.md → "Set up email"**.
 
-1. Turn on 2-Step Verification (App Passwords do not exist without it) —
-   <https://myaccount.google.com/signinoptions/two-step-verification>
-2. Create the App Password — <https://myaccount.google.com/apppasswords>
-   (choose Mail → Other, name it "KG Gold Garden website")
-3. Run `npm run setup` and paste the 16 characters when asked. Spaces don't
-   matter. It verifies them with Gmail on the spot and tells you if they are
-   wrong, rather than failing silently later.
-4. Restart with `npm start`.
+For local development, `npm run setup` saves the same four values into `.env`.
 
-**This is the single thing that makes the "email is not switched on" messages go
-away.** Appointment bookings and rate-alert signups are already being saved
-correctly without it — the site just cannot deliver the confirmation email yet,
-and says so honestly rather than claiming a message was sent.
-
-**Until you do this nothing is lost and nothing is faked.** Signups and bookings
-are saved to `data/`, the emails are queued as JSON in `data/outbox/`, and the
-website tells the visitor honestly that delivery is pending rather than claiming
-a mail was sent.
+**Until it is set up, nothing is faked.** Bookings and sign-ups are still taken,
+each email is kept as JSON in `data/outbox/` with the reason it was not sent, and
+the visitor is told plainly that no confirmation email went out.
 
 ### 3. Add a real hero film (optional)
 

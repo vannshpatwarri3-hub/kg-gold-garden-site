@@ -263,7 +263,7 @@ export const PAGES = [
     slug: 'visit-our-showroom',
     title: 'Visit KG Gold Garden — Gold Shop in Shahibaug, Ahmedabad',
     description:
-      'KG Gold Garden, First Floor, Aastamangal Complex, above HDFC Bank near Rajasthan Hospital, Shahibaug, Ahmedabad. Open Monday to Saturday, 11 AM to 8 PM.',
+      'KG Gold Garden, First Floor, Aastamangal Complex, above HDFC Bank near Rajasthan Hospital, Shahibaug, Ahmedabad. Open Monday to Saturday, 10:30 AM to 8 PM.',
     kicker: 'Visit',
     h1: 'Finding us in Shahibaug',
     lead:
@@ -273,7 +273,7 @@ export const PAGES = [
       {
         h: 'Opening hours',
         p: [
-          'Monday to Saturday, 11 AM to 8 PM. Closed on Sunday.',
+          'Monday to Saturday, 10:30 AM to 8 PM. Closed on Sunday.',
           'The quietest hours are late morning and mid-afternoon. Saturday evenings are the busiest, and if you want unhurried attention that is the time to avoid.',
         ],
       },
@@ -295,7 +295,7 @@ export const PAGES = [
     faq: [
       {
         q: 'Are you open on Sunday?',
-        a: 'No. Monday to Saturday, 11 AM to 8 PM.',
+        a: 'No. Monday to Saturday, 10:30 AM to 8 PM.',
       },
       {
         q: 'Do I need an appointment?',
@@ -510,7 +510,7 @@ export async function renderPage(slug, origin) {
   <h2>Come and see</h2>
   <p>
     ${esc(BUSINESS.name)} &middot; ${esc(addressLine())}<br>
-    Monday to Saturday, 11 AM to 8 PM. ${phoneLinks()}
+    Monday to Saturday, 10:30 AM to 8 PM. ${phoneLinks()}
   </p>
   <p><a href="/#visit">Book a time to visit</a>.</p>
 

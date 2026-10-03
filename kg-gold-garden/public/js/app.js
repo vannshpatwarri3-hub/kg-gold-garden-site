@@ -46,6 +46,12 @@ function renderOwners(config) {
           ? `<p><a href="${esc(config.business.social.instagram.url)}" target="_blank" rel="noopener">
                Instagram — @${esc(config.business.social.instagram.handle)}</a></p>`
           : ''
+      }
+      ${
+        config.business.social?.justdial
+          ? `<p><a href="${esc(config.business.social.justdial.url)}" target="_blank" rel="noopener">
+               Reviews on JustDial</a></p>`
+          : ''
       }`;
   }
 }

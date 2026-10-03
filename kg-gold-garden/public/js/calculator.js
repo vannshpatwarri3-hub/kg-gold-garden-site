@@ -88,21 +88,36 @@ export function initRates({ config, rates }) {
     }
   }
 
-  // Anchor the alert box to what 22K actually costs today.
+  // Anchor the alert box to what 22K actually costs today — but only when the
+  // figure is the showroom's own. The placeholder is not today's price, and
+  // quoting it here would state a made-up number as fact.
   const alertHint = $('#subAlertHint');
-  if (alertHint && Number.isFinite(rates.gold22)) {
-    alertHint.textContent = `22K is ${inr(rates.gold22)} today. Leave blank for the daily rates only.`;
+  if (alertHint && Number.isFinite(rates.gold22) && !rates.isPlaceholder) {
+    alertHint.textContent = `22K is ${inr(rates.gold22)} today.`;
   }
 
   // --- "open today" in the hero -------------------------------------------
+  // Judged by the shop's clock (India time), not the visitor's: someone looking
+  // from Dubai or New Jersey must still see whether the Shahibaug shop is open.
   const openEl = $('[data-open-state]');
   if (openEl) {
-    const now = new Date();
-    const day = now.getDay();
-    const isOpenDay = config.business.hours.openDays.includes(day);
-    const hour = now.getHours() + now.getMinutes() / 60;
-    const openNow = isOpenDay && hour >= config.business.hours.openHour && hour < config.business.hours.closeHour;
-    openEl.textContent = openNow ? 'Open now' : isOpenDay ? '11 AM – 8 PM' : 'Closed today';
+    const ist = Object.fromEntries(
+      new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Kolkata',
+        weekday: 'short',
+        hour: 'numeric',
+        minute: 'numeric',
+        hourCycle: 'h23',
+      })
+        .formatToParts(new Date())
+        .map((p) => [p.type, p.value])
+    );
+    const day = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(ist.weekday);
+    const hour = Number(ist.hour) + Number(ist.minute) / 60;
+    const { openDays, openHour, closeHour, shortLabel } = config.business.hours;
+    const isOpenDay = openDays.includes(day);
+    const openNow = isOpenDay && hour >= openHour && hour < closeHour;
+    openEl.textContent = openNow ? 'Open now' : isOpenDay ? shortLabel : 'Closed today';
   }
 }
 

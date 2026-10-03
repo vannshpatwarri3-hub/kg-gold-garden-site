@@ -48,7 +48,7 @@ export const BUSINESS = {
 
   email: {
     // Primary address for every outbound and inbound message on this site.
-    primary: 'primeplay345@gmail.com',
+    primary: 'kggoldgarden81@yahoo.com',
     displayName: 'KG Gold Garden',
   },
 
@@ -57,14 +57,26 @@ export const BUSINESS = {
       handle: 'kggold_ahemdabad',
       url: 'https://www.instagram.com/kggold_ahemdabad/',
     },
+    // The Shahibaug listing — address matches, "Justdial Verified". Linked
+    // without its star rating: the brand states no rating it cannot keep
+    // current, and this one moved from 4.7 to 4.8 within a single day.
+    // (Two other JustDial listings use similar names — "K G Gold Garden" at
+    // Bhadraraj Chambers, Dhabharnagar Society, and "K G Gold Jewellery" on
+    // the ground floor of this building. Neither is linked until the owner
+    // confirms they are this shop.)
+    justdial: {
+      url: 'https://www.justdial.com/Ahmedabad/K-G-Gold-Garden-Near-Rajsthan-Hospital-Above-Hdfc-Bank-Shahibaug/079P38271_BZDET',
+    },
   },
 
   hours: {
-    // Confirmed by owner: Monday–Saturday, 11:00–20:00. Closed Sunday.
+    // Confirmed by owner on 3 October 2026: Monday–Saturday, 10:30–20:00,
+    // closed Sunday. (The site said 11:00 until then; JustDial had it right.)
     openDays: [1, 2, 3, 4, 5, 6], // 0 = Sunday
-    openHour: 11,
+    openHour: 10.5, // 10:30 AM — booking slots and "Open now" both work in minutes
     closeHour: 20,
-    label: 'Monday – Saturday, 11:00 AM – 8:00 PM',
+    label: 'Monday – Saturday, 10:30 AM – 8:00 PM',
+    shortLabel: '10:30 AM – 8 PM',
     closedLabel: 'Closed on Sunday',
   },
 

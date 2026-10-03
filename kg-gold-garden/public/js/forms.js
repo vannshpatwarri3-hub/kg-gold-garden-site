@@ -126,13 +126,15 @@ export function initAppointment({ config }) {
       receipt.className = 'appt__receipt';
       receipt.setAttribute('role', 'status');
 
-      // The slot is already booked by the time this runs; the email leaves a
-      // moment later. Only promise an inbox note if delivery is actually set up.
-      const mailLine = !body.email
-        ? 'Please keep your reference number handy.'
-        : res.mailConfigured
-          ? 'A confirmation is on its way to your inbox.'
-          : 'Our email delivery is not switched on yet, so your confirmation is saved and will be sent shortly. Your slot is booked either way.';
+      // Say only what actually happened to the confirmation email — the server
+      // waits for the answer before replying, so this is a report, not a hope.
+      const keepRef = 'Please keep your reference number handy.';
+      const mailLine =
+        {
+          sent: `A confirmation has been sent to ${body.email}.`,
+          pending: `Your confirmation email is still being sent. ${keepRef}`,
+          failed: `We could not email your confirmation just now. Your slot is booked — ${keepRef.toLowerCase()}`,
+        }[res.emailStatus] ?? keepRef;
 
       receipt.innerHTML = `
         <h4>Your appointment is confirmed</h4>
@@ -184,7 +186,7 @@ export function initSubscribe() {
     try {
       const res = await api('/api/subscribe', { method: 'POST', body });
       // "Saved" and "emailed" are different claims — say which one happened.
-      status(statusEl, res.message, res.mailConfigured || res.alreadySubscribed ? 'ok' : 'warn');
+      status(statusEl, res.message, res.emailStatus === 'failed' ? 'warn' : 'ok');
       if (!res.alreadySubscribed) form.reset();
     } catch (err) {
       if (err.data?.errors) showErrors(form, err.data.errors);

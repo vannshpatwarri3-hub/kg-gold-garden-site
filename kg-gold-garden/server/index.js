@@ -7,7 +7,13 @@ import { fileURLToPath } from 'node:url';
 import { BUSINESS, CATEGORIES, PURITY, BULLION, FINISHES } from './config.js';
 import { startReminderSchedule, runReminder } from './reminder.js';
 import { getProducts, getTestimonials, getMuhurat } from './catalogue.js';
-import { runRateDropAlerts, validateAlertBelow } from './alerts.js';
+import {
+  runRateDropAlerts,
+  validateAlertBelow,
+  stopAlerts,
+  newStopToken,
+  stopUrlFor,
+} from './alerts.js';
 import {
   COOKIE,
   createSession,
@@ -100,6 +106,24 @@ app.use((req, res, next) => {
       "form-action 'self'",
     ].join('; ')
   );
+  next();
+});
+
+/**
+ * One address per page. "/privacy/" used to 404 while "/gold-rate-ahmedabad/"
+ * served a duplicate of the page; every trailing-slash path now redirects once,
+ * permanently, to the address without it.
+ *
+ * GET and HEAD only — redirecting a POST would quietly turn it into a GET and
+ * drop the form. Leading slashes are collapsed too, because "//evil.com/"
+ * would otherwise redirect to "//evil.com", which browsers treat as another
+ * website: an open redirect wearing this shop's name.
+ */
+app.use((req, res, next) => {
+  if ((req.method === 'GET' || req.method === 'HEAD') && req.path.length > 1 && req.path.endsWith('/')) {
+    const query = req.originalUrl.slice(req.originalUrl.indexOf('?') === -1 ? req.originalUrl.length : req.originalUrl.indexOf('?'));
+    return res.redirect(301, `/${req.path.replace(/^\/+|\/+$/g, '')}${query}`);
+  }
   next();
 });
 
@@ -254,6 +278,27 @@ app.get('/api/admin/data', requireAdmin, async (_req, res, next) => {
   }
 });
 
+/**
+ * Wait for an email the visitor is about to be told about — but never longer
+ * than a visitor should sit at a spinner. Resolves to:
+ *   'sent'    EmailJS accepted it
+ *   'failed'  it was not sent (and is in data/outbox/ with the reason)
+ *   'pending' still going after `ms`; it may yet arrive, so say exactly that
+ */
+function settleWithin(sending, ms = 8000) {
+  let timer;
+  const late = new Promise((resolve) => {
+    timer = setTimeout(() => resolve('pending'), ms);
+  });
+  return Promise.race([
+    sending.then(
+      (r) => (r.delivered ? 'sent' : 'failed'),
+      () => 'failed'
+    ),
+    late,
+  ]).finally(() => clearTimeout(timer));
+}
+
 // --- validation helpers -----------------------------------------------------
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
 
@@ -263,9 +308,10 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
  * The stripping is the part that earns its place. Values from these forms reach
  * mail headers — the owner's booking notice puts the customer's name straight
  * into the Subject line, and their address into Reply-To — and a carriage
- * return inside a header is exactly how header injection is done. nodemailer
- * guards against it as well, but a value that cannot contain a newline cannot
- * be smuggled through anything, now or after some future upgrade.
+ * return inside a header is exactly how header injection is done. EmailJS now
+ * builds those headers from our template fields, and may well guard against it
+ * too — but a value that cannot contain a newline cannot be smuggled through
+ * anything, now or after some future change of provider.
  *
  * `multiline` keeps real line breaks for fields that only ever reach a message
  * body and never a header.
@@ -386,7 +432,7 @@ app.post('/api/rates', limit('rates', 30, 60e3), requireAdmin, async (req, res, 
     res.json({ ok: true, rates });
 
     // After replying — nobody should wait on the post for an email run.
-    runRateDropAlerts(rates).catch((err) => console.error('[alerts]', err));
+    runRateDropAlerts(rates, siteOrigin(req)).catch((err) => console.error('[alerts]', err));
   } catch (err) {
     next(err);
   }
@@ -487,7 +533,7 @@ app.post('/api/appointments', limit('appt', 6, 10 * 60e3), async (req, res, next
 
     const slots = slotsForDate(date);
     if (!slots || slots.length === 0) {
-      errors.date = errors.date ?? `We are closed that day. ${BUSINESS.hours.closedLabel}.`;
+      errors.date = errors.date ?? `${BUSINESS.hours.closedLabel} — please choose another day.`;
     } else if (!slots.some((s) => s.value === time)) {
       errors.time = 'Please choose a time from the list.';
     }
@@ -536,33 +582,33 @@ app.post('/api/appointments', limit('appt', 6, 10 * 60e3), async (req, res, next
     await append('appointments.json', booking);
 
     /**
-     * Reply the moment the booking is safely stored.
+     * The showroom's notice goes first. On Render's free tier the bookings file
+     * is wiped whenever the server sleeps or redeploys, so this email is the one
+     * record of the booking that is certain to survive.
      *
-     * Email used to be sent *before* this line — two sequential Gmail handshakes
-     * that left the customer staring at a spinner for several seconds, watching
-     * nothing happen, with no idea whether their slot was taken. The booking is
-     * already saved by now, so nothing is lost by sending the mail afterwards.
+     * The customer's confirmation follows, and the page waits for it — a second
+     * or two through EmailJS — so the receipt can say "sent", "could not be
+     * sent" or "still sending" and mean it. The page used to promise an email
+     * whenever mail was switched on, which was untrue for every booking while
+     * the host was silently blocking the send.
      */
+    const detail = { ...booking, date: prettyDate, time: label };
+    send({ to: BUSINESS.email.primary, ...ownerAppointmentNotice(detail) }).catch((err) =>
+      console.error('[appointment mail]', err)
+    );
+    const emailStatus = email ? await settleWithin(send({ to: email, ...appointmentEmail(detail) })) : 'none';
+
     res.json({
       ok: true,
       reference,
       date: prettyDate,
       time: label,
-      emailQueued: Boolean(email),
-      mailConfigured: isMailConfigured(),
+      emailStatus,
       whatsapp: whatsappLink(
         BUSINESS.owners[0],
         `Hello ${BUSINESS.name}, I have booked an appointment. Reference ${reference}, ${prettyDate} at ${label}.`
       ),
     });
-
-    // Both notices go out together, after the reply. A failure here is already
-    // handled inside send(), which files the message in data/outbox/ instead.
-    const detail = { ...booking, date: prettyDate, time: label };
-    Promise.all([
-      send({ to: BUSINESS.email.primary, ...ownerAppointmentNotice(detail) }),
-      email ? send({ to: email, ...appointmentEmail(detail) }) : Promise.resolve(null),
-    ]).catch((err) => console.error('[appointment mail]', err));
   } catch (err) {
     next(err);
   }
@@ -586,24 +632,29 @@ app.post('/api/subscribe', limit('sub', 6, 10 * 60e3), async (req, res, next) =>
     const list = await readJson('subscribers.json', []);
     const existing = list.find((s) => s.email.toLowerCase() === email.toLowerCase());
 
+    const price = `₹${alert.value.toLocaleString('en-IN')}`;
+
     if (existing) {
-      // Let someone come back and set, change or clear their figure.
-      if (alert.value !== existing.alertBelow) {
+      // Someone coming back — to change their figure, or after stopping their
+      // alerts with the link — is switched back on rather than turned away.
+      const wasStopped = existing.status !== 'active';
+      if (wasStopped || alert.value !== existing.alertBelow) {
         existing.alertBelow = alert.value;
         existing.alertedAt = null;
+        existing.status = 'active';
+        existing.stopToken ||= newStopToken();
+        delete existing.stoppedAt;
         await writeJson('subscribers.json', list);
         return res.json({
           ok: true,
           alreadySubscribed: true,
-          message: alert.value
-            ? `Updated. We will write to you when 22K reaches ₹${alert.value.toLocaleString('en-IN')}.`
-            : 'Updated. Your rate alert has been turned off — you will still get the daily rates.',
+          message: `${wasStopped ? 'Welcome back.' : 'Updated.'} We will write to you when 22K reaches ${price}.`,
         });
       }
       return res.json({
         ok: true,
         alreadySubscribed: true,
-        message: 'You are already on our alert list — no need to sign up again.',
+        message: `You already have an alert for ${price} — no need to sign up again.`,
       });
     }
 
@@ -614,29 +665,58 @@ app.post('/api/subscribe', limit('sub', 6, 10 * 60e3), async (req, res, next) =>
       alertedAt: null,
       subscribedAt: new Date().toISOString(),
       status: 'active',
+      stopToken: newStopToken(),
     };
     await append('subscribers.json', record);
 
-    // Reply first — the sign-up is stored, so the visitor should not be made to
-    // wait on two Gmail handshakes before the form tells them it worked.
-    const mailReady = isMailConfigured();
+    // Same order as bookings: the showroom's copy first (the record that
+    // survives a wipe), then the welcome note, which the page waits for so it
+    // can say truthfully whether it went.
+    send({ to: BUSINESS.email.primary, ...ownerSubscriberNotice(record) }).catch((err) =>
+      console.error('[subscribe mail]', err)
+    );
+    const emailStatus = await settleWithin(
+      send({
+        to: email,
+        ...welcomeEmail(name, { target: alert.value, stopUrl: stopUrlFor(siteOrigin(req), record) }),
+      })
+    );
+
+    const welcomeLine = {
+      sent: 'You are on the list. A welcome note has been sent to your inbox.',
+      pending: 'You are on the list. Your welcome note is still being sent.',
+      failed: 'You are on the list. We could not send your welcome note just now.',
+    }[emailStatus];
+
     res.json({
       ok: true,
-      emailQueued: true,
-      mailConfigured: mailReady,
+      emailStatus,
       message:
-        (mailReady
-          ? 'You are on the list. A welcome note is on its way to your inbox.'
-          : 'You are on the list. Our email delivery is not switched on yet, so your welcome note is saved and will be sent as soon as it is.') +
-        (alert.value
-          ? ` We will write to you separately the day 22K reaches ₹${alert.value.toLocaleString('en-IN')}.`
-          : ''),
+        `${welcomeLine} We will write to you separately the day 22K reaches ${price}.`,
     });
+  } catch (err) {
+    next(err);
+  }
+});
 
-    Promise.all([
-      send({ to: email, ...welcomeEmail(name) }),
-      send({ to: BUSINESS.email.primary, ...ownerSubscriberNotice(record) }),
-    ]).catch((err) => console.error('[subscribe mail]', err));
+/**
+ * The "stop these alerts" link in every alert email lands on /stop-alerts, a
+ * page with a button that posts here. The link itself never stops anything:
+ * mail security scanners open every link in an email to check it, so a link
+ * that unsubscribed on open would quietly unsubscribe people who never asked.
+ */
+app.post('/api/stop-alerts', limit('stop', 10, 10 * 60e3), async (req, res, next) => {
+  try {
+    const { stopped } = await stopAlerts(req.body?.token);
+    res.json({
+      ok: true,
+      stopped,
+      // Either way they will get no alerts — say so plainly, without saying
+      // whether any given address is on the list.
+      message: stopped
+        ? 'Done. You will not receive any more rate alerts from us.'
+        : 'This link is not on our alert list, so you will not receive any rate alerts from us.',
+    });
   } catch (err) {
     next(err);
   }
