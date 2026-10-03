@@ -23,7 +23,10 @@
  *   can send through it — even with the public key, service and template IDs.
  *
  * LIMITS (free plan, from EmailJS's own documentation)
- *   1 request per second — every send waits its turn in one queue, 1.1s apart.
+ *   1 request per second — every send waits its turn in one queue, 1.3s apart
+ *                          (the first of a burst opens a fresh connection and
+ *                          arrives later than it left, so 1.1s could land two
+ *                          under a second apart at EmailJS).
  *   50 KB of variables   — checked before sending; our emails are 3–6 KB.
  *   200 emails a month   — beyond that, EmailJS drops requests.
  *
@@ -37,7 +40,7 @@ import { queueOutbox } from './store.js';
 const PRIMARY = BUSINESS.email.primary;
 const API_URL = process.env.EMAILJS_API_URL || 'https://api.emailjs.com/api/v1.0/email/send';
 const MAX_PARAMS_BYTES = 50 * 1024;
-const MIN_GAP_MS = 1100;
+const MIN_GAP_MS = 1300;
 const TIMEOUT_MS = 15_000;
 
 export function isMailConfigured() {
@@ -56,13 +59,14 @@ let lastSentAt = 0;
 
 function inTurn(task) {
   const run = queue.then(async () => {
+    // EmailJS limits how often requests START, so the gap is measured from
+    // the start of the previous send — not from when its answer came back.
+    // Measuring from the answer added the whole round trip to every second
+    // email and pushed the showroom's copy of a booking past three seconds.
     const wait = lastSentAt + MIN_GAP_MS - Date.now();
     if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
-    try {
-      return await task();
-    } finally {
-      lastSentAt = Date.now();
-    }
+    lastSentAt = Date.now();
+    return task();
   });
   queue = run.catch(() => {}); // one failed email must not jam the next
   return run;
@@ -95,33 +99,48 @@ export async function send({ to, subject, text, html, replyTo }) {
   }
 
   return inTurn(async () => {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
-    try {
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          service_id: process.env.EMAILJS_SERVICE_ID,
-          template_id: process.env.EMAILJS_TEMPLATE_ID,
-          user_id: process.env.EMAILJS_PUBLIC_KEY,
-          accessToken: process.env.EMAILJS_PRIVATE_KEY,
-          template_params,
-        }),
-        signal: controller.signal,
-      });
-      if (res.ok) return { delivered: true };
+    const body = JSON.stringify({
+      service_id: process.env.EMAILJS_SERVICE_ID,
+      template_id: process.env.EMAILJS_TEMPLATE_ID,
+      user_id: process.env.EMAILJS_PUBLIC_KEY,
+      accessToken: process.env.EMAILJS_PRIVATE_KEY,
+      template_params,
+    });
 
-      const detail = (await res.text().catch(() => '')).trim().slice(0, 240);
-      return notSent(message, 'send_failed', `EmailJS refused it (${res.status}) ${detail}`.trim());
-    } catch (err) {
-      const why =
-        err.name === 'AbortError'
-          ? `no answer from EmailJS within ${TIMEOUT_MS / 1000}s`
-          : `could not reach EmailJS — ${err.message}`;
-      return notSent(message, 'send_failed', why);
-    } finally {
-      clearTimeout(timer);
+    for (let attempt = 1; ; attempt++) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body,
+          signal: controller.signal,
+        });
+        if (res.ok) return { delivered: true };
+
+        // Sends start 1.3s apart, but network delay can still land two at
+        // EmailJS a hair under a second apart. "Too many requests" is the one
+        // refusal that is certain to succeed if asked again a moment later —
+        // and the email it would otherwise cost is usually the showroom's
+        // record of a booking. One retry, after a full gap.
+        if (res.status === 429 && attempt === 1) {
+          await new Promise((resolve) => setTimeout(resolve, MIN_GAP_MS));
+          lastSentAt = Date.now();
+          continue;
+        }
+
+        const detail = (await res.text().catch(() => '')).trim().slice(0, 240);
+        return notSent(message, 'send_failed', `EmailJS refused it (${res.status}) ${detail}`.trim());
+      } catch (err) {
+        const why =
+          err.name === 'AbortError'
+            ? `no answer from EmailJS within ${TIMEOUT_MS / 1000}s`
+            : `could not reach EmailJS — ${err.message}`;
+        return notSent(message, 'send_failed', why);
+      } finally {
+        clearTimeout(timer);
+      }
     }
   });
 }

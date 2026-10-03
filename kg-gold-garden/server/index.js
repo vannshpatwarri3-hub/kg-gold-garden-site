@@ -582,21 +582,24 @@ app.post('/api/appointments', limit('appt', 6, 10 * 60e3), async (req, res, next
     await append('appointments.json', booking);
 
     /**
-     * The showroom's notice goes first. On Render's free tier the bookings file
-     * is wiped whenever the server sleeps or redeploys, so this email is the one
-     * record of the booking that is certain to survive.
+     * The customer's confirmation goes first, the showroom's notice a moment
+     * later — EmailJS takes one email a second, so whichever is queued second
+     * waits about a second. The owner asked for the customer's email to be on
+     * its way within two seconds of pressing the button; this order is what
+     * makes that hold. Both are queued in this same instant, and the
+     * showroom's copy is still the record of the booking that survives a wipe.
      *
-     * The customer's confirmation follows, and the page waits for it — a second
-     * or two through EmailJS — so the receipt can say "sent", "could not be
-     * sent" or "still sending" and mean it. The page used to promise an email
-     * whenever mail was switched on, which was untrue for every booking while
-     * the host was silently blocking the send.
+     * The page waits for the customer's email — usually a second or two — so
+     * the receipt can say "sent", "could not be sent" or "still sending" and
+     * mean it. It used to promise an email whenever mail was switched on, which
+     * was untrue for every booking while the host was silently blocking the send.
      */
     const detail = { ...booking, date: prettyDate, time: label };
+    const toCustomer = email ? send({ to: email, ...appointmentEmail(detail) }) : null;
     send({ to: BUSINESS.email.primary, ...ownerAppointmentNotice(detail) }).catch((err) =>
       console.error('[appointment mail]', err)
     );
-    const emailStatus = email ? await settleWithin(send({ to: email, ...appointmentEmail(detail) })) : 'none';
+    const emailStatus = toCustomer ? await settleWithin(toCustomer) : 'none';
 
     res.json({
       ok: true,
@@ -669,18 +672,17 @@ app.post('/api/subscribe', limit('sub', 6, 10 * 60e3), async (req, res, next) =>
     };
     await append('subscribers.json', record);
 
-    // Same order as bookings: the showroom's copy first (the record that
-    // survives a wipe), then the welcome note, which the page waits for so it
-    // can say truthfully whether it went.
+    // Same order as bookings: the customer's welcome note first, so it is on its
+    // way within a couple of seconds, then the showroom's copy. The page waits
+    // for the welcome note so it can say truthfully whether it went.
+    const toCustomer = send({
+      to: email,
+      ...welcomeEmail(name, { target: alert.value, stopUrl: stopUrlFor(siteOrigin(req), record) }),
+    });
     send({ to: BUSINESS.email.primary, ...ownerSubscriberNotice(record) }).catch((err) =>
       console.error('[subscribe mail]', err)
     );
-    const emailStatus = await settleWithin(
-      send({
-        to: email,
-        ...welcomeEmail(name, { target: alert.value, stopUrl: stopUrlFor(siteOrigin(req), record) }),
-      })
-    );
+    const emailStatus = await settleWithin(toCustomer);
 
     const welcomeLine = {
       sent: 'You are on the list. A welcome note has been sent to your inbox.',
