@@ -6,7 +6,7 @@
 <title>KG Gold Garden — Gold Jewellery Shop in Shahibaug, Ahmedabad</title>
 <meta name="description" content="KG Gold Garden, Shahibaug, Ahmedabad — BIS hallmarked 22K (916) jewellery, 24K (999) gold biscuits from 1g to 100g, today’s gold rate and private viewings.">
 <meta name="theme-color" content="#FDFBF6">
-<link rel="canonical" href="/">
+<link rel="canonical" href="https://kg-gold-garden-site.onrender.com/">
 <!-- Proves to Google Search Console that we own this site. Leave it in place:
      removing it un-verifies the property. -->
 <meta name="google-site-verification" content="i8CG72opKW0YZZB8LlyTnVFTWP0tqZHJ0UrrHEh9NYw">
@@ -35,37 +35,82 @@
 <link rel="icon" href="/favicon-32.png" type="image/png" sizes="64x64">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
+<!-- Search data. The alternate names are the spellings the shop is listed under
+     elsewhere (Google Maps: "K. G. Gold Garden", JustDial: "K G Gold Garden"),
+     and hasMap is the shop's own Google Maps listing — together they tell
+     Google this website and that listing are the same business. -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "JewelryStore",
-  "name": "KG Gold Garden",
-  "slogan": "Trusted for a brighter tomorrow",
-  "description": "Retailer of BIS hallmarked 916/22K gold jewellery and 24K gold biscuits and bars.",
-  "url": "https://kg-gold-garden-site.onrender.com/",
-  "logo": "https://kg-gold-garden-site.onrender.com/assets/logo-mark.png",
-  "image": "https://kg-gold-garden-site.onrender.com/assets/og-image.jpg",
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": "First Floor, Aastamangal Complex, 138-139, above HDFC Bank, near Rajasthan Hospital",
-    "addressLocality": "Shahibaug, Ahmedabad",
-    "addressRegion": "Gujarat",
-    "postalCode": "380004",
-    "addressCountry": "IN"
-  },
-  "telephone": ["+918200329042", "+919898703136"],
-  "email": "kggoldgarden81@yahoo.com",
-  "sameAs": [
-    "https://www.instagram.com/kggold_ahemdabad/",
-    "https://www.justdial.com/Ahmedabad/K-G-Gold-Garden-Near-Rajsthan-Hospital-Above-Hdfc-Bank-Shahibaug/079P38271_BZDET"
-  ],
-  "currenciesAccepted": "INR",
-  "openingHoursSpecification": [{
-    "@type": "OpeningHoursSpecification",
-    "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
-    "opens": "10:30",
-    "closes": "20:00"
-  }]
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://kg-gold-garden-site.onrender.com/#website",
+      "name": "KG Gold Garden",
+      "alternateName": [
+        "K. G. Gold Garden",
+        "K G Gold Garden"
+      ],
+      "url": "https://kg-gold-garden-site.onrender.com/",
+      "publisher": {
+        "@id": "https://kg-gold-garden-site.onrender.com/#store"
+      }
+    },
+    {
+      "@type": "JewelryStore",
+      "@id": "https://kg-gold-garden-site.onrender.com/#store",
+      "name": "KG Gold Garden",
+      "alternateName": [
+        "K. G. Gold Garden",
+        "K G Gold Garden",
+        "K.G. Gold Garden"
+      ],
+      "slogan": "Trusted for a brighter tomorrow",
+      "description": "Retailer of BIS hallmarked 916/22K gold jewellery and 24K gold biscuits and bars.",
+      "url": "https://kg-gold-garden-site.onrender.com/",
+      "logo": "https://kg-gold-garden-site.onrender.com/assets/logo-mark.png",
+      "image": "https://kg-gold-garden-site.onrender.com/assets/og-image.jpg",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "First Floor, Aastamangal Complex, 138-139, above HDFC Bank, near Rajasthan Hospital",
+        "addressLocality": "Shahibaug, Ahmedabad",
+        "addressRegion": "Gujarat",
+        "postalCode": "380004",
+        "addressCountry": "IN"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 23.0543608,
+        "longitude": 72.5958897
+      },
+      "hasMap": "https://maps.google.com/?cid=2501661655557314793",
+      "telephone": [
+        "+918200329042",
+        "+919898703136"
+      ],
+      "email": "kggoldgarden81@yahoo.com",
+      "sameAs": [
+        "https://www.instagram.com/kggold_ahemdabad/",
+        "https://www.justdial.com/Ahmedabad/K-G-Gold-Garden-Near-Rajsthan-Hospital-Above-Hdfc-Bank-Shahibaug/079P38271_BZDET"
+      ],
+      "currenciesAccepted": "INR",
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday"
+          ],
+          "opens": "10:30",
+          "closes": "20:00"
+        }
+      ]
+    }
+  ]
 }
 </script>
 </head>
