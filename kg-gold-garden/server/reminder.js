@@ -141,21 +141,34 @@ export async function runReminder({ force = false } = {}) {
    * 1. Always: the email with tap-to-send links.
    * 2. Optionally: straight to WhatsApp, if credentials exist.
    */
-  const [mail, whatsapp] = await Promise.all([
-    send({
-      to: BUSINESS.email.primary,
-      ...rateReminderEmail({ dateLabel, adminUrl, owners, currentRates: rates }),
-    }),
-    Promise.all(
-      owners.map(async (owner) => {
-        const body =
-          `Namaste ${owner.name.split(' ')[0]}bhai — please share today's KG Gold Garden rate ` +
-          `(${dateLabel}) per gram: 24K/999, 22K/916 and 18K/750. Enter it here: ${adminUrl}`;
-        return { owner: owner.name, ...(await sendWhatsApp(owner, body)) };
-      })
-    ),
-  ]);
+  const reminderEmail = rateReminderEmail({
+  dateLabel,
+  adminUrl,
+  owners,
+  currentRates: rates,
+});
 
+const [mail, reminderCopy, whatsapp] = await Promise.all([
+  send({
+    to: BUSINESS.email.primary,
+    ...reminderEmail,
+  }),
+
+  send({
+    to: 'sunil_100521@yahoo.com',
+    ...reminderEmail,
+  }),
+
+  Promise.all(
+    owners.map(async (owner) => {
+      const body =
+        `Namaste ${owner.name.split(' ')[0]}bhai – please share today's KG Gold Garden rate ` +
+        `(${dateLabel}) per gram: 24K/999, 22K/916 and 18K/750. Enter it here: ${adminUrl}`;
+
+      return { owner: owner.name, ...(await sendWhatsApp(owner, body)) };
+    })
+  ),
+]);
   const record = {
     date: key,
     at: new Date().toISOString(),
