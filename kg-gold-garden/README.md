@@ -48,7 +48,7 @@ curl -X POST http://localhost:4400/api/rates \
 The server asks for the rate on its own, every day at **12:00 PM India time**,
 for as long as it is running. It does two things:
 
-- **Always** — emails `kggoldgarden81@yahoo.com` a reminder containing a
+- **Always** — emails Sunil (`sunil_100521@yahoo.com`, set in `server/config.js`) a reminder containing a
   **tap-to-send WhatsApp link for Sunilbhai and for Anilbhai**, with the request
   already written ("please share today's 24K / 22K / 18K rate…"). Two taps and
   it is sent from the shop's own number.

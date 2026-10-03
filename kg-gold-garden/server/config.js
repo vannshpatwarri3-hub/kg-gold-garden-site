@@ -50,6 +50,11 @@ export const BUSINESS = {
     // Primary address for every outbound and inbound message on this site.
     primary: 'kggoldgarden81@yahoo.com',
     displayName: 'KG Gold Garden',
+    // The daily rate reminder goes to Sunil's own inbox, and only there: he is
+    // the one who has the day's figure, and one email a day instead of two
+    // halves what the reminder costs of the free EmailJS allowance.
+    // (Owner's decision, 4 October 2026.)
+    reminderTo: 'sunil_100521@yahoo.com',
   },
 
   social: {

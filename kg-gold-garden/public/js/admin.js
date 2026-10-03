@@ -164,7 +164,8 @@ $('#runReminder').addEventListener('click', async () => {
 
     // "Not set up" and "set up but failed" are different problems with
     // different fixes, so they must never share a message again.
-    let message = `Reminder emailed to the shop with tap-to-send links.${wa}`;
+    // Name the inbox it actually went to — it is Sunil's, not the shop's.
+    let message = `Reminder emailed to ${res.emailTo || 'the shop'} with tap-to-send links.${wa}`;
     if (!res.emailDelivered) {
       message =
         res.emailReason === 'not_configured'

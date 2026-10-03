@@ -7,9 +7,10 @@
  *
  * Two delivery paths:
  *
- *   1. ALWAYS — an email to the shop (BUSINESS.email.primary) with a tap-to-send
- *      WhatsApp link for each owner, with the request already written. Two taps
- *      from the inbox and the message is on its way from the shop's own number.
+ *   1. ALWAYS — one email, to Sunil's own inbox only (BUSINESS.email.reminderTo),
+ *      with the link to enter the rate and a tap-to-send WhatsApp link for each
+ *      owner, the request already written. Not to the shop inbox as well: that
+ *      second copy cost a free EmailJS email every day for no extra answer.
  *
  *   2. OPTIONAL — a direct WhatsApp message, if WhatsApp Business credentials
  *      are configured. See the note on templates in sendWhatsApp() below; Meta
@@ -141,37 +142,27 @@ export async function runReminder({ force = false } = {}) {
    * 1. Always: the email with tap-to-send links.
    * 2. Optionally: straight to WhatsApp, if credentials exist.
    */
-  const reminderEmail = rateReminderEmail({
-  dateLabel,
-  adminUrl,
-  owners,
-  currentRates: rates,
-});
+  const reminderTo = BUSINESS.email.reminderTo || BUSINESS.email.primary;
 
-const [mail, reminderCopy, whatsapp] = await Promise.all([
-  send({
-    to: BUSINESS.email.primary,
-    ...reminderEmail,
-  }),
+  const [mail, whatsapp] = await Promise.all([
+    send({
+      to: reminderTo,
+      ...rateReminderEmail({ dateLabel, adminUrl, owners, currentRates: rates }),
+    }),
+    Promise.all(
+      owners.map(async (owner) => {
+        const body =
+          `Namaste ${owner.name.split(' ')[0]}bhai — please share today's KG Gold Garden rate ` +
+          `(${dateLabel}) per gram: 24K/999, 22K/916 and 18K/750. Enter it here: ${adminUrl}`;
+        return { owner: owner.name, ...(await sendWhatsApp(owner, body)) };
+      })
+    ),
+  ]);
 
-  send({
-    to: 'sunil_100521@yahoo.com',
-    ...reminderEmail,
-  }),
-
-  Promise.all(
-    owners.map(async (owner) => {
-      const body =
-        `Namaste ${owner.name.split(' ')[0]}bhai – please share today's KG Gold Garden rate ` +
-        `(${dateLabel}) per gram: 24K/999, 22K/916 and 18K/750. Enter it here: ${adminUrl}`;
-
-      return { owner: owner.name, ...(await sendWhatsApp(owner, body)) };
-    })
-  ),
-]);
   const record = {
     date: key,
     at: new Date().toISOString(),
+    emailTo: reminderTo,
     emailDelivered: mail.delivered,
     // Why it did not go, in words the admin page can show as they are.
     emailReason: mail.delivered ? null : mail.reason,
